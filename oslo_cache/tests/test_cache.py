@@ -22,7 +22,7 @@ Tests for `cache` module.
 from oslotest import base
 
 
-class TestCache(base.TestCase):
+class TestCache(base.BaseTestCase):
 
     def test_something(self):
         pass

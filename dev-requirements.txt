@@ -1,0 +1,8 @@
+# Need to install tox but it is not valid in the global requirements,
+# even though the gate has it installed. Install it here along with
+# test reqs and the main package as editable.
+
+-e .
+-r test-requirements.txt
+
+tox
