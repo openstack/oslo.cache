@@ -22,8 +22,8 @@ from oslo_utils import importutils
 from oslo_utils import timeutils
 import six
 
-from keystone import exception
-from keystone.i18n import _, _LW
+from oslo_cache import exception
+from oslo_cache._i18n import _, _LW
 
 
 NO_VALUE = api.NO_VALUE

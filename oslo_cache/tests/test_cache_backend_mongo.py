@@ -22,10 +22,9 @@ from dogpile.cache import region as dp_region
 import six
 from six.moves import range
 
-from keystone.common.cache.backends import mongo
-from keystone import exception
-from keystone.tests import unit as tests
-
+from oslo_cache.backends import mongo
+from oslo_cache import exception
+from oslo_cache.tests import test_cache
 
 # Mock database structure sample where 'ks_cache' is database and
 # 'cache' is collection. Dogpile CachedValue data is divided in two
@@ -278,7 +277,7 @@ class MyTransformer(mongo.BaseTransform):
         return super(MyTransformer, self).transform_outgoing(son, collection)
 
 
-class MongoCache(tests.BaseTestCase):
+class MongoCache(test_cache.BaseTestCase):
     def setUp(self):
         super(MongoCache, self).setUp()
         global COLLECTIONS
@@ -299,33 +298,33 @@ class MongoCache(tests.BaseTestCase):
         self.arguments.pop('db_hosts')
         region = dp_region.make_region()
         self.assertRaises(exception.ValidationError, region.configure,
-                          'keystone.cache.mongo',
+                          'oslo_cache.mongo',
                           arguments=self.arguments)
 
     def test_missing_db_name(self):
         self.arguments.pop('db_name')
         region = dp_region.make_region()
         self.assertRaises(exception.ValidationError, region.configure,
-                          'keystone.cache.mongo',
+                          'oslo_cache.mongo',
                           arguments=self.arguments)
 
     def test_missing_cache_collection_name(self):
         self.arguments.pop('cache_collection')
         region = dp_region.make_region()
         self.assertRaises(exception.ValidationError, region.configure,
-                          'keystone.cache.mongo',
+                          'oslo_cache.mongo',
                           arguments=self.arguments)
 
     def test_incorrect_write_concern(self):
         self.arguments['w'] = 'one value'
         region = dp_region.make_region()
         self.assertRaises(exception.ValidationError, region.configure,
-                          'keystone.cache.mongo',
+                          'oslo_cache.mongo',
                           arguments=self.arguments)
 
     def test_correct_write_concern(self):
         self.arguments['w'] = 1
-        region = dp_region.make_region().configure('keystone.cache.mongo',
+        region = dp_region.make_region().configure('oslo_cache.mongo',
                                                    arguments=self.arguments)
 
         random_key = uuid.uuid4().hex
@@ -335,7 +334,7 @@ class MongoCache(tests.BaseTestCase):
 
     def test_incorrect_read_preference(self):
         self.arguments['read_preference'] = 'inValidValue'
-        region = dp_region.make_region().configure('keystone.cache.mongo',
+        region = dp_region.make_region().configure('oslo_cache.mongo',
                                                    arguments=self.arguments)
         # As per delayed loading of pymongo, read_preference value should
         # still be string and NOT enum
@@ -347,7 +346,7 @@ class MongoCache(tests.BaseTestCase):
 
     def test_correct_read_preference(self):
         self.arguments['read_preference'] = 'secondaryPreferred'
-        region = dp_region.make_region().configure('keystone.cache.mongo',
+        region = dp_region.make_region().configure('oslo_cache.mongo',
                                                    arguments=self.arguments)
         # As per delayed loading of pymongo, read_preference value should
         # still be string and NOT enum
@@ -365,13 +364,13 @@ class MongoCache(tests.BaseTestCase):
         self.arguments['use_replica'] = True
         region = dp_region.make_region()
         self.assertRaises(exception.ValidationError, region.configure,
-                          'keystone.cache.mongo',
+                          'oslo_cache.mongo',
                           arguments=self.arguments)
 
     def test_provided_replica_set_name(self):
         self.arguments['use_replica'] = True
         self.arguments['replicaset_name'] = 'my_replica'
-        dp_region.make_region().configure('keystone.cache.mongo',
+        dp_region.make_region().configure('oslo_cache.mongo',
                                           arguments=self.arguments)
         self.assertTrue(True)  # reached here means no initialization error
 
@@ -379,7 +378,7 @@ class MongoCache(tests.BaseTestCase):
         self.arguments['mongo_ttl_seconds'] = 'sixty'
         region = dp_region.make_region()
         self.assertRaises(exception.ValidationError, region.configure,
-                          'keystone.cache.mongo',
+                          'oslo_cache.mongo',
                           arguments=self.arguments)
 
     def test_cache_configuration_values_assertion(self):
@@ -387,7 +386,7 @@ class MongoCache(tests.BaseTestCase):
         self.arguments['replicaset_name'] = 'my_replica'
         self.arguments['mongo_ttl_seconds'] = 60
         self.arguments['ssl'] = False
-        region = dp_region.make_region().configure('keystone.cache.mongo',
+        region = dp_region.make_region().configure('oslo_cache.mongo',
                                                    arguments=self.arguments)
         # There is no proxy so can access MongoCacheBackend directly
         self.assertEqual('localhost:27017', region.backend.api.hosts)
@@ -404,7 +403,7 @@ class MongoCache(tests.BaseTestCase):
         arguments1 = copy.copy(self.arguments)
         arguments1['cache_collection'] = 'cache_region1'
 
-        region1 = dp_region.make_region().configure('keystone.cache.mongo',
+        region1 = dp_region.make_region().configure('oslo_cache.mongo',
                                                     arguments=arguments1)
         # There is no proxy so can access MongoCacheBackend directly
         self.assertEqual('localhost:27017', region1.backend.api.hosts)
@@ -428,7 +427,7 @@ class MongoCache(tests.BaseTestCase):
         arguments2['cache_collection'] = 'cache_region2'
         arguments2['son_manipulator'] = class_name
 
-        region2 = dp_region.make_region().configure('keystone.cache.mongo',
+        region2 = dp_region.make_region().configure('oslo_cache.mongo',
                                                     arguments=arguments2)
         # There is no proxy so can access MongoCacheBackend directly
         self.assertEqual('localhost:27017', region2.backend.api.hosts)
@@ -451,7 +450,7 @@ class MongoCache(tests.BaseTestCase):
     def test_typical_configuration(self):
 
         dp_region.make_region().configure(
-            'keystone.cache.mongo',
+            'oslo_cache.mongo',
             arguments=self.arguments
         )
         self.assertTrue(True)  # reached here means no initialization error
@@ -459,7 +458,7 @@ class MongoCache(tests.BaseTestCase):
     def test_backend_get_missing_data(self):
 
         region = dp_region.make_region().configure(
-            'keystone.cache.mongo',
+            'oslo_cache.mongo',
             arguments=self.arguments
         )
 
@@ -470,7 +469,7 @@ class MongoCache(tests.BaseTestCase):
     def test_backend_set_data(self):
 
         region = dp_region.make_region().configure(
-            'keystone.cache.mongo',
+            'oslo_cache.mongo',
             arguments=self.arguments
         )
 
@@ -481,7 +480,7 @@ class MongoCache(tests.BaseTestCase):
     def test_backend_set_data_with_string_as_valid_ttl(self):
 
         self.arguments['mongo_ttl_seconds'] = '3600'
-        region = dp_region.make_region().configure('keystone.cache.mongo',
+        region = dp_region.make_region().configure('oslo_cache.mongo',
                                                    arguments=self.arguments)
         self.assertEqual(3600, region.backend.api.ttl_seconds)
         random_key = uuid.uuid4().hex
@@ -491,7 +490,7 @@ class MongoCache(tests.BaseTestCase):
     def test_backend_set_data_with_int_as_valid_ttl(self):
 
         self.arguments['mongo_ttl_seconds'] = 1800
-        region = dp_region.make_region().configure('keystone.cache.mongo',
+        region = dp_region.make_region().configure('oslo_cache.mongo',
                                                    arguments=self.arguments)
         self.assertEqual(1800, region.backend.api.ttl_seconds)
         random_key = uuid.uuid4().hex
@@ -501,7 +500,7 @@ class MongoCache(tests.BaseTestCase):
     def test_backend_set_none_as_data(self):
 
         region = dp_region.make_region().configure(
-            'keystone.cache.mongo',
+            'oslo_cache.mongo',
             arguments=self.arguments
         )
 
@@ -512,7 +511,7 @@ class MongoCache(tests.BaseTestCase):
     def test_backend_set_blank_as_data(self):
 
         region = dp_region.make_region().configure(
-            'keystone.cache.mongo',
+            'oslo_cache.mongo',
             arguments=self.arguments
         )
 
@@ -523,7 +522,7 @@ class MongoCache(tests.BaseTestCase):
     def test_backend_set_same_key_multiple_times(self):
 
         region = dp_region.make_region().configure(
-            'keystone.cache.mongo',
+            'oslo_cache.mongo',
             arguments=self.arguments
         )
 
@@ -541,7 +540,7 @@ class MongoCache(tests.BaseTestCase):
     def test_backend_multi_set_data(self):
 
         region = dp_region.make_region().configure(
-            'keystone.cache.mongo',
+            'oslo_cache.mongo',
             arguments=self.arguments
         )
         random_key = uuid.uuid4().hex
@@ -562,7 +561,7 @@ class MongoCache(tests.BaseTestCase):
     def test_backend_multi_get_data(self):
 
         region = dp_region.make_region().configure(
-            'keystone.cache.mongo',
+            'oslo_cache.mongo',
             arguments=self.arguments
         )
         random_key = uuid.uuid4().hex
@@ -585,7 +584,7 @@ class MongoCache(tests.BaseTestCase):
     def test_backend_multi_set_should_update_existing(self):
 
         region = dp_region.make_region().configure(
-            'keystone.cache.mongo',
+            'oslo_cache.mongo',
             arguments=self.arguments
         )
         random_key = uuid.uuid4().hex
@@ -613,7 +612,7 @@ class MongoCache(tests.BaseTestCase):
     def test_backend_multi_set_get_with_blanks_none(self):
 
         region = dp_region.make_region().configure(
-            'keystone.cache.mongo',
+            'oslo_cache.mongo',
             arguments=self.arguments
         )
         random_key = uuid.uuid4().hex
@@ -654,7 +653,7 @@ class MongoCache(tests.BaseTestCase):
     def test_backend_delete_data(self):
 
         region = dp_region.make_region().configure(
-            'keystone.cache.mongo',
+            'oslo_cache.mongo',
             arguments=self.arguments
         )
 
@@ -669,7 +668,7 @@ class MongoCache(tests.BaseTestCase):
     def test_backend_multi_delete_data(self):
 
         region = dp_region.make_region().configure(
-            'keystone.cache.mongo',
+            'oslo_cache.mongo',
             arguments=self.arguments
         )
         random_key = uuid.uuid4().hex
@@ -705,7 +704,7 @@ class MongoCache(tests.BaseTestCase):
         self.arguments['continue_on_error'] = True
         self.arguments['secondary_acceptable_latency_ms'] = 60
         region = dp_region.make_region().configure(
-            'keystone.cache.mongo',
+            'oslo_cache.mongo',
             arguments=self.arguments
         )
 

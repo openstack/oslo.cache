@@ -21,8 +21,8 @@ from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import importutils
 
-from keystone import exception
-from keystone.i18n import _, _LE
+from oslo_cache import exception
+from oslo_cache._i18n import _, _LE
 
 
 CONF = cfg.CONF
@@ -31,18 +31,18 @@ LOG = log.getLogger(__name__)
 make_region = dogpile.cache.make_region
 
 dogpile.cache.register_backend(
-    'keystone.common.cache.noop',
-    'keystone.common.cache.backends.noop',
+    'oslo_cache.noop',
+    'oslo_cache.backends.noop',
     'NoopCacheBackend')
 
 dogpile.cache.register_backend(
-    'keystone.cache.mongo',
-    'keystone.common.cache.backends.mongo',
+    'oslo_cache.mongo',
+    'oslo_cache.backends.mongo',
     'MongoCacheBackend')
 
 dogpile.cache.register_backend(
-    'keystone.cache.memcache_pool',
-    'keystone.common.cache.backends.memcache_pool',
+    'oslo_cache.memcache_pool',
+    'oslo_cache.backends.memcache_pool',
     'PooledMemcachedBackend')
 
 
@@ -105,7 +105,7 @@ def build_cache_config():
         arg_key = '.'.join([prefix, 'arguments', argname])
         conf_dict[arg_key] = argvalue
 
-        LOG.debug('Keystone Cache Config: %s', conf_dict)
+        LOG.debug('Oslo Cache Config: %s', conf_dict)
     # NOTE(yorik-sar): these arguments will be used for memcache-related
     # backends. Use setdefault for url to support old-style setting through
     # backend_argument=url:127.0.0.1:11211

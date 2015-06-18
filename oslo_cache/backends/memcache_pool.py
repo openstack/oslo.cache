@@ -20,7 +20,7 @@ import logging
 
 from dogpile.cache.backends import memcached as memcached_backend
 
-from keystone.common.cache import _memcache_pool
+from oslo_cache import _memcache_pool
 
 
 LOG = logging.getLogger(__name__)
