@@ -21,8 +21,6 @@ from dogpile.cache import proxy
 import mock
 from oslo_config import cfg
 from oslotest import base
-import six
-import testtools
 
 from oslo_cache import core as cache
 from oslo_cache import exception
@@ -41,6 +39,17 @@ class BaseTestCase(base.BaseTestCase):
 
         self.config_fixture = self.useFixture(config_fixture.Config(CONF))
         self.addCleanup(delattr, self, 'config_fixture')
+
+        self.config_overrides()
+
+    def config_overrides(self):
+        self.config_fixture.config(
+            # TODO(morganfainberg): Make Cache Testing a separate test case
+            # in tempest, and move it out of the base unit tests.
+            group='cache',
+            backend='dogpile.cache.memory',
+            enabled=True,
+            proxies=['oslo_cache.tests.test_cache.CacheIsolatingProxy'])
 
 
 def _copy_value(value):
@@ -111,13 +120,12 @@ class CacheRegionTest(BaseTestCase):
 
         return cacheable_function
 
-    # FIXME(dims) : Need to resurrect this test ported from keystone
-    # def test_region_built_with_proxy_direct_cache_test(self):
-    #     # Verify cache regions are properly built with proxies.
-    #     test_value = TestProxyValue('Direct Cache Test')
-    #     self.region.set('cache_test', test_value)
-    #     cached_value = self.region.get('cache_test')
-    #     self.assertTrue(cached_value.cached)
+    def test_region_built_with_proxy_direct_cache_test(self):
+        # Verify cache regions are properly built with proxies.
+        test_value = TestProxyValue('Direct Cache Test')
+        self.region.set('cache_test', test_value)
+        cached_value = self.region.get('cache_test')
+        self.assertTrue(cached_value.cached)
 
     def test_cache_region_no_error_multiple_config(self):
         # Verify configuring the CacheRegion again doesn't error.
@@ -167,48 +175,44 @@ class CacheRegionTest(BaseTestCase):
 
         return _do_test
 
-    # FIXME(dims) : Need to resurrect this test ported from keystone
-    # def test_cache_no_fallthrough_expiration_time_fn(self):
-    #     # Since we do not re-configure the cache region, for ease of testing
-    #     # this value is set the same as the expiration_time default in the
-    #     # [cache] section
-    #     cache_time = 600
-    #     expiration_time = cache.get_expiration_time_fn('role')
-    #     do_test = self._get_cache_fallthrough_fn(cache_time)
-    #     # Run the test with the assignment cache_time value
-    #     self.config_fixture.config(cache_time=cache_time,
-    #                                group='role')
-    #     test_value = TestProxyValue(uuid.uuid4().hex)
-    #     self.assertEqual(cache_time, expiration_time())
-    #     do_test(value=test_value)
+    def test_cache_no_fallthrough_expiration_time_fn(self):
+        # Since we do not re-configure the cache region, for ease of testing
+        # this value is set the same as the expiration_time default in the
+        # [cache] section
+        cache_time = 600
+        expiration_time = cache.get_expiration_time_fn('role')
+        do_test = self._get_cache_fallthrough_fn(cache_time)
+        # Run the test with the assignment cache_time value
+        self.config_fixture.config(cache_time=cache_time,
+                                   group='role')
+        test_value = TestProxyValue(uuid.uuid4().hex)
+        self.assertEqual(cache_time, expiration_time())
+        do_test(value=test_value)
 
-    # FIXME(dims) : Need to resurrect this test ported from keystone
-    # def test_cache_fallthrough_expiration_time_fn(self):
-    #     # Since we do not re-configure the cache region, for ease of testing
-    #     # this value is set the same as the expiration_time default in the
-    #     # [cache] section
-    #     cache_time = 599
-    #     expiration_time = cache.get_expiration_time_fn('role')
-    #     do_test = self._get_cache_fallthrough_fn(cache_time)
-    #     # Run the test with the assignment cache_time value set to None and
-    #     # the global value set.
-    #     self.config_fixture.config(cache_time=None, group='role')
-    #     test_value = TestProxyValue(uuid.uuid4().hex)
-    #     self.assertIsNone(expiration_time())
-    #     do_test(value=test_value)
+    def test_cache_fallthrough_expiration_time_fn(self):
+        # Since we do not re-configure the cache region, for ease of testing
+        # this value is set the same as the expiration_time default in the
+        # [cache] section
+        cache_time = 599
+        expiration_time = cache.get_expiration_time_fn('role')
+        do_test = self._get_cache_fallthrough_fn(cache_time)
+        # Run the test with the assignment cache_time value set to None and
+        # the global value set.
+        self.config_fixture.config(cache_time=None, group='role')
+        test_value = TestProxyValue(uuid.uuid4().hex)
+        self.assertIsNone(expiration_time())
+        do_test(value=test_value)
 
-    # FIXME(dims) : Need to resurrect this test ported from keystone
-    # def test_should_cache_fn_global_cache_enabled(self):
-    #     # Verify should_cache_fn generates a sane function for subsystem and
-    #     # functions as expected with caching globally enabled.
-    #     cacheable_function = self._get_cacheable_function()
-    #
-    #     self.config_fixture.config(group='cache', enabled=True)
-    #     cacheable_function(self.test_value)
-    #     cached_value = cacheable_function(self.test_value)
-    #     self.assertTrue(cached_value.cached)
+    def test_should_cache_fn_global_cache_enabled(self):
+        # Verify should_cache_fn generates a sane function for subsystem and
+        # functions as expected with caching globally enabled.
+        cacheable_function = self._get_cacheable_function()
 
-    @testtools.skipIf(six.PY3, 'FIXME: this test does not work python 3.x')
+        self.config_fixture.config(group='cache', enabled=True)
+        cacheable_function(self.test_value)
+        cached_value = cacheable_function(self.test_value)
+        self.assertTrue(cached_value.cached)
+
     def test_should_cache_fn_global_cache_disabled(self):
         # Verify should_cache_fn generates a sane function for subsystem and
         # functions as expected with caching globally disabled.
@@ -219,7 +223,6 @@ class CacheRegionTest(BaseTestCase):
         cached_value = cacheable_function(self.test_value)
         self.assertFalse(cached_value.cached)
 
-    @testtools.skipIf(six.PY3, 'FIXME: this test does not work python 3.x')
     def test_should_cache_fn_global_cache_disabled_section_cache_enabled(self):
         # Verify should_cache_fn generates a sane function for subsystem and
         # functions as expected with caching globally disabled and the specific
@@ -234,7 +237,6 @@ class CacheRegionTest(BaseTestCase):
         cached_value = cacheable_function(self.test_value)
         self.assertFalse(cached_value.cached)
 
-    @testtools.skipIf(six.PY3, 'FIXME: this test does not work python 3.x')
     def test_should_cache_fn_global_cache_enabled_section_cache_disabled(self):
         # Verify should_cache_fn generates a sane function for subsystem and
         # functions as expected with caching globally enabled and the specific
@@ -249,21 +251,19 @@ class CacheRegionTest(BaseTestCase):
         cached_value = cacheable_function(self.test_value)
         self.assertFalse(cached_value.cached)
 
-    # FIXME(dims) : Need to resurrect this test ported from keystone
-    # def test_should_cache_fn_global_cache_enabled_section_cache_enabled(
-    #                                                                    self):
-    #     #Verify should_cache_fn generates a sane function for subsystem and
-    #     #functions as expected with caching globally enabled and the specific
-    #     #section caching enabled.
-    #     cacheable_function = self._get_cacheable_function()
-    #
-    #     self._add_test_caching_option()
-    #     self.config_fixture.config(group='cache', enabled=True)
-    #     self.config_fixture.config(group='cache', caching=True)
-    #
-    #     cacheable_function(self.test_value)
-    #     cached_value = cacheable_function(self.test_value)
-    #     self.assertTrue(cached_value.cached)
+    def test_should_cache_fn_global_cache_enabled_section_cache_enabled(self):
+        # Verify should_cache_fn generates a sane function for subsystem and
+        # functions as expected with caching globally enabled and the specific
+        # section caching enabled.
+        cacheable_function = self._get_cacheable_function()
+
+        self._add_test_caching_option()
+        self.config_fixture.config(group='cache', enabled=True)
+        self.config_fixture.config(group='cache', caching=True)
+
+        cacheable_function(self.test_value)
+        cached_value = cacheable_function(self.test_value)
+        self.assertTrue(cached_value.cached)
 
     def test_cache_dictionary_config_builder(self):
         """Validate we build a sane dogpile.cache dictionary config."""
@@ -286,27 +286,26 @@ class CacheRegionTest(BaseTestCase):
                          config_dict['test_prefix.arguments.arg2'])
         self.assertNotIn('test_prefix.arguments.arg3', config_dict)
 
-    # FIXME(dims) : Need to resurrect this test ported from keystone
-    # def test_cache_debug_proxy(self):
-    #     single_value = 'Test Value'
-    #     single_key = 'testkey'
-    #     multi_values = {'key1': 1, 'key2': 2, 'key3': 3}
-    #
-    #     self.region.set(single_key, single_value)
-    #     self.assertEqual(single_value, self.region.get(single_key))
-    #
-    #     self.region.delete(single_key)
-    #     self.assertEqual(NO_VALUE, self.region.get(single_key))
-    #
-    #     self.region.set_multi(multi_values)
-    #     cached_values = self.region.get_multi(multi_values.keys())
-    #     for value in multi_values.values():
-    #         self.assertIn(value, cached_values)
-    #     self.assertEqual(len(multi_values.values()), len(cached_values))
-    #
-    #     self.region.delete_multi(multi_values.keys())
-    #     for value in self.region.get_multi(multi_values.keys()):
-    #         self.assertEqual(NO_VALUE, value)
+    def test_cache_debug_proxy(self):
+        single_value = 'Test Value'
+        single_key = 'testkey'
+        multi_values = {'key1': 1, 'key2': 2, 'key3': 3}
+
+        self.region.set(single_key, single_value)
+        self.assertEqual(single_value, self.region.get(single_key))
+
+        self.region.delete(single_key)
+        self.assertEqual(NO_VALUE, self.region.get(single_key))
+
+        self.region.set_multi(multi_values)
+        cached_values = self.region.get_multi(multi_values.keys())
+        for value in multi_values.values():
+            self.assertIn(value, cached_values)
+        self.assertEqual(len(multi_values.values()), len(cached_values))
+
+        self.region.delete_multi(multi_values.keys())
+        for value in self.region.get_multi(multi_values.keys()):
+            self.assertEqual(NO_VALUE, value)
 
     def test_configure_non_region_object_raises_error(self):
         self.assertRaises(exception.ValidationError,
@@ -324,9 +323,8 @@ class CacheNoopBackendTest(BaseTestCase):
     def config_overrides(self):
         super(CacheNoopBackendTest, self).config_overrides()
         self.config_fixture.config(group='cache',
-                                   backend='oslo_cache.cache.noop')
+                                   backend='oslo_cache.noop')
 
-    @testtools.skipIf(six.PY3, 'FIXME: this test does not work python 3.x')
     def test_noop_backend(self):
         single_value = 'Test Value'
         single_key = 'testkey'

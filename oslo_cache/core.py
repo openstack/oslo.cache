@@ -23,6 +23,7 @@ from oslo_utils import importutils
 
 from oslo_cache import exception
 from oslo_cache._i18n import _, _LE
+from oslo_cache import _opts
 
 
 CONF = cfg.CONF
@@ -119,6 +120,10 @@ def build_cache_config():
     return conf_dict
 
 
+def sha1_mangle_key(key):
+    return util.sha1_mangle_key(key.encode('UTF-8'))
+
+
 def configure_cache_region(region):
     """Configure a cache region.
 
@@ -149,7 +154,7 @@ def configure_cache_region(region):
         # mangler provided by dogpile.cache. This ensures we always use a fixed
         # size cache-key.
         if region.key_mangler is None:
-            region.key_mangler = util.sha1_mangle_key
+            region.key_mangler = sha1_mangle_key
 
         for class_path in CONF.cache.proxies:
             # NOTE(morganfainberg): if we have any proxy wrappers, we should
@@ -306,3 +311,7 @@ def get_memoization_decorator(section, expiration_section=None):
     memoize.get_expiration_time = expiration_time
 
     return memoize
+
+
+def configure(conf):
+    _opts.configure(conf)
