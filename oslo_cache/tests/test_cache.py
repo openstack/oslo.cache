@@ -29,6 +29,8 @@ from oslo_config import fixture as config_fixture
 
 CONF = cfg.CONF
 NO_VALUE = api.NO_VALUE
+TEST_GROUP = uuid.uuid4().hex
+TEST_GROUP2 = uuid.uuid4().hex
 
 
 class BaseTestCase(base.BaseTestCase):
@@ -109,6 +111,12 @@ class CacheRegionTest(BaseTestCase):
         self.config_fixture.register_opt(
             cfg.BoolOpt('caching', default=True), group='cache')
 
+    def _add_dummy_config_group(self):
+        self.config_fixture.register_opt(
+            cfg.IntOpt('cache_time', default=None), group=TEST_GROUP)
+        self.config_fixture.register_opt(
+            cfg.IntOpt('cache_time', default=None), group=TEST_GROUP2)
+
     def _get_cacheable_function(self):
         with mock.patch.object(cache.REGION, 'cache_on_arguments',
                                self.region.cache_on_arguments):
@@ -137,7 +145,7 @@ class CacheRegionTest(BaseTestCase):
                                self.region.cache_on_arguments):
             memoize = cache.get_memoization_decorator(
                 section='cache',
-                expiration_section='assignment')
+                expiration_section=TEST_GROUP2)
 
             class _test_obj(object):
                 def __init__(self, value):
@@ -176,29 +184,31 @@ class CacheRegionTest(BaseTestCase):
         return _do_test
 
     def test_cache_no_fallthrough_expiration_time_fn(self):
+        self._add_dummy_config_group()
         # Since we do not re-configure the cache region, for ease of testing
         # this value is set the same as the expiration_time default in the
         # [cache] section
         cache_time = 600
-        expiration_time = cache.get_expiration_time_fn('role')
+        expiration_time = cache.get_expiration_time_fn(TEST_GROUP)
         do_test = self._get_cache_fallthrough_fn(cache_time)
-        # Run the test with the assignment cache_time value
+        # Run the test with the dummy group cache_time value
         self.config_fixture.config(cache_time=cache_time,
-                                   group='role')
+                                   group=TEST_GROUP)
         test_value = TestProxyValue(uuid.uuid4().hex)
         self.assertEqual(cache_time, expiration_time())
         do_test(value=test_value)
 
     def test_cache_fallthrough_expiration_time_fn(self):
+        self._add_dummy_config_group()
         # Since we do not re-configure the cache region, for ease of testing
         # this value is set the same as the expiration_time default in the
         # [cache] section
         cache_time = 599
-        expiration_time = cache.get_expiration_time_fn('role')
+        expiration_time = cache.get_expiration_time_fn(TEST_GROUP)
         do_test = self._get_cache_fallthrough_fn(cache_time)
-        # Run the test with the assignment cache_time value set to None and
+        # Run the test with the dummy group cache_time value set to None and
         # the global value set.
-        self.config_fixture.config(cache_time=None, group='role')
+        self.config_fixture.config(cache_time=None, group=TEST_GROUP)
         test_value = TestProxyValue(uuid.uuid4().hex)
         self.assertIsNone(expiration_time())
         do_test(value=test_value)
