@@ -120,7 +120,7 @@ class ConnectionPool(queue.Queue):
         try:
             conn = self.get(timeout=self._connection_get_timeout)
         except queue.Empty:
-            raise exception.UnexpectedError(
+            raise exception.QueueEmpty(
                 _('Unable to get a connection from pool id %(id)s after '
                   '%(seconds)s seconds.') %
                 {'id': id(self), 'seconds': self._connection_get_timeout})

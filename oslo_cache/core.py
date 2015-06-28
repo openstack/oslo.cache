@@ -129,11 +129,11 @@ def configure_cache_region(region):
 
     :param region: optional CacheRegion object, if not provided a new region
                    will be instantiated
-    :raises: exception.ValidationError
+    :raises: exception.ConfigurationError
     :returns: dogpile.cache.CacheRegion
     """
     if not isinstance(region, dogpile.cache.CacheRegion):
-        raise exception.ValidationError(
+        raise exception.ConfigurationError(
             _('region not type dogpile.cache.CacheRegion'))
 
     if not region.is_configured:

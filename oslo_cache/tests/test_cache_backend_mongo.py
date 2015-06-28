@@ -297,28 +297,28 @@ class MongoCache(test_cache.BaseTestCase):
     def test_missing_db_hosts(self):
         self.arguments.pop('db_hosts')
         region = dp_region.make_region()
-        self.assertRaises(exception.ValidationError, region.configure,
+        self.assertRaises(exception.ConfigurationError, region.configure,
                           'oslo_cache.mongo',
                           arguments=self.arguments)
 
     def test_missing_db_name(self):
         self.arguments.pop('db_name')
         region = dp_region.make_region()
-        self.assertRaises(exception.ValidationError, region.configure,
+        self.assertRaises(exception.ConfigurationError, region.configure,
                           'oslo_cache.mongo',
                           arguments=self.arguments)
 
     def test_missing_cache_collection_name(self):
         self.arguments.pop('cache_collection')
         region = dp_region.make_region()
-        self.assertRaises(exception.ValidationError, region.configure,
+        self.assertRaises(exception.ConfigurationError, region.configure,
                           'oslo_cache.mongo',
                           arguments=self.arguments)
 
     def test_incorrect_write_concern(self):
         self.arguments['w'] = 'one value'
         region = dp_region.make_region()
-        self.assertRaises(exception.ValidationError, region.configure,
+        self.assertRaises(exception.ConfigurationError, region.configure,
                           'oslo_cache.mongo',
                           arguments=self.arguments)
 
@@ -363,7 +363,7 @@ class MongoCache(test_cache.BaseTestCase):
     def test_missing_replica_set_name(self):
         self.arguments['use_replica'] = True
         region = dp_region.make_region()
-        self.assertRaises(exception.ValidationError, region.configure,
+        self.assertRaises(exception.ConfigurationError, region.configure,
                           'oslo_cache.mongo',
                           arguments=self.arguments)
 
@@ -377,7 +377,7 @@ class MongoCache(test_cache.BaseTestCase):
     def test_incorrect_mongo_ttl_seconds(self):
         self.arguments['mongo_ttl_seconds'] = 'sixty'
         region = dp_region.make_region()
-        self.assertRaises(exception.ValidationError, region.configure,
+        self.assertRaises(exception.ConfigurationError, region.configure,
                           'oslo_cache.mongo',
                           arguments=self.arguments)
 
