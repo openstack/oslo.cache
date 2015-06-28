@@ -90,3 +90,10 @@ class NotImplemented(Error):
                        " been implemented.")
     code = 501
     title = 'Not Implemented'
+
+
+class UnexpectedError(Error):
+    message_format = _("An unexpected error prevented the server from "
+                       "fulfilling your request.")
+    code = 500
+    title = 'Internal Server Error'
