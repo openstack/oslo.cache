@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2013 Metacloud
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -321,6 +322,24 @@ class CacheRegionTest(BaseTestCase):
         self.assertRaises(exception.ValidationError,
                           cache.configure_cache_region,
                           "bogus")
+
+
+class UTF8KeyManglerTests(BaseTestCase):
+
+    def test_key_is_utf8_encoded(self):
+        key = u'fäké1'
+        encoded = cache.sha1_mangle_key(key)
+        self.assertIsNotNone(encoded)
+
+    def test_key_is_bytestring(self):
+        key = b'\xcf\x84o\xcf\x81\xce\xbdo\xcf\x82'
+        encoded = cache.sha1_mangle_key(key)
+        self.assertIsNotNone(encoded)
+
+    def test_key_is_string(self):
+        key = 'fake'
+        encoded = cache.sha1_mangle_key(key)
+        self.assertIsNotNone(encoded)
 
 
 class CacheNoopBackendTest(BaseTestCase):

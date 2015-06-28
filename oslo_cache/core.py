@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""Keystone Caching Layer Implementation."""
+"""Caching Layer Implementation."""
 
 import dogpile.cache
 from dogpile.cache import proxy
@@ -121,7 +121,18 @@ def build_cache_config():
 
 
 def sha1_mangle_key(key):
-    return util.sha1_mangle_key(key.encode('UTF-8'))
+    """Wrapper for dogpile's sha1_mangle_key.
+
+    dogpile's sha1_mangle_key function expects an encoded string, so we
+    should take steps to properly handle multiple inputs before passing
+    the key through.
+    """
+    try:
+        key = key.encode('utf-8', errors='xmlcharrefreplace')
+    except (UnicodeError, AttributeError):
+        # NOTE(stevemar): if encoding fails just continue anyway.
+        pass
+    return util.sha1_mangle_key(key)
 
 
 def configure_cache_region(region):
