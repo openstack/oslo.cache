@@ -103,7 +103,7 @@ class CacheRegionTest(BaseTestCase):
 
     def setUp(self):
         super(CacheRegionTest, self).setUp()
-        self.region = cache.make_region()
+        self.region = cache._make_region()
         cache.configure_cache_region(self.region)
         self.region.wrap(TestProxy)
         self.test_value = TestProxyValue('Decorator Test')
@@ -119,7 +119,7 @@ class CacheRegionTest(BaseTestCase):
             cfg.IntOpt('cache_time', default=None), group=TEST_GROUP2)
 
     def _get_cacheable_function(self):
-        with mock.patch.object(cache.REGION, 'cache_on_arguments',
+        with mock.patch.object(cache._REGION, 'cache_on_arguments',
                                self.region.cache_on_arguments):
             memoize = cache.get_memoization_decorator(section='cache')
 
@@ -142,7 +142,7 @@ class CacheRegionTest(BaseTestCase):
         cache.configure_cache_region(self.region)
 
     def _get_cache_fallthrough_fn(self, cache_time):
-        with mock.patch.object(cache.REGION, 'cache_on_arguments',
+        with mock.patch.object(cache._REGION, 'cache_on_arguments',
                                self.region.cache_on_arguments):
             memoize = cache.get_memoization_decorator(
                 section='cache',
@@ -190,7 +190,7 @@ class CacheRegionTest(BaseTestCase):
         # this value is set the same as the expiration_time default in the
         # [cache] section
         cache_time = 600
-        expiration_time = cache.get_expiration_time_fn(TEST_GROUP)
+        expiration_time = cache._get_expiration_time_fn(TEST_GROUP)
         do_test = self._get_cache_fallthrough_fn(cache_time)
         # Run the test with the dummy group cache_time value
         self.config_fixture.config(cache_time=cache_time,
@@ -205,7 +205,7 @@ class CacheRegionTest(BaseTestCase):
         # this value is set the same as the expiration_time default in the
         # [cache] section
         cache_time = 599
-        expiration_time = cache.get_expiration_time_fn(TEST_GROUP)
+        expiration_time = cache._get_expiration_time_fn(TEST_GROUP)
         do_test = self._get_cache_fallthrough_fn(cache_time)
         # Run the test with the dummy group cache_time value set to None and
         # the global value set.
@@ -286,7 +286,7 @@ class CacheRegionTest(BaseTestCase):
                                                      'arg2:test:test',
                                                      'arg3.invalid'])
 
-        config_dict = cache.build_cache_config()
+        config_dict = cache._build_cache_config()
         self.assertEqual(
             CONF.cache.backend, config_dict['test_prefix.backend'])
         self.assertEqual(
@@ -328,17 +328,17 @@ class UTF8KeyManglerTests(BaseTestCase):
 
     def test_key_is_utf8_encoded(self):
         key = u'fäké1'
-        encoded = cache.sha1_mangle_key(key)
+        encoded = cache._sha1_mangle_key(key)
         self.assertIsNotNone(encoded)
 
     def test_key_is_bytestring(self):
         key = b'\xcf\x84o\xcf\x81\xce\xbdo\xcf\x82'
-        encoded = cache.sha1_mangle_key(key)
+        encoded = cache._sha1_mangle_key(key)
         self.assertIsNotNone(encoded)
 
     def test_key_is_string(self):
         key = 'fake'
-        encoded = cache.sha1_mangle_key(key)
+        encoded = cache._sha1_mangle_key(key)
         self.assertIsNotNone(encoded)
 
 
@@ -346,7 +346,7 @@ class CacheNoopBackendTest(BaseTestCase):
 
     def setUp(self):
         super(CacheNoopBackendTest, self).setUp()
-        self.region = cache.make_region()
+        self.region = cache._make_region()
         cache.configure_cache_region(self.region)
 
     def config_overrides(self):

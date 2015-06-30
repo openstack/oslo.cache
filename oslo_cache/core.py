@@ -26,10 +26,17 @@ from oslo_cache._i18n import _, _LE
 from oslo_cache import _opts
 
 
-CONF = cfg.CONF
-LOG = log.getLogger(__name__)
+__all__ = [
+    'configure',
+    'configure_cache_region',
+    'DebugProxy',
+    'get_memoization_decorator',
+]
 
-make_region = dogpile.cache.make_region
+_CONF = cfg.CONF
+_LOG = log.getLogger(__name__)
+
+_make_region = dogpile.cache.make_region
 
 dogpile.cache.register_backend(
     'oslo_cache.noop',
@@ -57,70 +64,70 @@ class DebugProxy(proxy.ProxyBackend):
 
     def get(self, key):
         value = self.proxied.get(key)
-        LOG.debug('CACHE_GET: Key: "%(key)r" Value: "%(value)r"',
-                  {'key': key, 'value': value})
+        _LOG.debug('CACHE_GET: Key: "%(key)r" Value: "%(value)r"',
+                   {'key': key, 'value': value})
         return value
 
     def get_multi(self, keys):
         values = self.proxied.get_multi(keys)
-        LOG.debug('CACHE_GET_MULTI: "%(keys)r" Values: "%(values)r"',
-                  {'keys': keys, 'values': values})
+        _LOG.debug('CACHE_GET_MULTI: "%(keys)r" Values: "%(values)r"',
+                   {'keys': keys, 'values': values})
         return values
 
     def set(self, key, value):
-        LOG.debug('CACHE_SET: Key: "%(key)r" Value: "%(value)r"',
-                  {'key': key, 'value': value})
+        _LOG.debug('CACHE_SET: Key: "%(key)r" Value: "%(value)r"',
+                   {'key': key, 'value': value})
         return self.proxied.set(key, value)
 
     def set_multi(self, keys):
-        LOG.debug('CACHE_SET_MULTI: "%r"', keys)
+        _LOG.debug('CACHE_SET_MULTI: "%r"', keys)
         self.proxied.set_multi(keys)
 
     def delete(self, key):
         self.proxied.delete(key)
-        LOG.debug('CACHE_DELETE: "%r"', key)
+        _LOG.debug('CACHE_DELETE: "%r"', key)
 
     def delete_multi(self, keys):
-        LOG.debug('CACHE_DELETE_MULTI: "%r"', keys)
+        _LOG.debug('CACHE_DELETE_MULTI: "%r"', keys)
         self.proxied.delete_multi(keys)
 
 
-def build_cache_config():
+def _build_cache_config():
     """Build the cache region dictionary configuration.
 
     :returns: dict
     """
-    prefix = CONF.cache.config_prefix
+    prefix = _CONF.cache.config_prefix
     conf_dict = {}
-    conf_dict['%s.backend' % prefix] = CONF.cache.backend
-    conf_dict['%s.expiration_time' % prefix] = CONF.cache.expiration_time
-    for argument in CONF.cache.backend_argument:
+    conf_dict['%s.backend' % prefix] = _CONF.cache.backend
+    conf_dict['%s.expiration_time' % prefix] = _CONF.cache.expiration_time
+    for argument in _CONF.cache.backend_argument:
         try:
             (argname, argvalue) = argument.split(':', 1)
         except ValueError:
             msg = _LE('Unable to build cache config-key. Expected format '
                       '"<argname>:<value>". Skipping unknown format: %s')
-            LOG.error(msg, argument)
+            _LOG.error(msg, argument)
             continue
 
         arg_key = '.'.join([prefix, 'arguments', argname])
         conf_dict[arg_key] = argvalue
 
-        LOG.debug('Oslo Cache Config: %s', conf_dict)
+        _LOG.debug('Oslo Cache Config: %s', conf_dict)
     # NOTE(yorik-sar): these arguments will be used for memcache-related
     # backends. Use setdefault for url to support old-style setting through
     # backend_argument=url:127.0.0.1:11211
     conf_dict.setdefault('%s.arguments.url' % prefix,
-                         CONF.cache.memcache_servers)
+                         _CONF.cache.memcache_servers)
     for arg in ('dead_retry', 'socket_timeout', 'pool_maxsize',
                 'pool_unused_timeout', 'pool_connection_get_timeout'):
-        value = getattr(CONF.cache, 'memcache_' + arg)
+        value = getattr(_CONF.cache, 'memcache_' + arg)
         conf_dict['%s.arguments.%s' % (prefix, arg)] = value
 
     return conf_dict
 
 
-def sha1_mangle_key(key):
+def _sha1_mangle_key(key):
     """Wrapper for dogpile's sha1_mangle_key.
 
     dogpile's sha1_mangle_key function expects an encoded string, so we
@@ -152,11 +159,11 @@ def configure_cache_region(region):
         # There is a request logged with dogpile.cache upstream to make this
         # easier / less ugly.
 
-        config_dict = build_cache_config()
+        config_dict = _build_cache_config()
         region.configure_from_config(config_dict,
-                                     '%s.' % CONF.cache.config_prefix)
+                                     '%s.' % _CONF.cache.config_prefix)
 
-        if CONF.cache.debug_cache_backend:
+        if _CONF.cache.debug_cache_backend:
             region.wrap(DebugProxy)
 
         # NOTE(morganfainberg): if the backend requests the use of a
@@ -165,9 +172,9 @@ def configure_cache_region(region):
         # mangler provided by dogpile.cache. This ensures we always use a fixed
         # size cache-key.
         if region.key_mangler is None:
-            region.key_mangler = sha1_mangle_key
+            region.key_mangler = _sha1_mangle_key
 
-        for class_path in CONF.cache.proxies:
+        for class_path in _CONF.cache.proxies:
             # NOTE(morganfainberg): if we have any proxy wrappers, we should
             # ensure they are added to the cache region's backend.  Since
             # configure_from_config doesn't handle the wrap argument, we need
@@ -175,28 +182,28 @@ def configure_cache_region(region):
             # ProxyBackends work, see the dogpile.cache documents on
             # "changing-backend-behavior"
             cls = importutils.import_class(class_path)
-            LOG.debug("Adding cache-proxy '%s' to backend.", class_path)
+            _LOG.debug("Adding cache-proxy '%s' to backend.", class_path)
             region.wrap(cls)
 
     return region
 
 
-def get_should_cache_fn(section):
+def _get_should_cache_fn(section):
     """Build a function that returns a config section's caching status.
 
-    For any given driver in keystone that has caching capabilities, a boolean
-    config option for that driver's section (e.g. ``token``) should exist and
-    default to ``True``.  This function will use that value to tell the caching
-    decorator if caching for that driver is enabled.  To properly use this
-    with the decorator, pass this function the configuration section and assign
-    the result to a variable.  Pass the new variable to the caching decorator
-    as the named argument ``should_cache_fn``.  e.g.::
+    For any given object that has caching capabilities, a boolean config option
+    for that object's section should exist and default to ``True``. This
+    function will use that value to tell the caching decorator if caching for
+    that object is enabled. To properly use this with the decorator, pass this
+    function the configuration section and assign the result to a variable.
+    Pass the new variable to the caching decorator as the named argument
+    ``should_cache_fn``.  e.g.::
 
-        from keystone.common import cache
+        import oslo_cache
 
-        SHOULD_CACHE = cache.get_should_cache_fn('token')
+        SHOULD_CACHE = oslo_cache._get_should_cache_fn(section='section1')
 
-        @cache.on_arguments(should_cache_fn=SHOULD_CACHE)
+        @oslo_cache._on_arguments(should_cache_fn=SHOULD_CACHE)
         def function(arg1, arg2):
             ...
 
@@ -205,38 +212,36 @@ def get_should_cache_fn(section):
     :returns: function reference
     """
     def should_cache(value):
-        if not CONF.cache.enabled:
+        if not _CONF.cache.enabled:
             return False
-        conf_group = getattr(CONF, section)
+        conf_group = getattr(_CONF, section)
         return getattr(conf_group, 'caching', True)
     return should_cache
 
 
-def get_expiration_time_fn(section):
+def _get_expiration_time_fn(section):
     """Build a function that returns a config section's expiration time status.
 
-    For any given driver in keystone that has caching capabilities, an int
-    config option called ``cache_time`` for that driver's section
-    (e.g. ``token``) should exist and typically default to ``None``. This
-    function will use that value to tell the caching decorator of the TTL
-    override for caching the resulting objects. If the value of the config
-    option is ``None`` the default value provided in the
+    For any given object that has caching capabilities, an int config option
+    called ``cache_time`` for that driver's section should exist and typically
+    default to ``None``. This function will use that value to tell the caching
+    decorator of the TTL override for caching the resulting objects. If the
+    value of the config option is ``None`` the default value provided in the
     ``[cache] expiration_time`` option will be used by the decorator. The
     default may be set to something other than ``None`` in cases where the
-    caching TTL should not be tied to the global default(s) (e.g.
-    revocation_list changes very infrequently and can be cached for >1h by
-    default).
+    caching TTL should not be tied to the global default(s).
 
     To properly use this with the decorator, pass this function the
     configuration section and assign the result to a variable. Pass the new
     variable to the caching decorator as the named argument
     ``expiration_time``.  e.g.::
 
-        from keystone.common import cache
+        import oslo_cache
 
-        EXPIRATION_TIME = cache.get_expiration_time_fn('token')
+        EXPIRATION_TIME = oslo_cache._get_expiration_time_fn(
+            section='section1')
 
-        @cache.on_arguments(expiration_time=EXPIRATION_TIME)
+        @oslo_cache._on_arguments(expiration_time=EXPIRATION_TIME)
         def function(arg1, arg2):
             ...
 
@@ -245,12 +250,12 @@ def get_expiration_time_fn(section):
     :rtype: function reference
     """
     def get_expiration_time():
-        conf_group = getattr(CONF, section)
+        conf_group = getattr(_CONF, section)
         return getattr(conf_group, 'cache_time', None)
     return get_expiration_time
 
 
-def key_generate_to_str(s):
+def _key_generate_to_str(s):
     # NOTE(morganfainberg): Since we need to stringify all arguments, attempt
     # to stringify and handle the Unicode error explicitly as needed.
     try:
@@ -259,40 +264,39 @@ def key_generate_to_str(s):
         return s.encode('utf-8')
 
 
-def function_key_generator(namespace, fn, to_str=key_generate_to_str):
+def _function_key_generator(namespace, fn, to_str=_key_generate_to_str):
     # NOTE(morganfainberg): This wraps dogpile.cache's default
     # function_key_generator to change the default to_str mechanism.
     return util.function_key_generator(namespace, fn, to_str=to_str)
 
 
-REGION = dogpile.cache.make_region(
-    function_key_generator=function_key_generator)
-on_arguments = REGION.cache_on_arguments
+_REGION = dogpile.cache.make_region(
+    function_key_generator=_function_key_generator)
+_on_arguments = _REGION.cache_on_arguments
 
 
 def get_memoization_decorator(section, expiration_section=None):
-    """Build a function based on the `on_arguments` decorator for the section.
+    """Build a function based on the `_on_arguments` decorator for the section.
 
-    For any given driver in Keystone that has caching capabilities, a
-    pair of functions is required to properly determine the status of the
-    caching capabilities (a toggle to indicate caching is enabled and any
-    override of the default TTL for cached data). This function will return
-    an object that has the memoization decorator ``on_arguments``
-    pre-configured for the driver.
+    For any given object that has caching capabilities, a pair of functions is
+    required to properly determine the status of the caching capabilities (a
+    toggle to indicate caching is enabled and any override of the default TTL
+    for cached data). This function will return an object that has the
+    memoization decorator ``_on_arguments`` pre-configured for the driver.
 
     Example usage::
 
-        from keystone.common import cache
+        import oslo_cache
 
-        MEMOIZE = cache.get_memoization_decorator(section='token')
+        MEMOIZE = oslo_cache.get_memoization_decorator(section='section1')
 
         @MEMOIZE
         def function(arg1, arg2):
             ...
 
 
-        ALTERNATE_MEMOIZE = cache.get_memoization_decorator(
-            section='token', expiration_section='revoke')
+        ALTERNATE_MEMOIZE = oslo_cache.get_memoization_decorator(
+            section='section2', expiration_section='section3')
 
         @ALTERNATE_MEMOIZE
         def function2(arg1, arg2):
@@ -309,11 +313,11 @@ def get_memoization_decorator(section, expiration_section=None):
     """
     if expiration_section is None:
         expiration_section = section
-    should_cache = get_should_cache_fn(section)
-    expiration_time = get_expiration_time_fn(expiration_section)
+    should_cache = _get_should_cache_fn(section)
+    expiration_time = _get_expiration_time_fn(expiration_section)
 
-    memoize = REGION.cache_on_arguments(should_cache_fn=should_cache,
-                                        expiration_time=expiration_time)
+    memoize = _REGION.cache_on_arguments(should_cache_fn=should_cache,
+                                         expiration_time=expiration_time)
 
     # Make sure the actual "should_cache" and "expiration_time" methods are
     # available. This is potentially interesting/useful to pre-seed cache
