@@ -319,7 +319,7 @@ class CacheRegionTest(BaseTestCase):
             self.assertEqual(NO_VALUE, value)
 
     def test_configure_non_region_object_raises_error(self):
-        self.assertRaises(exception.ValidationError,
+        self.assertRaises(exception.ConfigurationError,
                           cache.configure_cache_region,
                           "bogus")
 

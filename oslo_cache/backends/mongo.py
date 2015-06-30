@@ -229,17 +229,17 @@ class MongoApi(object):
         self.hosts = arguments.pop('db_hosts', None)
         if self.hosts is None:
             msg = _('db_hosts value is required')
-            raise exception.ValidationError(message=msg)
+            raise exception.ConfigurationError(msg)
 
         self.db_name = arguments.pop('db_name', None)
         if self.db_name is None:
             msg = _('database db_name is required')
-            raise exception.ValidationError(message=msg)
+            raise exception.ConfigurationError(msg)
 
         self.cache_collection = arguments.pop('cache_collection', None)
         if self.cache_collection is None:
             msg = _('cache_collection name is required')
-            raise exception.ValidationError(message=msg)
+            raise exception.ConfigurationError(msg)
 
         self.username = arguments.pop('username', None)
         self.password = arguments.pop('password', None)
@@ -250,7 +250,7 @@ class MongoApi(object):
             self.w = int(self.w)
         except ValueError:
             msg = _('integer value expected for w (write concern attribute)')
-            raise exception.ValidationError(message=msg)
+            raise exception.ConfigurationError(msg)
 
         self.read_preference = arguments.pop('read_preference', None)
 
@@ -258,7 +258,7 @@ class MongoApi(object):
         if self.use_replica:
             if arguments.get('replicaset_name') is None:
                 msg = _('replicaset_name required when use_replica is True')
-                raise exception.ValidationError(message=msg)
+                raise exception.ConfigurationError(msg)
             self.replicaset_name = arguments.get('replicaset_name')
 
         self.son_manipulator = arguments.pop('son_manipulator', None)
@@ -273,7 +273,7 @@ class MongoApi(object):
             self.ttl_seconds = int(self.ttl_seconds)
         except ValueError:
             msg = _('integer value expected for mongo_ttl_seconds')
-            raise exception.ValidationError(message=msg)
+            raise exception.ConfigurationError(msg)
 
         self.conn_kwargs['ssl'] = arguments.pop('ssl', False)
         if self.conn_kwargs['ssl']:
@@ -298,7 +298,7 @@ class MongoApi(object):
         try:
             import ssl
         except ImportError:
-            raise exception.ValidationError(_('no ssl support available'))
+            raise exception.ConfigurationError(_('no ssl support available'))
         req_type = req_type.upper()
         try:
             return {
@@ -309,7 +309,7 @@ class MongoApi(object):
         except KeyError:
             msg = _('Invalid ssl_cert_reqs value of %s, must be one of '
                     '"NONE", "OPTIONAL", "REQUIRED"') % (req_type)
-            raise exception.ValidationError(message=msg)
+            raise exception.ConfigurationError(msg)
 
     def _get_db(self):
         # defer imports until backend is used
@@ -498,7 +498,7 @@ class AbstractManipulator(object):
         :returns: transformed SON object
 
         """
-        raise exception.NotImplemented()  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     @abc.abstractmethod
     def transform_outgoing(self, son, collection):
@@ -509,7 +509,7 @@ class AbstractManipulator(object):
 
         :returns: transformed SON object
         """
-        raise exception.NotImplemented()  # pragma: no cover
+        raise NotImplementedError()  # pragma: no cover
 
     def will_copy(self):
         """Will this SON manipulator make a copy of the incoming document?

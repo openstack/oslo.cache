@@ -125,7 +125,7 @@ class TestConnectionPool(test_cache.BaseTestCase):
         # Make sure we've consumed the only available connection from the pool
         conn = connection_pool.get_nowait()
 
-        self.assertRaises(exception.UnexpectedError, _acquire_connection)
+        self.assertRaises(exception.QueueEmpty, _acquire_connection)
 
         # Put the connection back and ensure we can acquire the connection
         # after it is available.
