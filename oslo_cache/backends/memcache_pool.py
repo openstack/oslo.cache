@@ -40,6 +40,8 @@ class ClientProxy(object):
 
 
 class PooledMemcachedBackend(memcached_backend.MemcachedBackend):
+    """Memcached backend that does connection pooling."""
+
     # Composed from GenericMemcachedBackend's and MemcacheArgs's __init__
     def __init__(self, arguments):
         super(PooledMemcachedBackend, self).__init__(arguments)
