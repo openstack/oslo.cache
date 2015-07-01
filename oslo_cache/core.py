@@ -197,15 +197,7 @@ def _get_should_cache_fn(section):
     that object is enabled. To properly use this with the decorator, pass this
     function the configuration section and assign the result to a variable.
     Pass the new variable to the caching decorator as the named argument
-    ``should_cache_fn``.  e.g.::
-
-        import oslo_cache
-
-        SHOULD_CACHE = oslo_cache._get_should_cache_fn(section='section1')
-
-        @oslo_cache._on_arguments(should_cache_fn=SHOULD_CACHE)
-        def function(arg1, arg2):
-            ...
+    ``should_cache_fn``.
 
     :param section: name of the configuration section to examine
     :type section: string
@@ -234,16 +226,7 @@ def _get_expiration_time_fn(section):
     To properly use this with the decorator, pass this function the
     configuration section and assign the result to a variable. Pass the new
     variable to the caching decorator as the named argument
-    ``expiration_time``.  e.g.::
-
-        import oslo_cache
-
-        EXPIRATION_TIME = oslo_cache._get_expiration_time_fn(
-            section='section1')
-
-        @oslo_cache._on_arguments(expiration_time=EXPIRATION_TIME)
-        def function(arg1, arg2):
-            ...
+    ``expiration_time``.
 
     :param section: name of the configuration section to examine
     :type section: string
