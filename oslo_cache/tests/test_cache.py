@@ -119,7 +119,7 @@ class CacheRegionTest(BaseTestCase):
             cfg.IntOpt('cache_time', default=None), group=TEST_GROUP2)
 
     def _get_cacheable_function(self):
-        with mock.patch.object(cache._REGION, 'cache_on_arguments',
+        with mock.patch.object(cache.REGION, 'cache_on_arguments',
                                self.region.cache_on_arguments):
             memoize = cache.get_memoization_decorator(section='cache')
 
@@ -142,7 +142,7 @@ class CacheRegionTest(BaseTestCase):
         cache.configure_cache_region(self.region)
 
     def _get_cache_fallthrough_fn(self, cache_time):
-        with mock.patch.object(cache._REGION, 'cache_on_arguments',
+        with mock.patch.object(cache.REGION, 'cache_on_arguments',
                                self.region.cache_on_arguments):
             memoize = cache.get_memoization_decorator(
                 section='cache',
