@@ -29,9 +29,8 @@ from oslo_cache import _opts
 __all__ = [
     'configure',
     'configure_cache_region',
-    'DebugProxy',
-    'REGION',
     'get_memoization_decorator',
+    'REGION',
 ]
 
 _CONF = cfg.CONF
@@ -55,7 +54,7 @@ dogpile.cache.register_backend(
     'PooledMemcachedBackend')
 
 
-class DebugProxy(proxy.ProxyBackend):
+class _DebugProxy(proxy.ProxyBackend):
     """Extra Logging ProxyBackend."""
     # NOTE(morganfainberg): Pass all key/values through repr to ensure we have
     # a clean description of the information.  Without use of repr, it might
@@ -169,7 +168,7 @@ def configure_cache_region(region):
                                      '%s.' % _CONF.cache.config_prefix)
 
         if _CONF.cache.debug_cache_backend:
-            region.wrap(DebugProxy)
+            region.wrap(_DebugProxy)
 
         # NOTE(morganfainberg): if the backend requests the use of a
         # key_mangler, we should respect that key_mangler function.  If a
