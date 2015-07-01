@@ -113,7 +113,7 @@ class CacheRegionTest(BaseTestCase):
         with mock.patch.object(cache.REGION, 'cache_on_arguments',
                                self.region.cache_on_arguments):
             memoize = cache.get_memoization_decorator(self.config_fixture.conf,
-                                                      section='cache')
+                                                      group='cache')
 
             @memoize
             def cacheable_function(value):
@@ -138,8 +138,8 @@ class CacheRegionTest(BaseTestCase):
                                self.region.cache_on_arguments):
             memoize = cache.get_memoization_decorator(
                 self.config_fixture.conf,
-                section='cache',
-                expiration_section=TEST_GROUP2)
+                group='cache',
+                expiration_group=TEST_GROUP2)
 
             class _test_obj(object):
                 def __init__(self, value):
@@ -181,7 +181,7 @@ class CacheRegionTest(BaseTestCase):
         self._add_dummy_config_group()
         # Since we do not re-configure the cache region, for ease of testing
         # this value is set the same as the expiration_time default in the
-        # [cache] section
+        # [cache] group
         cache_time = 600
         expiration_time = cache._get_expiration_time_fn(
             self.config_fixture.conf, TEST_GROUP)
@@ -197,7 +197,7 @@ class CacheRegionTest(BaseTestCase):
         self._add_dummy_config_group()
         # Since we do not re-configure the cache region, for ease of testing
         # this value is set the same as the expiration_time default in the
-        # [cache] section
+        # [cache] group
         cache_time = 599
         expiration_time = cache._get_expiration_time_fn(
             self.config_fixture.conf, TEST_GROUP)
@@ -229,10 +229,10 @@ class CacheRegionTest(BaseTestCase):
         cached_value = cacheable_function(self.test_value)
         self.assertFalse(cached_value.cached)
 
-    def test_should_cache_fn_global_cache_disabled_section_cache_enabled(self):
+    def test_should_cache_fn_global_cache_disabled_group_cache_enabled(self):
         # Verify should_cache_fn generates a sane function for subsystem and
         # functions as expected with caching globally disabled and the specific
-        # section caching enabled.
+        # group caching enabled.
         cacheable_function = self._get_cacheable_function()
 
         self._add_test_caching_option()
@@ -243,10 +243,10 @@ class CacheRegionTest(BaseTestCase):
         cached_value = cacheable_function(self.test_value)
         self.assertFalse(cached_value.cached)
 
-    def test_should_cache_fn_global_cache_enabled_section_cache_disabled(self):
+    def test_should_cache_fn_global_cache_enabled_group_cache_disabled(self):
         # Verify should_cache_fn generates a sane function for subsystem and
         # functions as expected with caching globally enabled and the specific
-        # section caching disabled.
+        # group caching disabled.
         cacheable_function = self._get_cacheable_function()
 
         self._add_test_caching_option()
@@ -257,10 +257,10 @@ class CacheRegionTest(BaseTestCase):
         cached_value = cacheable_function(self.test_value)
         self.assertFalse(cached_value.cached)
 
-    def test_should_cache_fn_global_cache_enabled_section_cache_enabled(self):
+    def test_should_cache_fn_global_cache_enabled_group_cache_enabled(self):
         # Verify should_cache_fn generates a sane function for subsystem and
         # functions as expected with caching globally enabled and the specific
-        # section caching enabled.
+        # group caching enabled.
         cacheable_function = self._get_cacheable_function()
 
         self._add_test_caching_option()

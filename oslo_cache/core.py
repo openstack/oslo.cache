@@ -192,36 +192,36 @@ def configure_cache_region(conf, region):
     return region
 
 
-def _get_should_cache_fn(conf, section):
-    """Build a function that returns a config section's caching status.
+def _get_should_cache_fn(conf, group):
+    """Build a function that returns a config group's caching status.
 
     For any given object that has caching capabilities, a boolean config option
-    for that object's section should exist and default to ``True``. This
+    for that object's group should exist and default to ``True``. This
     function will use that value to tell the caching decorator if caching for
     that object is enabled. To properly use this with the decorator, pass this
-    function the configuration section and assign the result to a variable.
+    function the configuration group and assign the result to a variable.
     Pass the new variable to the caching decorator as the named argument
     ``should_cache_fn``.
 
     :param conf: config object, must have had :func:`configure` called on it.
     :type conf: oslo_config.cfg.ConfigOpts
-    :param section: name of the configuration section to examine
-    :type section: string
+    :param group: name of the configuration group to examine
+    :type group: string
     :returns: function reference
     """
     def should_cache(value):
         if not conf.cache.enabled:
             return False
-        conf_group = getattr(conf, section)
+        conf_group = getattr(conf, group)
         return getattr(conf_group, 'caching', True)
     return should_cache
 
 
-def _get_expiration_time_fn(conf, section):
-    """Build a function that returns a config section's expiration time status.
+def _get_expiration_time_fn(conf, group):
+    """Build a function that returns a config group's expiration time status.
 
     For any given object that has caching capabilities, an int config option
-    called ``cache_time`` for that driver's section should exist and typically
+    called ``cache_time`` for that driver's group should exist and typically
     default to ``None``. This function will use that value to tell the caching
     decorator of the TTL override for caching the resulting objects. If the
     value of the config option is ``None`` the default value provided in the
@@ -230,16 +230,16 @@ def _get_expiration_time_fn(conf, section):
     caching TTL should not be tied to the global default(s).
 
     To properly use this with the decorator, pass this function the
-    configuration section and assign the result to a variable. Pass the new
+    configuration group and assign the result to a variable. Pass the new
     variable to the caching decorator as the named argument
     ``expiration_time``.
 
-    :param section: name of the configuration section to examine
-    :type section: string
+    :param group: name of the configuration group to examine
+    :type group: string
     :rtype: function reference
     """
     def get_expiration_time():
-        conf_group = getattr(conf, section)
+        conf_group = getattr(conf, group)
         return getattr(conf_group, 'cache_time', None)
     return get_expiration_time
 
@@ -266,8 +266,8 @@ REGION = dogpile.cache.make_region(
 _on_arguments = REGION.cache_on_arguments
 
 
-def get_memoization_decorator(conf, section, expiration_section=None):
-    """Build a function based on the `_on_arguments` decorator for the section.
+def get_memoization_decorator(conf, group, expiration_group=None):
+    """Build a function based on the `_on_arguments` decorator for the group.
 
     For any given object that has caching capabilities, a pair of functions is
     required to properly determine the status of the caching capabilities (a
@@ -280,7 +280,7 @@ def get_memoization_decorator(conf, section, expiration_section=None):
         import oslo_cache.core
 
         MEMOIZE = oslo_cache.core.get_memoization_decorator(conf,
-                                                            section='section1')
+                                                            group='group1')
 
         @MEMOIZE
         def function(arg1, arg2):
@@ -288,7 +288,7 @@ def get_memoization_decorator(conf, section, expiration_section=None):
 
 
         ALTERNATE_MEMOIZE = oslo_cache.core.get_memoization_decorator(
-            conf, section='section2', expiration_section='section3')
+            conf, group='group2', expiration_group='group3')
 
         @ALTERNATE_MEMOIZE
         def function2(arg1, arg2):
@@ -296,19 +296,19 @@ def get_memoization_decorator(conf, section, expiration_section=None):
 
     :param conf: config object, must have had :func:`configure` called on it.
     :type conf: oslo_config.cfg.ConfigOpts
-    :param section: name of the configuration section to examine
-    :type section: string
-    :param expiration_section: name of the configuration section to examine
-                               for the expiration option. This will fall back
-                               to using ``section`` if the value is unspecified
-                               or ``None``
-    :type expiration_section: string
+    :param group: name of the configuration group to examine
+    :type group: string
+    :param expiration_group: name of the configuration group to examine
+                             for the expiration option. This will fall back to
+                             using ``group`` if the value is unspecified or
+                             ``None``
+    :type expiration_group: string
     :rtype: function reference
     """
-    if expiration_section is None:
-        expiration_section = section
-    should_cache = _get_should_cache_fn(conf, section)
-    expiration_time = _get_expiration_time_fn(conf, expiration_section)
+    if expiration_group is None:
+        expiration_group = group
+    should_cache = _get_should_cache_fn(conf, group)
+    expiration_time = _get_expiration_time_fn(conf, expiration_group)
 
     memoize = REGION.cache_on_arguments(should_cache_fn=should_cache,
                                         expiration_time=expiration_time)
