@@ -329,4 +329,12 @@ def get_memoization_decorator(section, expiration_section=None):
 
 
 def configure(conf):
+    """Configure the library.
+
+    This must be called before conf().
+
+    :param conf: The configuration object.
+    :type conf: oslo_config.cfg.ConfigOpts
+
+    """
     _opts.configure(conf)
