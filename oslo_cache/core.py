@@ -286,16 +286,16 @@ def get_memoization_decorator(section, expiration_section=None):
 
     Example usage::
 
-        import oslo_cache
+        import oslo_cache.core
 
-        MEMOIZE = oslo_cache.get_memoization_decorator(section='section1')
+        MEMOIZE = oslo_cache.core.get_memoization_decorator(section='section1')
 
         @MEMOIZE
         def function(arg1, arg2):
             ...
 
 
-        ALTERNATE_MEMOIZE = oslo_cache.get_memoization_decorator(
+        ALTERNATE_MEMOIZE = oslo_cache.core.get_memoization_decorator(
             section='section2', expiration_section='section3')
 
         @ALTERNATE_MEMOIZE
