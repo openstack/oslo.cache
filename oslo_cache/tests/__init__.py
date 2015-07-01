@@ -12,4 +12,7 @@
 
 from oslo_cache import _opts
 
-_opts.configure()
+from oslo_config import cfg
+
+
+_opts.configure(cfg.CONF)

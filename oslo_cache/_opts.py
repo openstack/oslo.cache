@@ -95,13 +95,7 @@ FILE_OPTIONS = {
 }
 
 
-CONF = cfg.CONF
-
-
-def configure(conf=None):
-    if conf is None:
-        conf = CONF
-
+def configure(conf):
     for section in FILE_OPTIONS:
         for option in FILE_OPTIONS[section]:
             conf.register_opt(option, group=section)

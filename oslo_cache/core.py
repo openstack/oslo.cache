@@ -17,7 +17,6 @@
 import dogpile.cache
 from dogpile.cache import proxy
 from dogpile.cache import util
-from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import importutils
 
@@ -33,7 +32,6 @@ __all__ = [
     'REGION',
 ]
 
-_CONF = cfg.CONF
 _LOG = log.getLogger(__name__)
 
 _make_region = dogpile.cache.make_region
@@ -92,16 +90,16 @@ class _DebugProxy(proxy.ProxyBackend):
         self.proxied.delete_multi(keys)
 
 
-def _build_cache_config():
+def _build_cache_config(conf):
     """Build the cache region dictionary configuration.
 
     :returns: dict
     """
-    prefix = _CONF.cache.config_prefix
+    prefix = conf.cache.config_prefix
     conf_dict = {}
-    conf_dict['%s.backend' % prefix] = _CONF.cache.backend
-    conf_dict['%s.expiration_time' % prefix] = _CONF.cache.expiration_time
-    for argument in _CONF.cache.backend_argument:
+    conf_dict['%s.backend' % prefix] = conf.cache.backend
+    conf_dict['%s.expiration_time' % prefix] = conf.cache.expiration_time
+    for argument in conf.cache.backend_argument:
         try:
             (argname, argvalue) = argument.split(':', 1)
         except ValueError:
@@ -118,10 +116,10 @@ def _build_cache_config():
     # backends. Use setdefault for url to support old-style setting through
     # backend_argument=url:127.0.0.1:11211
     conf_dict.setdefault('%s.arguments.url' % prefix,
-                         _CONF.cache.memcache_servers)
+                         conf.cache.memcache_servers)
     for arg in ('dead_retry', 'socket_timeout', 'pool_maxsize',
                 'pool_unused_timeout', 'pool_connection_get_timeout'):
-        value = getattr(_CONF.cache, 'memcache_' + arg)
+        value = getattr(conf.cache, 'memcache_' + arg)
         conf_dict['%s.arguments.%s' % (prefix, arg)] = value
 
     return conf_dict
@@ -142,7 +140,7 @@ def _sha1_mangle_key(key):
     return util.sha1_mangle_key(key)
 
 
-def configure_cache_region(region):
+def configure_cache_region(region, conf):
     """Configure a cache region.
 
     If the cache region is already configured, this function does nothing.
@@ -150,6 +148,8 @@ def configure_cache_region(region):
 
     :param region: Cache region to configure
     :type region: dogpile.cache.CacheRegion
+    :param conf: config object, must have had :func:`configure` called on it.
+    :type conf: oslo_config.cfg.ConfigOpts
     :raises oslo_cache.exception.ConfigurationError: If the region parameter is
         not a dogpile.cache.CacheRegion.
     :returns: The region.
@@ -163,11 +163,11 @@ def configure_cache_region(region):
         # There is a request logged with dogpile.cache upstream to make this
         # easier / less ugly.
 
-        config_dict = _build_cache_config()
+        config_dict = _build_cache_config(conf)
         region.configure_from_config(config_dict,
-                                     '%s.' % _CONF.cache.config_prefix)
+                                     '%s.' % conf.cache.config_prefix)
 
-        if _CONF.cache.debug_cache_backend:
+        if conf.cache.debug_cache_backend:
             region.wrap(_DebugProxy)
 
         # NOTE(morganfainberg): if the backend requests the use of a
@@ -178,7 +178,7 @@ def configure_cache_region(region):
         if region.key_mangler is None:
             region.key_mangler = _sha1_mangle_key
 
-        for class_path in _CONF.cache.proxies:
+        for class_path in conf.cache.proxies:
             # NOTE(morganfainberg): if we have any proxy wrappers, we should
             # ensure they are added to the cache region's backend.  Since
             # configure_from_config doesn't handle the wrap argument, we need
@@ -192,7 +192,7 @@ def configure_cache_region(region):
     return region
 
 
-def _get_should_cache_fn(section):
+def _get_should_cache_fn(conf, section):
     """Build a function that returns a config section's caching status.
 
     For any given object that has caching capabilities, a boolean config option
@@ -203,19 +203,21 @@ def _get_should_cache_fn(section):
     Pass the new variable to the caching decorator as the named argument
     ``should_cache_fn``.
 
+    :param conf: config object, must have had :func:`configure` called on it.
+    :type conf: oslo_config.cfg.ConfigOpts
     :param section: name of the configuration section to examine
     :type section: string
     :returns: function reference
     """
     def should_cache(value):
-        if not _CONF.cache.enabled:
+        if not conf.cache.enabled:
             return False
-        conf_group = getattr(_CONF, section)
+        conf_group = getattr(conf, section)
         return getattr(conf_group, 'caching', True)
     return should_cache
 
 
-def _get_expiration_time_fn(section):
+def _get_expiration_time_fn(conf, section):
     """Build a function that returns a config section's expiration time status.
 
     For any given object that has caching capabilities, an int config option
@@ -237,7 +239,7 @@ def _get_expiration_time_fn(section):
     :rtype: function reference
     """
     def get_expiration_time():
-        conf_group = getattr(_CONF, section)
+        conf_group = getattr(conf, section)
         return getattr(conf_group, 'cache_time', None)
     return get_expiration_time
 
@@ -264,7 +266,7 @@ REGION = dogpile.cache.make_region(
 _on_arguments = REGION.cache_on_arguments
 
 
-def get_memoization_decorator(section, expiration_section=None):
+def get_memoization_decorator(conf, section, expiration_section=None):
     """Build a function based on the `_on_arguments` decorator for the section.
 
     For any given object that has caching capabilities, a pair of functions is
@@ -277,7 +279,8 @@ def get_memoization_decorator(section, expiration_section=None):
 
         import oslo_cache.core
 
-        MEMOIZE = oslo_cache.core.get_memoization_decorator(section='section1')
+        MEMOIZE = oslo_cache.core.get_memoization_decorator(conf,
+                                                            section='section1')
 
         @MEMOIZE
         def function(arg1, arg2):
@@ -285,12 +288,14 @@ def get_memoization_decorator(section, expiration_section=None):
 
 
         ALTERNATE_MEMOIZE = oslo_cache.core.get_memoization_decorator(
-            section='section2', expiration_section='section3')
+            conf, section='section2', expiration_section='section3')
 
         @ALTERNATE_MEMOIZE
         def function2(arg1, arg2):
             ...
 
+    :param conf: config object, must have had :func:`configure` called on it.
+    :type conf: oslo_config.cfg.ConfigOpts
     :param section: name of the configuration section to examine
     :type section: string
     :param expiration_section: name of the configuration section to examine
@@ -302,8 +307,8 @@ def get_memoization_decorator(section, expiration_section=None):
     """
     if expiration_section is None:
         expiration_section = section
-    should_cache = _get_should_cache_fn(section)
-    expiration_time = _get_expiration_time_fn(expiration_section)
+    should_cache = _get_should_cache_fn(conf, section)
+    expiration_time = _get_expiration_time_fn(conf, expiration_section)
 
     memoize = REGION.cache_on_arguments(should_cache_fn=should_cache,
                                         expiration_time=expiration_time)

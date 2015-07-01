@@ -28,7 +28,6 @@ from oslo_cache import exception
 from oslo_config import fixture as config_fixture
 
 
-CONF = cfg.CONF
 NO_VALUE = api.NO_VALUE
 TEST_GROUP = uuid.uuid4().hex
 TEST_GROUP2 = uuid.uuid4().hex
@@ -37,15 +36,7 @@ TEST_GROUP2 = uuid.uuid4().hex
 class BaseTestCase(base.BaseTestCase):
     def setUp(self):
         super(BaseTestCase, self).setUp()
-
-        self.addCleanup(CONF.reset)
-
-        self.config_fixture = self.useFixture(config_fixture.Config(CONF))
-        self.addCleanup(delattr, self, 'config_fixture')
-
-        self.config_overrides()
-
-    def config_overrides(self):
+        self.config_fixture = self.useFixture(config_fixture.Config())
         self.config_fixture.config(
             # TODO(morganfainberg): Make Cache Testing a separate test case
             # in tempest, and move it out of the base unit tests.
@@ -104,7 +95,7 @@ class CacheRegionTest(BaseTestCase):
     def setUp(self):
         super(CacheRegionTest, self).setUp()
         self.region = cache._make_region()
-        cache.configure_cache_region(self.region)
+        cache.configure_cache_region(self.region, self.config_fixture.conf)
         self.region.wrap(TestProxy)
         self.test_value = TestProxyValue('Decorator Test')
 
@@ -121,7 +112,8 @@ class CacheRegionTest(BaseTestCase):
     def _get_cacheable_function(self):
         with mock.patch.object(cache.REGION, 'cache_on_arguments',
                                self.region.cache_on_arguments):
-            memoize = cache.get_memoization_decorator(section='cache')
+            memoize = cache.get_memoization_decorator(self.config_fixture.conf,
+                                                      section='cache')
 
             @memoize
             def cacheable_function(value):
@@ -138,13 +130,14 @@ class CacheRegionTest(BaseTestCase):
 
     def test_cache_region_no_error_multiple_config(self):
         # Verify configuring the CacheRegion again doesn't error.
-        cache.configure_cache_region(self.region)
-        cache.configure_cache_region(self.region)
+        cache.configure_cache_region(self.region, self.config_fixture.conf)
+        cache.configure_cache_region(self.region, self.config_fixture.conf)
 
     def _get_cache_fallthrough_fn(self, cache_time):
         with mock.patch.object(cache.REGION, 'cache_on_arguments',
                                self.region.cache_on_arguments):
             memoize = cache.get_memoization_decorator(
+                self.config_fixture.conf,
                 section='cache',
                 expiration_section=TEST_GROUP2)
 
@@ -190,7 +183,8 @@ class CacheRegionTest(BaseTestCase):
         # this value is set the same as the expiration_time default in the
         # [cache] section
         cache_time = 600
-        expiration_time = cache._get_expiration_time_fn(TEST_GROUP)
+        expiration_time = cache._get_expiration_time_fn(
+            self.config_fixture.conf, TEST_GROUP)
         do_test = self._get_cache_fallthrough_fn(cache_time)
         # Run the test with the dummy group cache_time value
         self.config_fixture.config(cache_time=cache_time,
@@ -205,7 +199,8 @@ class CacheRegionTest(BaseTestCase):
         # this value is set the same as the expiration_time default in the
         # [cache] section
         cache_time = 599
-        expiration_time = cache._get_expiration_time_fn(TEST_GROUP)
+        expiration_time = cache._get_expiration_time_fn(
+            self.config_fixture.conf, TEST_GROUP)
         do_test = self._get_cache_fallthrough_fn(cache_time)
         # Run the test with the dummy group cache_time value set to None and
         # the global value set.
@@ -286,11 +281,12 @@ class CacheRegionTest(BaseTestCase):
                                                      'arg2:test:test',
                                                      'arg3.invalid'])
 
-        config_dict = cache._build_cache_config()
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
         self.assertEqual(
-            CONF.cache.backend, config_dict['test_prefix.backend'])
+            self.config_fixture.conf.cache.backend,
+            config_dict['test_prefix.backend'])
         self.assertEqual(
-            CONF.cache.expiration_time,
+            self.config_fixture.conf.cache.expiration_time,
             config_dict['test_prefix.expiration_time'])
         self.assertEqual('test', config_dict['test_prefix.arguments.arg1'])
         self.assertEqual('test:test',
@@ -321,6 +317,7 @@ class CacheRegionTest(BaseTestCase):
     def test_configure_non_region_object_raises_error(self):
         self.assertRaises(exception.ConfigurationError,
                           cache.configure_cache_region,
+                          self.config_fixture.conf,
                           "bogus")
 
 
@@ -346,13 +343,11 @@ class CacheNoopBackendTest(BaseTestCase):
 
     def setUp(self):
         super(CacheNoopBackendTest, self).setUp()
-        self.region = cache._make_region()
-        cache.configure_cache_region(self.region)
-
-    def config_overrides(self):
-        super(CacheNoopBackendTest, self).config_overrides()
         self.config_fixture.config(group='cache',
                                    backend='oslo_cache.noop')
+
+        self.region = cache._make_region()
+        cache.configure_cache_region(self.region, self.config_fixture.conf)
 
     def test_noop_backend(self):
         single_value = 'Test Value'
