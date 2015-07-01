@@ -140,16 +140,16 @@ def _sha1_mangle_key(key):
     return util.sha1_mangle_key(key)
 
 
-def configure_cache_region(region, conf):
+def configure_cache_region(conf, region):
     """Configure a cache region.
 
     If the cache region is already configured, this function does nothing.
     Otherwise, the region is configured.
 
-    :param region: Cache region to configure
-    :type region: dogpile.cache.CacheRegion
     :param conf: config object, must have had :func:`configure` called on it.
     :type conf: oslo_config.cfg.ConfigOpts
+    :param region: Cache region to configure
+    :type region: dogpile.cache.CacheRegion
     :raises oslo_cache.exception.ConfigurationError: If the region parameter is
         not a dogpile.cache.CacheRegion.
     :returns: The region.

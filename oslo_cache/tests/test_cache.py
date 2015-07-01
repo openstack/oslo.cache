@@ -95,7 +95,7 @@ class CacheRegionTest(BaseTestCase):
     def setUp(self):
         super(CacheRegionTest, self).setUp()
         self.region = cache._make_region()
-        cache.configure_cache_region(self.region, self.config_fixture.conf)
+        cache.configure_cache_region(self.config_fixture.conf, self.region)
         self.region.wrap(TestProxy)
         self.test_value = TestProxyValue('Decorator Test')
 
@@ -130,8 +130,8 @@ class CacheRegionTest(BaseTestCase):
 
     def test_cache_region_no_error_multiple_config(self):
         # Verify configuring the CacheRegion again doesn't error.
-        cache.configure_cache_region(self.region, self.config_fixture.conf)
-        cache.configure_cache_region(self.region, self.config_fixture.conf)
+        cache.configure_cache_region(self.config_fixture.conf, self.region)
+        cache.configure_cache_region(self.config_fixture.conf, self.region)
 
     def _get_cache_fallthrough_fn(self, cache_time):
         with mock.patch.object(cache.REGION, 'cache_on_arguments',
@@ -347,7 +347,7 @@ class CacheNoopBackendTest(BaseTestCase):
                                    backend='oslo_cache.noop')
 
         self.region = cache._make_region()
-        cache.configure_cache_region(self.region, self.config_fixture.conf)
+        cache.configure_cache_region(self.config_fixture.conf, self.region)
 
     def test_noop_backend(self):
         single_value = 'Test Value'
