@@ -145,10 +145,14 @@ def _sha1_mangle_key(key):
 def configure_cache_region(region):
     """Configure a cache region.
 
-    :param region: optional CacheRegion object, if not provided a new region
-                   will be instantiated
-    :raises: exception.ConfigurationError
-    :returns: dogpile.cache.CacheRegion
+    If the cache region is already configured, this function does nothing.
+    Otherwise, the region is configured.
+
+    :param region: Cache region to configure
+    :type region: dogpile.cache.CacheRegion
+    :raises oslo_cache.exception.ConfigurationError: If the region parameter is
+        not a dogpile.cache.CacheRegion.
+    :returns: The region.
     """
     if not isinstance(region, dogpile.cache.CacheRegion):
         raise exception.ConfigurationError(
