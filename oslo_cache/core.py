@@ -30,6 +30,7 @@ __all__ = [
     'configure',
     'configure_cache_region',
     'DebugProxy',
+    'REGION',
     'get_memoization_decorator',
 ]
 
@@ -270,9 +271,11 @@ def _function_key_generator(namespace, fn, to_str=_key_generate_to_str):
     return util.function_key_generator(namespace, fn, to_str=to_str)
 
 
-_REGION = dogpile.cache.make_region(
+REGION = dogpile.cache.make_region(
     function_key_generator=_function_key_generator)
-_on_arguments = _REGION.cache_on_arguments
+"""A front end to a particular dogpile cache backend."""
+
+_on_arguments = REGION.cache_on_arguments
 
 
 def get_memoization_decorator(section, expiration_section=None):
@@ -316,8 +319,8 @@ def get_memoization_decorator(section, expiration_section=None):
     should_cache = _get_should_cache_fn(section)
     expiration_time = _get_expiration_time_fn(expiration_section)
 
-    memoize = _REGION.cache_on_arguments(should_cache_fn=should_cache,
-                                         expiration_time=expiration_time)
+    memoize = REGION.cache_on_arguments(should_cache_fn=should_cache,
+                                        expiration_time=expiration_time)
 
     # Make sure the actual "should_cache" and "expiration_time" methods are
     # available. This is potentially interesting/useful to pre-seed cache
