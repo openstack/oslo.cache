@@ -36,20 +36,15 @@ _LOG = log.getLogger(__name__)
 
 _make_region = dogpile.cache.make_region
 
-dogpile.cache.register_backend(
-    'oslo_cache.noop',
-    'oslo_cache.backends.noop',
-    'NoopCacheBackend')
+_BACKENDS = [
+    ('oslo_cache.noop', 'oslo_cache.backends.noop', 'NoopCacheBackend'),
+    ('oslo_cache.mongo', 'oslo_cache.backends.mongo', 'MongoCacheBackend'),
+    ('oslo_cache.memcache_pool', 'oslo_cache.backends.memcache_pool',
+     'PooledMemcachedBackend')
+]
 
-dogpile.cache.register_backend(
-    'oslo_cache.mongo',
-    'oslo_cache.backends.mongo',
-    'MongoCacheBackend')
-
-dogpile.cache.register_backend(
-    'oslo_cache.memcache_pool',
-    'oslo_cache.backends.memcache_pool',
-    'PooledMemcachedBackend')
+for backend in _BACKENDS:
+    dogpile.cache.register_backend(*backend)
 
 
 class _DebugProxy(proxy.ProxyBackend):
