@@ -15,6 +15,10 @@
 from dogpile.cache import api
 
 
+__all__ = [
+    'NoopCacheBackend'
+]
+
 NO_VALUE = api.NO_VALUE
 
 

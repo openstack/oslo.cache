@@ -26,6 +26,10 @@ from oslo_cache import exception
 from oslo_cache._i18n import _, _LW
 
 
+__all__ = [
+    'MongoCacheBackend'
+]
+
 NO_VALUE = api.NO_VALUE
 LOG = log.getLogger(__name__)
 
