@@ -258,8 +258,6 @@ REGION = dogpile.cache.make_region(
     function_key_generator=_function_key_generator)
 """A front end to a particular dogpile cache backend."""
 
-_on_arguments = REGION.cache_on_arguments
-
 
 def get_memoization_decorator(conf, group, expiration_group=None):
     """Build a function based on the `_on_arguments` decorator for the group.
