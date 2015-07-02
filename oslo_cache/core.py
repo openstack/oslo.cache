@@ -12,7 +12,29 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""Caching Layer Implementation."""
+"""Caching Layer Implementation.
+
+When this library is imported, it registers the following backends in
+:mod:`dogpile.cache`:
+
+* ``oslo_cache.noop`` - :class:`oslo_cache.backends.noop.NoopCacheBackend`
+* ``oslo_cache.mongo`` - :class:`oslo_cache.backends.mongo.MongoCacheBackend`
+* ``oslo_cache.memcache_pool`` -
+  :class:`oslo_cache.backends.memcache_pool.PooledMemcachedBackend`
+
+To use this library:
+
+Inside your application code, decorate the methods that you want the results
+to be cached with a memoization decorator created with
+:func:`get_memoization_decorator`. This function takes a group name from the
+config. Register [`group`] ``caching`` and [`group`] ``cache_time`` options
+for the groups that your decorators use so that caching can be configured.
+
+This library's configuration options must be registered in your application's
+:class:`oslo_config.cfg.ConfigOpts` instance. Do this by passing the ConfigOpts
+instance to :func:`configure`.
+
+"""
 
 import dogpile.cache
 from dogpile.cache import proxy
@@ -260,13 +282,21 @@ REGION = dogpile.cache.make_region(
 
 
 def get_memoization_decorator(conf, group, expiration_group=None):
-    """Build a function based on the `_on_arguments` decorator for the group.
+    """Build a function based on the `cache_on_arguments` decorator.
 
-    For any given object that has caching capabilities, a pair of functions is
-    required to properly determine the status of the caching capabilities (a
-    toggle to indicate caching is enabled and any override of the default TTL
-    for cached data). This function will return an object that has the
-    memoization decorator ``_on_arguments`` pre-configured for the driver.
+    The memoization decorator that gets created by this function is a
+    :meth:`dogpile.cache.region.CacheRegion.cache_on_arguments` decorator,
+    where
+
+    * The ``should_cache_fn`` is set to a function that returns True if both
+      the ``[cache] enabled`` option is true and [`group`] ``caching`` is
+      True.
+
+    * The ``expiration_time`` is set from the
+      [`expiration_group`] ``cache_time`` option if ``expiration_group``
+      is passed in and the value is set, or [`group`] ``cache_time`` if
+      ``expiration_group`` is not passed in and the value is set, or
+      ``[cache] expiration_time`` otherwise.
 
     Example usage::
 
