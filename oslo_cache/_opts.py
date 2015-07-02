@@ -38,7 +38,7 @@ FILE_OPTIONS = {
         cfg.StrOpt('backend', default='oslo_cache.noop',
                    help='Dogpile.cache backend module. It is recommended '
                         'that Memcache with pooling '
-                        '(keystone.cache.memcache_pool) or Redis '
+                        '(oslo_cache.memcache_pool) or Redis '
                         '(dogpile.cache.redis) be used in production '
                         'deployments.  Small workloads (single process) '
                         'like devstack can use the dogpile.cache.memory '
@@ -54,8 +54,7 @@ FILE_OPTIONS = {
                          'dogpile.cache documentation on '
                          'changing-backend-behavior.'),
         cfg.BoolOpt('enabled', default=False,
-                    help='Global toggle for all caching using the '
-                         'should_cache_fn mechanism.'),
+                    help='Global toggle for caching.'),
         cfg.BoolOpt('debug_cache_backend', default=False,
                     help='Extra debugging from the cache backend (cache '
                          'keys, get/set/delete/etc calls). This is only '
@@ -65,7 +64,7 @@ FILE_OPTIONS = {
                          'to false.'),
         cfg.ListOpt('memcache_servers', default=['localhost:11211'],
                     help='Memcache servers in the format of "host:port".'
-                    ' (dogpile.cache.memcache and keystone.cache.memcache_pool'
+                    ' (dogpile.cache.memcache and oslo_cache.memcache_pool'
                     ' backends only).'),
         cfg.IntOpt('memcache_dead_retry',
                    default=5 * 60,
@@ -75,18 +74,18 @@ FILE_OPTIONS = {
         cfg.IntOpt('memcache_socket_timeout',
                    default=3,
                    help='Timeout in seconds for every call to a server.'
-                   ' (dogpile.cache.memcache and keystone.cache.memcache_pool'
+                   ' (dogpile.cache.memcache and oslo_cache.memcache_pool'
                    ' backends only).'),
         cfg.IntOpt('memcache_pool_maxsize',
                    default=10,
                    help='Max total number of open connections to every'
-                   ' memcached server. (keystone.cache.memcache_pool backend'
+                   ' memcached server. (oslo_cache.memcache_pool backend'
                    ' only).'),
         cfg.IntOpt('memcache_pool_unused_timeout',
                    default=60,
                    help='Number of seconds a connection to memcached is held'
                    ' unused in the pool before it is closed.'
-                   ' (keystone.cache.memcache_pool backend only).'),
+                   ' (oslo_cache.memcache_pool backend only).'),
         cfg.IntOpt('memcache_pool_connection_get_timeout',
                    default=10,
                    help='Number of seconds that an operation will wait to get '
@@ -102,12 +101,10 @@ def configure(conf):
 
 
 def list_opts():
-    """Return a list of oslo_config options available in Keystone.
+    """Return a list of oslo_config options.
 
     The returned list includes all oslo_config options which are registered as
-    the "FILE_OPTIONS" in keystone.common.config. This list will not include
-    the options from the oslo-incubator library or any options registered
-    dynamically at run time.
+    the "FILE_OPTIONS".
 
     Each object in the list is a two element tuple. The first element of
     each tuple is the name of the group under which the list of options in the
@@ -115,7 +112,7 @@ def list_opts():
     [DEFAULT] group in config files.
 
     This function is also discoverable via the 'oslo_config.opts' entry point
-    under the 'keystone.config.opts' namespace.
+    under the 'oslo_cache.config.opts' namespace.
 
     The purpose of this is to allow tools like the Oslo sample config file
     generator to discover the options exposed to users by this library.
