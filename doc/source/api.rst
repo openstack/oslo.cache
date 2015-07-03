@@ -16,3 +16,6 @@
 
 .. automodule:: oslo_cache.backends.noop
    :members:
+
+.. automodule:: oslo_cache.backends.dictionary
+   :members:

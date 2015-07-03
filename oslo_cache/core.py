@@ -21,6 +21,8 @@ When this library is imported, it registers the following backends in
 * ``oslo_cache.mongo`` - :class:`oslo_cache.backends.mongo.MongoCacheBackend`
 * ``oslo_cache.memcache_pool`` -
   :class:`oslo_cache.backends.memcache_pool.PooledMemcachedBackend`
+* ``oslo_cache.dict`` -
+  :class:`oslo_cache.backends.dictionary.DictCacheBackend`
 
 To use this library:
 
@@ -62,7 +64,8 @@ _BACKENDS = [
     ('oslo_cache.noop', 'oslo_cache.backends.noop', 'NoopCacheBackend'),
     ('oslo_cache.mongo', 'oslo_cache.backends.mongo', 'MongoCacheBackend'),
     ('oslo_cache.memcache_pool', 'oslo_cache.backends.memcache_pool',
-     'PooledMemcachedBackend')
+     'PooledMemcachedBackend'),
+    ('oslo_cache.dict', 'oslo_cache.backends.dictionary', 'DictCacheBackend'),
 ]
 
 for backend in _BACKENDS:
