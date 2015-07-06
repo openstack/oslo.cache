@@ -100,7 +100,7 @@ class ConnectionPool(queue.Queue):
 
         This is called when the pool wishes to get rid of an existing
         connection. This is the opportunity for a subclass to free up
-        resources and cleaup after itself.
+        resources and cleanup after itself.
 
         :param conn: the connection object to destroy
 

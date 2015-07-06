@@ -312,7 +312,7 @@ class MongoApi(object):
             }[req_type]
         except KeyError:
             msg = _('Invalid ssl_cert_reqs value of %s, must be one of '
-                    '"NONE", "OPTIONAL", "REQUIRED"') % (req_type)
+                    '"NONE", "OPTIONAL", "REQUIRED"') % req_type
             raise exception.ConfigurationError(msg)
 
     def _get_db(self):
@@ -416,8 +416,8 @@ class MongoApi(object):
                                    'indx_name': indx_name})
 
     def get(self, key):
-        critieria = {'_id': key}
-        result = self.get_cache_collection().find_one(spec_or_id=critieria,
+        criteria = {'_id': key}
+        result = self.get_cache_collection().find_one(spec_or_id=criteria,
                                                       **self.meth_kwargs)
         if result:
             return result['value']
@@ -429,8 +429,8 @@ class MongoApi(object):
         return {doc['_id']: doc['value'] for doc in six.itervalues(db_results)}
 
     def _get_results_as_dict(self, keys):
-        critieria = {'_id': {'$in': keys}}
-        db_results = self.get_cache_collection().find(spec=critieria,
+        criteria = {'_id': {'$in': keys}}
+        db_results = self.get_cache_collection().find(spec=criteria,
                                                       **self.meth_kwargs)
         return {doc['_id']: doc for doc in db_results}
 
@@ -472,13 +472,13 @@ class MongoApi(object):
                                              **self.meth_kwargs)
 
     def delete(self, key):
-        critieria = {'_id': key}
-        self.get_cache_collection().remove(spec_or_id=critieria,
+        criteria = {'_id': key}
+        self.get_cache_collection().remove(spec_or_id=criteria,
                                            **self.meth_kwargs)
 
     def delete_multi(self, keys):
-        critieria = {'_id': {'$in': keys}}
-        self.get_cache_collection().remove(spec_or_id=critieria,
+        criteria = {'_id': {'$in': keys}}
+        self.get_cache_collection().remove(spec_or_id=criteria,
                                            **self.meth_kwargs)
 
 

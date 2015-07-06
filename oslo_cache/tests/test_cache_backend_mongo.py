@@ -222,7 +222,6 @@ class MockCollection(object):
 class MockMongoDB(object):
     def __init__(self, dbname):
         self._dbname = dbname
-        self.mainpulator = None
 
     def authenticate(self, username, password):
         pass
