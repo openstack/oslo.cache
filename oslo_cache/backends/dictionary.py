@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""dogpile.cache backend that uses dictionary as a storage"""
+"""dogpile.cache backend that uses dictionary for storage"""
 
 from dogpile.cache import api
 from oslo_utils import timeutils
@@ -32,9 +32,9 @@ class DictCacheBackend(api.CacheBackend):
     Arguments accepted in the arguments dictionary:
 
     :param expiration_time: interval in seconds to indicate maximum
-        time-to-live value. This parameter is common for a single backend
-        instance. Default expiration_time value is 0, that means that all keys
-        have infinite time-to-live value.
+        time-to-live value for each key in DictCacheBackend.
+        Default expiration_time value is 0, that means that all keys have
+        infinite time-to-live value.
     :type expiration_time: real
     """
 
