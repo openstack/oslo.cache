@@ -52,13 +52,11 @@ from oslo_cache import _opts
 __all__ = [
     'configure',
     'configure_cache_region',
+    'create_region',
     'get_memoization_decorator',
-    'REGION',
 ]
 
 _LOG = log.getLogger(__name__)
-
-_make_region = dogpile.cache.make_region
 
 _BACKENDS = [
     ('oslo_cache.noop', 'oslo_cache.backends.noop', 'NoopCacheBackend'),
@@ -160,6 +158,26 @@ def _sha1_mangle_key(key):
     return util.sha1_mangle_key(key)
 
 
+def create_region():
+    """Create a region.
+
+    This is just dogpile.cache.make_region, but the key generator has a
+    different to_str mechanism.
+
+    .. note::
+
+        You must call :func:`configure_cache_region` with this region before
+        a memoized method is called.
+
+    :returns: The new region.
+    :rtype: :class:`dogpile.cache.CacheRegion`
+
+    """
+
+    return dogpile.cache.make_region(
+        function_key_generator=_function_key_generator)
+
+
 def configure_cache_region(conf, region):
     """Configure a cache region.
 
@@ -168,7 +186,7 @@ def configure_cache_region(conf, region):
 
     :param conf: config object, must have had :func:`configure` called on it.
     :type conf: oslo_config.cfg.ConfigOpts
-    :param region: Cache region to configure
+    :param region: Cache region to configure (see :func:`create_region`).
     :type region: dogpile.cache.CacheRegion
     :raises oslo_cache.exception.ConfigurationError: If the region parameter is
         not a dogpile.cache.CacheRegion.
@@ -279,12 +297,7 @@ def _function_key_generator(namespace, fn, to_str=_key_generate_to_str):
     return util.function_key_generator(namespace, fn, to_str=to_str)
 
 
-REGION = dogpile.cache.make_region(
-    function_key_generator=_function_key_generator)
-"""A front end to a particular dogpile cache backend."""
-
-
-def get_memoization_decorator(conf, group, expiration_group=None):
+def get_memoization_decorator(conf, region, group, expiration_group=None):
     """Build a function based on the `cache_on_arguments` decorator.
 
     The memoization decorator that gets created by this function is a
@@ -322,6 +335,7 @@ def get_memoization_decorator(conf, group, expiration_group=None):
 
     :param conf: config object, must have had :func:`configure` called on it.
     :type conf: oslo_config.cfg.ConfigOpts
+    :param region: region as created by :func:`create_region`.
     :param group: name of the configuration group to examine
     :type group: string
     :param expiration_group: name of the configuration group to examine
@@ -336,7 +350,7 @@ def get_memoization_decorator(conf, group, expiration_group=None):
     should_cache = _get_should_cache_fn(conf, group)
     expiration_time = _get_expiration_time_fn(conf, expiration_group)
 
-    memoize = REGION.cache_on_arguments(should_cache_fn=should_cache,
+    memoize = region.cache_on_arguments(should_cache_fn=should_cache,
                                         expiration_time=expiration_time)
 
     # Make sure the actual "should_cache" and "expiration_time" methods are

@@ -94,7 +94,7 @@ class CacheRegionTest(BaseTestCase):
 
     def setUp(self):
         super(CacheRegionTest, self).setUp()
-        self.region = cache._make_region()
+        self.region = cache.create_region()
         cache.configure_cache_region(self.config_fixture.conf, self.region)
         self.region.wrap(TestProxy)
         self.test_value = TestProxyValue('Decorator Test')
@@ -110,14 +110,12 @@ class CacheRegionTest(BaseTestCase):
             cfg.IntOpt('cache_time', default=None), group=TEST_GROUP2)
 
     def _get_cacheable_function(self):
-        with mock.patch.object(cache.REGION, 'cache_on_arguments',
-                               self.region.cache_on_arguments):
-            memoize = cache.get_memoization_decorator(self.config_fixture.conf,
-                                                      group='cache')
+        memoize = cache.get_memoization_decorator(
+            self.config_fixture.conf, self.region, group='cache')
 
-            @memoize
-            def cacheable_function(value):
-                return value
+        @memoize
+        def cacheable_function(value):
+            return value
 
         return cacheable_function
 
@@ -134,46 +132,45 @@ class CacheRegionTest(BaseTestCase):
         cache.configure_cache_region(self.config_fixture.conf, self.region)
 
     def _get_cache_fallthrough_fn(self, cache_time):
-        with mock.patch.object(cache.REGION, 'cache_on_arguments',
-                               self.region.cache_on_arguments):
-            memoize = cache.get_memoization_decorator(
-                self.config_fixture.conf,
-                group='cache',
-                expiration_group=TEST_GROUP2)
+        memoize = cache.get_memoization_decorator(
+            self.config_fixture.conf,
+            self.region,
+            group='cache',
+            expiration_group=TEST_GROUP2)
 
-            class _test_obj(object):
-                def __init__(self, value):
-                    self.test_value = value
+        class _test_obj(object):
+            def __init__(self, value):
+                self.test_value = value
 
-                @memoize
-                def get_test_value(self):
-                    return self.test_value
+            @memoize
+            def get_test_value(self):
+                return self.test_value
 
-            def _do_test(value):
+        def _do_test(value):
 
-                test_obj = _test_obj(value)
+            test_obj = _test_obj(value)
 
-                # Ensure the value has been cached
-                test_obj.get_test_value()
-                # Get the now cached value
-                cached_value = test_obj.get_test_value()
-                self.assertTrue(cached_value.cached)
-                self.assertEqual(value.value, cached_value.value)
-                self.assertEqual(cached_value.value, test_obj.test_value.value)
-                # Change the underlying value on the test object.
-                test_obj.test_value = TestProxyValue(uuid.uuid4().hex)
-                self.assertEqual(cached_value.value,
-                                 test_obj.get_test_value().value)
-                # override the system time to ensure the non-cached new value
-                # is returned
-                new_time = time.time() + (cache_time * 2)
-                with mock.patch.object(time, 'time',
-                                       return_value=new_time):
-                    overriden_cache_value = test_obj.get_test_value()
-                    self.assertNotEqual(cached_value.value,
-                                        overriden_cache_value.value)
-                    self.assertEqual(test_obj.test_value.value,
-                                     overriden_cache_value.value)
+            # Ensure the value has been cached
+            test_obj.get_test_value()
+            # Get the now cached value
+            cached_value = test_obj.get_test_value()
+            self.assertTrue(cached_value.cached)
+            self.assertEqual(value.value, cached_value.value)
+            self.assertEqual(cached_value.value, test_obj.test_value.value)
+            # Change the underlying value on the test object.
+            test_obj.test_value = TestProxyValue(uuid.uuid4().hex)
+            self.assertEqual(cached_value.value,
+                             test_obj.get_test_value().value)
+            # override the system time to ensure the non-cached new value
+            # is returned
+            new_time = time.time() + (cache_time * 2)
+            with mock.patch.object(time, 'time',
+                                   return_value=new_time):
+                overriden_cache_value = test_obj.get_test_value()
+                self.assertNotEqual(cached_value.value,
+                                    overriden_cache_value.value)
+                self.assertEqual(test_obj.test_value.value,
+                                 overriden_cache_value.value)
 
         return _do_test
 
@@ -346,7 +343,7 @@ class CacheNoopBackendTest(BaseTestCase):
         self.config_fixture.config(group='cache',
                                    backend='oslo_cache.noop')
 
-        self.region = cache._make_region()
+        self.region = cache.create_region()
         cache.configure_cache_region(self.config_fixture.conf, self.region)
 
     def test_noop_backend(self):
