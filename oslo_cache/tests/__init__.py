@@ -10,9 +10,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_cache import _opts
+from oslo_cache import core
 
 from oslo_config import cfg
 
 
-_opts.configure(cfg.CONF)
+core.configure(cfg.CONF)

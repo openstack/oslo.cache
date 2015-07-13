@@ -14,17 +14,9 @@
 
 """Caching Layer Implementation.
 
-When this library is imported, it registers the following backends in
-:mod:`dogpile.cache`:
-
-* ``oslo_cache.noop`` - :class:`oslo_cache.backends.noop.NoopCacheBackend`
-* ``oslo_cache.mongo`` - :class:`oslo_cache.backends.mongo.MongoCacheBackend`
-* ``oslo_cache.memcache_pool`` -
-  :class:`oslo_cache.backends.memcache_pool.PooledMemcachedBackend`
-* ``oslo_cache.dict`` -
-  :class:`oslo_cache.backends.dictionary.DictCacheBackend`
-
 To use this library:
+
+You must call :func:`configure`.
 
 Inside your application code, decorate the methods that you want the results
 to be cached with a memoization decorator created with
@@ -65,9 +57,6 @@ _BACKENDS = [
      'PooledMemcachedBackend'),
     ('oslo_cache.dict', 'oslo_cache.backends.dictionary', 'DictCacheBackend'),
 ]
-
-for backend in _BACKENDS:
-    dogpile.cache.register_backend(*backend)
 
 
 class _DebugProxy(proxy.ProxyBackend):
@@ -367,8 +356,21 @@ def configure(conf):
 
     This must be called before conf().
 
+    The following backends are registered in :mod:`dogpile.cache`:
+
+    * ``oslo_cache.noop`` - :class:`oslo_cache.backends.noop.NoopCacheBackend`
+    * ``oslo_cache.mongo`` -
+      :class:`oslo_cache.backends.mongo.MongoCacheBackend`
+    * ``oslo_cache.memcache_pool`` -
+      :class:`oslo_cache.backends.memcache_pool.PooledMemcachedBackend`
+    * ``oslo_cache.dict`` -
+      :class:`oslo_cache.backends.dictionary.DictCacheBackend`
+
     :param conf: The configuration object.
     :type conf: oslo_config.cfg.ConfigOpts
 
     """
     _opts.configure(conf)
+
+    for backend in _BACKENDS:
+        dogpile.cache.register_backend(*backend)
