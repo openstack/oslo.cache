@@ -17,7 +17,7 @@ from oslo_config import cfg
 
 FILE_OPTIONS = {
     'cache': [
-        cfg.StrOpt('config_prefix', default='cache.keystone',
+        cfg.StrOpt('config_prefix', default='cache.oslo',
                    help='Prefix for building the configuration dictionary '
                         'for the cache region. This should not need to be '
                         'changed unless there is another dogpile.cache '
@@ -70,7 +70,7 @@ FILE_OPTIONS = {
                    default=5 * 60,
                    help='Number of seconds memcached server is considered dead'
                    ' before it is tried again. (dogpile.cache.memcache and'
-                   ' keystone.cache.memcache_pool backends only).'),
+                   ' oslo_cache.memcache_pool backends only).'),
         cfg.IntOpt('memcache_socket_timeout',
                    default=3,
                    help='Timeout in seconds for every call to a server.'
