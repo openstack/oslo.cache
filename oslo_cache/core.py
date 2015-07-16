@@ -28,9 +28,15 @@ This library's configuration options must be registered in your application's
 :class:`oslo_config.cfg.ConfigOpts` instance. Do this by passing the ConfigOpts
 instance to :func:`configure`.
 
+The library has special public value for nonexistent or expired keys called
+:data:`NO_VALUE`. To use this value you should import it from oslo_cache.core::
+
+    from oslo_cache import core
+    NO_VALUE = core.NO_VALUE
 """
 
 import dogpile.cache
+from dogpile.cache import api
 from dogpile.cache import proxy
 from dogpile.cache import util
 from oslo_log import log
@@ -46,7 +52,11 @@ __all__ = [
     'configure_cache_region',
     'create_region',
     'get_memoization_decorator',
+    'NO_VALUE',
 ]
+
+NO_VALUE = api.NO_VALUE
+"""Value returned for nonexistent or expired keys."""
 
 _LOG = log.getLogger(__name__)
 

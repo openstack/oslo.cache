@@ -17,12 +17,12 @@ import copy
 import functools
 import uuid
 
-from dogpile.cache import api
 from dogpile.cache import region as dp_region
 import six
 from six.moves import range
 
 from oslo_cache.backends import mongo
+from oslo_cache import core
 from oslo_cache import exception
 from oslo_cache.tests import test_cache
 
@@ -61,6 +61,7 @@ ks_cache = {
 
 COLLECTIONS = {}
 SON_MANIPULATOR = None
+NO_VALUE = core.NO_VALUE
 
 
 class MockCursor(object):
@@ -463,7 +464,7 @@ class MongoCache(test_cache.BaseTestCase):
 
         random_key = uuid.uuid4().hex
         # should return NO_VALUE as key does not exist in cache
-        self.assertEqual(api.NO_VALUE, region.get(random_key))
+        self.assertEqual(NO_VALUE, region.get(random_key))
 
     def test_backend_set_data(self):
 
@@ -551,7 +552,7 @@ class MongoCache(test_cache.BaseTestCase):
                    random_key3: 'dummyValue3'}
         region.set_multi(mapping)
         # should return NO_VALUE as key does not exist in cache
-        self.assertEqual(api.NO_VALUE, region.get(random_key))
+        self.assertEqual(NO_VALUE, region.get(random_key))
         self.assertFalse(region.get(random_key))
         self.assertEqual("dummyValue1", region.get(random_key1))
         self.assertEqual("dummyValue2", region.get(random_key2))
@@ -575,7 +576,7 @@ class MongoCache(test_cache.BaseTestCase):
         keys = [random_key, random_key1, random_key2, random_key3]
         results = region.get_multi(keys)
         # should return NO_VALUE as key does not exist in cache
-        self.assertEqual(api.NO_VALUE, results[0])
+        self.assertEqual(NO_VALUE, results[0])
         self.assertEqual("dummyValue1", results[1])
         self.assertEqual("", results[2])
         self.assertEqual("dummyValue3", results[3])
@@ -595,7 +596,7 @@ class MongoCache(test_cache.BaseTestCase):
                    random_key3: 'dummyValue3'}
         region.set_multi(mapping)
         # should return NO_VALUE as key does not exist in cache
-        self.assertEqual(api.NO_VALUE, region.get(random_key))
+        self.assertEqual(NO_VALUE, region.get(random_key))
         self.assertEqual("dummyValue1", region.get(random_key1))
         self.assertEqual("dummyValue2", region.get(random_key2))
         self.assertEqual("dummyValue3", region.get(random_key3))
@@ -603,7 +604,7 @@ class MongoCache(test_cache.BaseTestCase):
         mapping = {random_key1: 'dummyValue4',
                    random_key2: 'dummyValue5'}
         region.set_multi(mapping)
-        self.assertEqual(api.NO_VALUE, region.get(random_key))
+        self.assertEqual(NO_VALUE, region.get(random_key))
         self.assertEqual("dummyValue4", region.get(random_key1))
         self.assertEqual("dummyValue5", region.get(random_key2))
         self.assertEqual("dummyValue3", region.get(random_key3))
@@ -625,7 +626,7 @@ class MongoCache(test_cache.BaseTestCase):
                    random_key4: 'dummyValue4'}
         region.set_multi(mapping)
         # should return NO_VALUE as key does not exist in cache
-        self.assertEqual(api.NO_VALUE, region.get(random_key))
+        self.assertEqual(NO_VALUE, region.get(random_key))
         self.assertEqual("dummyValue1", region.get(random_key1))
         self.assertIsNone(region.get(random_key2))
         self.assertEqual("", region.get(random_key3))
@@ -635,7 +636,7 @@ class MongoCache(test_cache.BaseTestCase):
         results = region.get_multi(keys)
 
         # should return NO_VALUE as key does not exist in cache
-        self.assertEqual(api.NO_VALUE, results[0])
+        self.assertEqual(NO_VALUE, results[0])
         self.assertEqual("dummyValue1", results[1])
         self.assertIsNone(results[2])
         self.assertEqual("", results[3])
@@ -644,7 +645,7 @@ class MongoCache(test_cache.BaseTestCase):
         mapping = {random_key1: 'dummyValue5',
                    random_key2: 'dummyValue6'}
         region.set_multi(mapping)
-        self.assertEqual(api.NO_VALUE, region.get(random_key))
+        self.assertEqual(NO_VALUE, region.get(random_key))
         self.assertEqual("dummyValue5", region.get(random_key1))
         self.assertEqual("dummyValue6", region.get(random_key2))
         self.assertEqual("", region.get(random_key3))
@@ -662,7 +663,7 @@ class MongoCache(test_cache.BaseTestCase):
 
         region.delete(random_key)
         # should return NO_VALUE as key no longer exists in cache
-        self.assertEqual(api.NO_VALUE, region.get(random_key))
+        self.assertEqual(NO_VALUE, region.get(random_key))
 
     def test_backend_multi_delete_data(self):
 
@@ -679,21 +680,21 @@ class MongoCache(test_cache.BaseTestCase):
                    random_key3: 'dummyValue3'}
         region.set_multi(mapping)
         # should return NO_VALUE as key does not exist in cache
-        self.assertEqual(api.NO_VALUE, region.get(random_key))
+        self.assertEqual(NO_VALUE, region.get(random_key))
         self.assertEqual("dummyValue1", region.get(random_key1))
         self.assertEqual("dummyValue2", region.get(random_key2))
         self.assertEqual("dummyValue3", region.get(random_key3))
-        self.assertEqual(api.NO_VALUE, region.get("InvalidKey"))
+        self.assertEqual(NO_VALUE, region.get("InvalidKey"))
 
         keys = mapping.keys()
 
         region.delete_multi(keys)
 
-        self.assertEqual(api.NO_VALUE, region.get("InvalidKey"))
+        self.assertEqual(NO_VALUE, region.get("InvalidKey"))
         # should return NO_VALUE as keys no longer exist in cache
-        self.assertEqual(api.NO_VALUE, region.get(random_key1))
-        self.assertEqual(api.NO_VALUE, region.get(random_key2))
-        self.assertEqual(api.NO_VALUE, region.get(random_key3))
+        self.assertEqual(NO_VALUE, region.get(random_key1))
+        self.assertEqual(NO_VALUE, region.get(random_key2))
+        self.assertEqual(NO_VALUE, region.get(random_key3))
 
     def test_additional_crud_method_arguments_support(self):
         """Additional arguments should works across find/insert/update."""

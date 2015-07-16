@@ -17,6 +17,7 @@ import datetime
 
 from dogpile.cache import api
 from dogpile.cache import util as dp_util
+from oslo_cache import core
 from oslo_log import log
 from oslo_utils import importutils
 from oslo_utils import timeutils
@@ -30,7 +31,7 @@ __all__ = [
     'MongoCacheBackend'
 ]
 
-NO_VALUE = api.NO_VALUE
+_NO_VALUE = core.NO_VALUE
 LOG = log.getLogger(__name__)
 
 
@@ -173,16 +174,28 @@ class MongoCacheBackend(api.CacheBackend):
         return self.api
 
     def get(self, key):
+        """Retrieves the value for a key.
+
+        :param key: key to be retrieved.
+        :returns: value for a key or :data:`oslo_cache.core.NO_VALUE`
+            for nonexistent or expired keys.
+        """
         value = self.client.get(key)
         if value is None:
-            return NO_VALUE
+            return _NO_VALUE
         else:
             return value
 
     def get_multi(self, keys):
+        """Return multiple values from the cache, based on the given keys.
+
+        :param keys: sequence of keys to be retrieved.
+        :returns: returns values (or :data:`oslo_cache.core.NO_VALUE`)
+            as a list matching the keys given.
+        """
         values = self.client.get_multi(keys)
         return [
-            NO_VALUE if key not in values
+            _NO_VALUE if key not in values
             else values[key] for key in keys
         ]
 

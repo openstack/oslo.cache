@@ -12,15 +12,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from dogpile.cache import api
 from dogpile.cache import region as dp_region
 
+from oslo_cache import core
 from oslo_cache.tests import test_cache
 from oslo_config import fixture as config_fixture
 from oslo_utils import fixture as time_fixture
 
 
-NO_VALUE = api.NO_VALUE
+NO_VALUE = core.NO_VALUE
 KEY = 'test_key'
 VALUE = 'test_value'
 
