@@ -17,7 +17,6 @@ import copy
 import time
 import uuid
 
-from dogpile.cache import api
 from dogpile.cache import proxy
 import mock
 from oslo_config import cfg
@@ -28,7 +27,7 @@ from oslo_cache import exception
 from oslo_config import fixture as config_fixture
 
 
-NO_VALUE = api.NO_VALUE
+NO_VALUE = cache.NO_VALUE
 TEST_GROUP = uuid.uuid4().hex
 TEST_GROUP2 = uuid.uuid4().hex
 

@@ -15,15 +15,14 @@
 """dogpile.cache backend that uses dictionary for storage"""
 
 from dogpile.cache import api
+from oslo_cache import core
 from oslo_utils import timeutils
 
 __all__ = [
     'DictCacheBackend'
 ]
 
-
-# Value for nonexistent and expired keys
-NO_VALUE = api.NO_VALUE
+_NO_VALUE = core.NO_VALUE
 
 
 class DictCacheBackend(api.CacheBackend):
@@ -43,15 +42,16 @@ class DictCacheBackend(api.CacheBackend):
         self.cache = {}
 
     def get(self, key):
-        """Retrieves the value for a key or NO_VALUE for nonexistent and
-         expired keys.
+        """Retrieves the value for a key.
 
         :param key: dictionary key
+        :returns: value for a key or :data:`oslo_cache.core.NO_VALUE`
+            for nonexistent or expired keys.
         """
-        (value, timeout) = self.cache.get(key, (NO_VALUE, 0))
+        (value, timeout) = self.cache.get(key, (_NO_VALUE, 0))
         if self.expiration_time > 0 and timeutils.utcnow_ts() >= timeout:
             self.cache.pop(key, None)
-            return NO_VALUE
+            return _NO_VALUE
 
         return value
 

@@ -13,13 +13,14 @@
 # under the License.
 
 from dogpile.cache import api
+from oslo_cache import core
 
 
 __all__ = [
     'NoopCacheBackend'
 ]
 
-NO_VALUE = api.NO_VALUE
+_NO_VALUE = core.NO_VALUE
 
 
 class NoopCacheBackend(api.CacheBackend):
@@ -35,10 +36,10 @@ class NoopCacheBackend(api.CacheBackend):
         return
 
     def get(self, key):
-        return NO_VALUE
+        return _NO_VALUE
 
     def get_multi(self, keys):
-        return [NO_VALUE for x in keys]
+        return [_NO_VALUE for x in keys]
 
     def set(self, key, value):
         return
