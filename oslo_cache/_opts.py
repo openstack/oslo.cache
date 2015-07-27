@@ -35,7 +35,7 @@ FILE_OPTIONS = {
         # prevent issues with the memory cache ending up in "production"
         # unintentionally, we register a no-op as the keystone default caching
         # backend.
-        cfg.StrOpt('backend', default='oslo_cache.noop',
+        cfg.StrOpt('backend', default='dogpile.cache.null',
                    help='Dogpile.cache backend module. It is recommended '
                         'that Memcache with pooling '
                         '(oslo_cache.memcache_pool) or Redis '
