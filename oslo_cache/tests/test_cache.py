@@ -333,32 +333,3 @@ class UTF8KeyManglerTests(BaseTestCase):
         key = 'fake'
         encoded = cache._sha1_mangle_key(key)
         self.assertIsNotNone(encoded)
-
-
-class CacheNoopBackendTest(BaseTestCase):
-
-    def setUp(self):
-        super(CacheNoopBackendTest, self).setUp()
-        self.config_fixture.config(group='cache',
-                                   backend='oslo_cache.noop')
-
-        self.region = cache.create_region()
-        cache.configure_cache_region(self.config_fixture.conf, self.region)
-
-    def test_noop_backend(self):
-        single_value = 'Test Value'
-        single_key = 'testkey'
-        multi_values = {'key1': 1, 'key2': 2, 'key3': 3}
-
-        self.region.set(single_key, single_value)
-        self.assertEqual(NO_VALUE, self.region.get(single_key))
-
-        self.region.set_multi(multi_values)
-        cached_values = self.region.get_multi(multi_values.keys())
-        self.assertEqual(len(cached_values), len(multi_values.values()))
-        for value in cached_values:
-            self.assertEqual(NO_VALUE, value)
-
-        # Delete should not raise exceptions
-        self.region.delete(single_key)
-        self.region.delete_multi(multi_values.keys())
