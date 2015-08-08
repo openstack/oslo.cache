@@ -42,9 +42,10 @@ from dogpile.cache import util
 from oslo_log import log
 from oslo_utils import importutils
 
-from oslo_cache import exception
-from oslo_cache._i18n import _, _LE
+from oslo_cache._i18n import _
+from oslo_cache._i18n import _LE
 from oslo_cache import _opts
+from oslo_cache import exception
 
 
 __all__ = [
