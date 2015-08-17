@@ -23,8 +23,9 @@ from oslo_utils import importutils
 from oslo_utils import timeutils
 import six
 
+from oslo_cache._i18n import _
+from oslo_cache._i18n import _LW
 from oslo_cache import exception
-from oslo_cache._i18n import _, _LW
 
 
 __all__ = [
