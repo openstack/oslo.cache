@@ -62,7 +62,6 @@ NO_VALUE = api.NO_VALUE
 _LOG = log.getLogger(__name__)
 
 _BACKENDS = [
-    ('oslo_cache.noop', 'oslo_cache.backends.noop', 'NoopCacheBackend'),
     ('oslo_cache.mongo', 'oslo_cache.backends.mongo', 'MongoCacheBackend'),
     ('oslo_cache.memcache_pool', 'oslo_cache.backends.memcache_pool',
      'PooledMemcachedBackend'),
@@ -369,7 +368,6 @@ def configure(conf):
 
     The following backends are registered in :mod:`dogpile.cache`:
 
-    * ``oslo_cache.noop`` - :class:`oslo_cache.backends.noop.NoopCacheBackend`
     * ``oslo_cache.mongo`` -
       :class:`oslo_cache.backends.mongo.MongoCacheBackend`
     * ``oslo_cache.memcache_pool`` -
