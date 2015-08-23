@@ -88,6 +88,27 @@ class CacheDictBackendTest(test_cache.BaseTestCase):
         self.assertIs(NO_VALUE, self.region.get('key2'))
         self.assertEqual('value3', self.region.get('key3'))
 
+    def test_dict_backend_multi_keys_in_one_call(self):
+        single_value = 'Test Value'
+        single_key = 'testkey'
+        multi_values = {'key1': 1, 'key2': 2, 'key3': 3}
+
+        self.region.set(single_key, single_value)
+        self.assertEqual(single_value, self.region.get(single_key))
+
+        self.region.delete(single_key)
+        self.assertEqual(NO_VALUE, self.region.get(single_key))
+
+        self.region.set_multi(multi_values)
+        cached_values = self.region.get_multi(multi_values.keys())
+        for value in multi_values.values():
+            self.assertIn(value, cached_values)
+        self.assertEqual(len(multi_values.values()), len(cached_values))
+
+        self.region.delete_multi(multi_values.keys())
+        for value in self.region.get_multi(multi_values.keys()):
+            self.assertEqual(NO_VALUE, value)
+
     def test_dict_backend_rewrite_value(self):
         self.region.set(KEY, 'value1')
         self.region.set(KEY, 'value2')

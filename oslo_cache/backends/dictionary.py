@@ -55,18 +55,32 @@ class DictCacheBackend(api.CacheBackend):
 
         return value
 
+    def get_multi(self, keys):
+        """Retrieves the value for a list of keys."""
+        return [self.get(key) for key in keys]
+
     def set(self, key, value):
         """Sets the value for a key.
+
         Expunges expired keys during each set.
 
         :param key: dictionary key
         :param value: value associated with the key
         """
+        self.set_multi({key: value})
+
+    def set_multi(self, mapping):
+        """Set multiple values in the cache.
+        Expunges expired keys during each set.
+
+        :param mapping: dictionary with key/value pairs
+        """
         self._clear()
         timeout = 0
         if self.expiration_time > 0:
             timeout = timeutils.utcnow_ts() + self.expiration_time
-        self.cache[key] = (value, timeout)
+        for key, value in mapping.items():
+            self.cache[key] = (value, timeout)
 
     def delete(self, key):
         """Deletes the value associated with the key if it exists.
@@ -74,6 +88,14 @@ class DictCacheBackend(api.CacheBackend):
         :param key: dictionary key
         """
         self.cache.pop(key, None)
+
+    def delete_multi(self, keys):
+        """Deletes the value associated with each key in list if it exists.
+
+        :param keys: list of dictionary keys
+        """
+        for key in keys:
+            self.cache.pop(key, None)
 
     def _clear(self):
         """Expunges expired keys."""
