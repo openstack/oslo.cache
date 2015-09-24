@@ -13,6 +13,7 @@ Contents
    installation
    api/modules
    usage
+   opts
    contributing
    history
 
