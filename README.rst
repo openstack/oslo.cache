@@ -2,6 +2,14 @@
 oslo.cache
 ==========
 
+.. image:: https://img.shields.io/pypi/v/oslo.cache.svg
+    :target: https://pypi.python.org/pypi/oslo.cache/
+    :alt: Latest Version
+
+.. image:: https://img.shields.io/pypi/dm/oslo.cache.svg
+    :target: https://pypi.python.org/pypi/oslo.cache/
+    :alt: Downloads
+
 `oslo.cache` aims to provide a generic caching mechanism for OpenStack projects
 by wrapping the `dogpile.cache
 <http://dogpilecache.readthedocs.org/en/latest/>`_ library. The dogpile.cache
