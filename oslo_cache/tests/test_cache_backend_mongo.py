@@ -394,9 +394,9 @@ class MongoCache(test_cache.BaseTestCase):
         self.assertEqual('cache', region.backend.api.cache_collection)
         self.assertEqual('test_user', region.backend.api.username)
         self.assertEqual('test_password', region.backend.api.password)
-        self.assertEqual(True, region.backend.api.use_replica)
+        self.assertTrue(region.backend.api.use_replica)
         self.assertEqual('my_replica', region.backend.api.replicaset_name)
-        self.assertEqual(False, region.backend.api.conn_kwargs['ssl'])
+        self.assertFalse(region.backend.api.conn_kwargs['ssl'])
         self.assertEqual(60, region.backend.api.ttl_seconds)
 
     def test_multiple_region_cache_configuration(self):
@@ -711,8 +711,8 @@ class MongoCache(test_cache.BaseTestCase):
         # There is no proxy so can access MongoCacheBackend directly
         api_methargs = region.backend.api.meth_kwargs
         self.assertEqual(30000, api_methargs['wtimeout'])
-        self.assertEqual(True, api_methargs['j'])
-        self.assertEqual(True, api_methargs['continue_on_error'])
+        self.assertTrue(api_methargs['j'])
+        self.assertTrue(api_methargs['continue_on_error'])
         self.assertEqual(60, api_methargs['secondary_acceptable_latency_ms'])
 
         random_key = uuid.uuid4().hex
