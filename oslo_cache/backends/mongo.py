@@ -426,8 +426,8 @@ class MongoApi(object):
                               '<%(c_name)s>, remove index <%(indx_name)s> '
                               'first to make updated mongo_ttl_seconds value '
                               'to be  effective')
-                    LOG.warn(msg, {'c_name': coll_name,
-                                   'indx_name': indx_name})
+                    LOG.warning(msg, {'c_name': coll_name,
+                                      'indx_name': indx_name})
 
     def get(self, key):
         criteria = {'_id': key}
