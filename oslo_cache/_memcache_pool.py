@@ -108,16 +108,22 @@ class ConnectionPool(queue.Queue):
         """
         raise NotImplementedError
 
-    def _debug_logger(self, msg, *args, **kwargs):
-        if LOG.isEnabledFor(logging.DEBUG):
+    def _do_log(self, level, msg, *args, **kwargs):
+        if LOG.isEnabledFor(level):
             thread_id = threading.current_thread().ident
             args = (id(self), thread_id) + args
             prefix = 'Memcached pool %s, thread %s: '
-            LOG.debug(prefix + msg, *args, **kwargs)
+            LOG.log(level, prefix + msg, *args, **kwargs)
+
+    def _debug_logger(self, msg, *args, **kwargs):
+        self._do_log(logging.DEBUG, msg, *args, **kwargs)
+
+    def _trace_logger(self, msg, *args, **kwargs):
+        self._do_log(log.TRACE, msg, *args, **kwargs)
 
     @contextlib.contextmanager
     def acquire(self):
-        self._debug_logger('Acquiring connection')
+        self._trace_logger('Acquiring connection')
         try:
             conn = self.get(timeout=self._connection_get_timeout)
         except queue.Empty:
@@ -125,18 +131,18 @@ class ConnectionPool(queue.Queue):
                 _('Unable to get a connection from pool id %(id)s after '
                   '%(seconds)s seconds.') %
                 {'id': id(self), 'seconds': self._connection_get_timeout})
-        self._debug_logger('Acquired connection %s', id(conn))
+        self._trace_logger('Acquired connection %s', id(conn))
         try:
             yield conn
         finally:
-            self._debug_logger('Releasing connection %s', id(conn))
+            self._trace_logger('Releasing connection %s', id(conn))
             self._drop_expired_connections()
             try:
                 # super() cannot be used here because Queue in stdlib is an
                 # old-style class
                 queue.Queue.put(self, conn, block=False)
             except queue.Full:
-                self._debug_logger('Reaping exceeding connection %s', id(conn))
+                self._trace_logger('Reaping exceeding connection %s', id(conn))
                 self._destroy_connection(conn)
 
     def _qsize(self):
@@ -166,7 +172,7 @@ class ConnectionPool(queue.Queue):
         now = time.time()
         while self.queue and self.queue[0].ttl < now:
             conn = self.queue.popleft().connection
-            self._debug_logger('Reaping connection %s', id(conn))
+            self._trace_logger('Reaping connection %s', id(conn))
             self._destroy_connection(conn)
 
     def _put(self, conn):
