@@ -114,7 +114,9 @@ def _build_cache_config(conf):
     """
     prefix = conf.cache.config_prefix
     conf_dict = {}
-    conf_dict['%s.backend' % prefix] = conf.cache.backend
+    conf_dict['%s.backend' % prefix] = _opts._DEFAULT_BACKEND
+    if conf.cache.enabled is True:
+        conf_dict['%s.backend' % prefix] = conf.cache.backend
     conf_dict['%s.expiration_time' % prefix] = conf.cache.expiration_time
     for argument in conf.cache.backend_argument:
         try:

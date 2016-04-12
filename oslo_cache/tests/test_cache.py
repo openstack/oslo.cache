@@ -23,6 +23,7 @@ from oslo_config import cfg
 from oslo_config import fixture as config_fixture
 from oslotest import base
 
+from oslo_cache import _opts
 from oslo_cache import core as cache
 from oslo_cache import exception
 
@@ -265,6 +266,19 @@ class CacheRegionTest(BaseTestCase):
         self.assertEqual('test:test',
                          config_dict['test_prefix.arguments.arg2'])
         self.assertNotIn('test_prefix.arguments.arg3', config_dict)
+
+    def test_cache_dictionary_config_builder_global_disabled(self):
+        """Validate the backend is reset to default if caching is disabled."""
+        self.config_fixture.config(group='cache',
+                                   enabled=False,
+                                   config_prefix='test_prefix',
+                                   backend='some_test_backend')
+
+        self.assertFalse(self.config_fixture.conf.cache.enabled)
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+        self.assertEqual(
+            _opts._DEFAULT_BACKEND,
+            config_dict['test_prefix.backend'])
 
     def test_cache_debug_proxy(self):
         single_value = 'Test Value'
