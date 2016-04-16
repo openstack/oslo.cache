@@ -1,0 +1,55 @@
+# OpenStack Infra <zanata@openstack.org>, 2015. #zanata
+# Tom Cocozzello <tjcocozz@us.ibm.com>, 2015. #zanata
+msgid ""
+msgstr ""
+"Project-Id-Version: oslo.cache 1.5.1.dev2\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2016-04-12 20:14+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"X-Generator: Zanata 3.7.3\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+#, python-format
+msgid ""
+"Invalid ssl_cert_reqs value of %s, must be one of \"NONE\", \"OPTIONAL\", "
+"\"REQUIRED\""
+msgstr ""
+"Valor ssl_cert_reqs no válido de %s, debe ser uno de \"NONE\", \"OPTIONAL\", "
+"\"REQUIRED\""
+
+#, python-format
+msgid ""
+"Unable to get a connection from pool id %(id)s after %(seconds)s seconds."
+msgstr ""
+"No se puede obtener una conexión del ID de agrupación %(id)s después de "
+"%(seconds)s segundos."
+
+msgid "cache_collection name is required"
+msgstr "el nombre de cache_collection es necesario"
+
+msgid "database db_name is required"
+msgstr "base de datos db_name es necesario"
+
+msgid "db_hosts value is required"
+msgstr "El valor db_hosts es necesario"
+
+msgid "integer value expected for mongo_ttl_seconds"
+msgstr "se esperaba un valor entero para mongo_ttl_seconds"
+
+msgid "integer value expected for w (write concern attribute)"
+msgstr "se esperaba un valor entero para w (atributo en cuestión write)"
+
+msgid "no ssl support available"
+msgstr "Soporte SSL no disponible."
+
+msgid "region not type dogpile.cache.CacheRegion"
+msgstr "región no tipo dogpile.cache.CacheRegion"
+
+msgid "replicaset_name required when use_replica is True"
+msgstr "se necesita replicaset_name cuando use_replica es True (verdadero)"

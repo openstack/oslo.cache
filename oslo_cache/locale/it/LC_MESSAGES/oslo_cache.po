@@ -1,0 +1,54 @@
+# Tom Cocozzello <tjcocozz@us.ibm.com>, 2015. #zanata
+msgid ""
+msgstr ""
+"Project-Id-Version: oslo.cache 1.5.1.dev2\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2016-04-12 20:14+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: Italian\n"
+"Language: it\n"
+"X-Generator: Zanata 3.7.3\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+#, python-format
+msgid ""
+"Invalid ssl_cert_reqs value of %s, must be one of \"NONE\", \"OPTIONAL\", "
+"\"REQUIRED\""
+msgstr ""
+"Valore ssl_cert_reqs di %s non valido; deve essere uno tra \"NONE\", "
+"\"OPTIONAL\", \"REQUIRED\""
+
+#, python-format
+msgid ""
+"Unable to get a connection from pool id %(id)s after %(seconds)s seconds."
+msgstr ""
+"Impossibile ottenere una connessione dall'ID pool %(id)s dopo %(seconds)s "
+"secondi."
+
+msgid "cache_collection name is required"
+msgstr "Il nome cache_collection è obbligatorio"
+
+msgid "database db_name is required"
+msgstr "Il database db_name è obbligatorio"
+
+msgid "db_hosts value is required"
+msgstr "Il valore db_hosts è obbligatorio"
+
+msgid "integer value expected for mongo_ttl_seconds"
+msgstr "valore intero previsto per mongo_ttl_seconds"
+
+msgid "integer value expected for w (write concern attribute)"
+msgstr "valore intero previsto per w (attributo di scrittura)"
+
+msgid "no ssl support available"
+msgstr "nessun supporto ssl disponibile"
+
+msgid "region not type dogpile.cache.CacheRegion"
+msgstr "regione non tipo dogpile.cache.CacheRegion"
+
+msgid "replicaset_name required when use_replica is True"
+msgstr "replicaset_name è obbligatorio quando use_replica è True"

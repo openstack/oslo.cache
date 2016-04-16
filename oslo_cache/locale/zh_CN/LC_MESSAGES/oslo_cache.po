@@ -1,0 +1,51 @@
+# Lucas Palm <lapalm@us.ibm.com>, 2015. #zanata
+msgid ""
+msgstr ""
+"Project-Id-Version: oslo.cache 1.5.1.dev2\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2016-04-12 20:14+0200\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: Chinese (China)\n"
+"Language: zh-CN\n"
+"X-Generator: Zanata 3.7.3\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+
+#, python-format
+msgid ""
+"Invalid ssl_cert_reqs value of %s, must be one of \"NONE\", \"OPTIONAL\", "
+"\"REQUIRED\""
+msgstr ""
+"ssl_cert_reqs 值 %s 无效，必须是下列其中一项：“NONE”、“OPTIONAL”和“REQUIRED”"
+
+#, python-format
+msgid ""
+"Unable to get a connection from pool id %(id)s after %(seconds)s seconds."
+msgstr "在 %(seconds)s 秒之后，无法根据池标识 %(id)s 获取连接。"
+
+msgid "cache_collection name is required"
+msgstr "需要 cache_collection 名称"
+
+msgid "database db_name is required"
+msgstr "需要数据库 db_name"
+
+msgid "db_hosts value is required"
+msgstr "需要 db_hosts 值"
+
+msgid "integer value expected for mongo_ttl_seconds"
+msgstr "mongo_ttl_seconds 需要整数值"
+
+msgid "integer value expected for w (write concern attribute)"
+msgstr "w（写相关属性）需要整数值"
+
+msgid "no ssl support available"
+msgstr "未提供 ssl 支持"
+
+msgid "region not type dogpile.cache.CacheRegion"
+msgstr "区域的类型不是 dogpile.cache.CacheRegion"
+
+msgid "replicaset_name required when use_replica is True"
+msgstr "当 use_replica 为 True 时，需要 replicaset_name"
