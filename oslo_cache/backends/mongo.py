@@ -16,7 +16,7 @@ import abc
 import datetime
 
 from dogpile.cache import api
-from dogpile.cache import util as dp_util
+from dogpile import util as dp_util
 from oslo_cache import core
 from oslo_log import log
 from oslo_utils import importutils

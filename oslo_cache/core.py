@@ -61,13 +61,6 @@ NO_VALUE = api.NO_VALUE
 
 _LOG = log.getLogger(__name__)
 
-_BACKENDS = [
-    ('oslo_cache.mongo', 'oslo_cache.backends.mongo', 'MongoCacheBackend'),
-    ('oslo_cache.memcache_pool', 'oslo_cache.backends.memcache_pool',
-     'PooledMemcachedBackend'),
-    ('oslo_cache.dict', 'oslo_cache.backends.dictionary', 'DictCacheBackend'),
-]
-
 
 class _DebugProxy(proxy.ProxyBackend):
     """Extra Logging ProxyBackend."""
@@ -366,22 +359,13 @@ def get_memoization_decorator(conf, region, group, expiration_group=None):
 def configure(conf):
     """Configure the library.
 
+    Register the required oslo.cache config options into an oslo.config CONF
+    object.
+
     This must be called before conf().
-
-    The following backends are registered in :mod:`dogpile.cache`:
-
-    * ``oslo_cache.mongo`` -
-      :class:`oslo_cache.backends.mongo.MongoCacheBackend`
-    * ``oslo_cache.memcache_pool`` -
-      :class:`oslo_cache.backends.memcache_pool.PooledMemcachedBackend`
-    * ``oslo_cache.dict`` -
-      :class:`oslo_cache.backends.dictionary.DictCacheBackend`
 
     :param conf: The configuration object.
     :type conf: oslo_config.cfg.ConfigOpts
 
     """
     _opts.configure(conf)
-
-    for backend in _BACKENDS:
-        dogpile.cache.register_backend(*backend)
