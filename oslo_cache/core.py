@@ -164,7 +164,7 @@ def create_region():
         a memoized method is called.
 
     :returns: The new region.
-    :rtype: :class:`dogpile.cache.CacheRegion`
+    :rtype: :class:`dogpile.cache.region.CacheRegion`
 
     """
 
@@ -181,10 +181,11 @@ def configure_cache_region(conf, region):
     :param conf: config object, must have had :func:`configure` called on it.
     :type conf: oslo_config.cfg.ConfigOpts
     :param region: Cache region to configure (see :func:`create_region`).
-    :type region: dogpile.cache.CacheRegion
+    :type region: dogpile.cache.region.CacheRegion
     :raises oslo_cache.exception.ConfigurationError: If the region parameter is
         not a dogpile.cache.CacheRegion.
     :returns: The region.
+    :rtype: :class:`dogpile.cache.region.CacheRegion`
     """
     if not isinstance(region, dogpile.cache.CacheRegion):
         raise exception.ConfigurationError(
@@ -330,6 +331,7 @@ def get_memoization_decorator(conf, region, group, expiration_group=None):
     :param conf: config object, must have had :func:`configure` called on it.
     :type conf: oslo_config.cfg.ConfigOpts
     :param region: region as created by :func:`create_region`.
+    :type region: dogpile.cache.region.CacheRegion
     :param group: name of the configuration group to examine
     :type group: string
     :param expiration_group: name of the configuration group to examine
@@ -362,10 +364,9 @@ def configure(conf):
     Register the required oslo.cache config options into an oslo.config CONF
     object.
 
-    This must be called before conf().
+    This must be called before :py:func:`configure_cache_region`.
 
     :param conf: The configuration object.
     :type conf: oslo_config.cfg.ConfigOpts
-
     """
     _opts.configure(conf)
