@@ -160,20 +160,28 @@ class ConnectionPool(queue.Queue):
         qsize = _qsize
 
     def _get(self):
-        if self.queue:
+        try:
             conn = self.queue.pop().connection
-        else:
+        except IndexError:
             conn = self._create_connection()
         self._acquired += 1
         return conn
 
     def _drop_expired_connections(self):
-        """Drop all expired connections from the right end of the queue."""
+        """Drop all expired connections from the left end of the queue."""
         now = time.time()
-        while self.queue and self.queue[0].ttl < now:
-            conn = self.queue.popleft().connection
-            self._trace_logger('Reaping connection %s', id(conn))
-            self._destroy_connection(conn)
+        try:
+            while self.queue[0].ttl < now:
+                conn = self.queue.popleft().connection
+                self._trace_logger('Reaping connection %s', id(conn))
+                self._destroy_connection(conn)
+        except IndexError:
+            # NOTE(amakarov): This is an expected excepton. so there's no
+            # need to react. We have to handle exceptions instead of
+            # checking queue length as IndexError is a result of race
+            # condition too as well as of mere queue depletio of mere queue
+            # depletionn.
+            pass
 
     def _put(self, conn):
         self.queue.append(_PoolItem(
