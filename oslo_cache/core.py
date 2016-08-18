@@ -313,8 +313,8 @@ def get_memoization_decorator(conf, region, group, expiration_group=None):
 
         import oslo_cache.core
 
-        MEMOIZE = oslo_cache.core.get_memoization_decorator(conf,
-                                                            group='group1')
+        MEMOIZE = oslo_cache.core.get_memoization_decorator(
+            conf, region, group='group1')
 
         @MEMOIZE
         def function(arg1, arg2):
@@ -322,7 +322,7 @@ def get_memoization_decorator(conf, region, group, expiration_group=None):
 
 
         ALTERNATE_MEMOIZE = oslo_cache.core.get_memoization_decorator(
-            conf, group='group2', expiration_group='group3')
+            conf, region, group='group2', expiration_group='group3')
 
         @ALTERNATE_MEMOIZE
         def function2(arg1, arg2):
