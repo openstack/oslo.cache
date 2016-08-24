@@ -2,7 +2,7 @@
  oslo.cache
 ============
 
-Cache storage for Openstack projects.
+Cache storage for OpenStack projects.
 
 Contents
 ========
