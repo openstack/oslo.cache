@@ -82,9 +82,9 @@ class CacheRegionTest(BaseTestCase):
 
     def _add_dummy_config_group(self):
         self.config_fixture.register_opt(
-            cfg.IntOpt('cache_time', default=None), group=TEST_GROUP)
+            cfg.IntOpt('cache_time'), group=TEST_GROUP)
         self.config_fixture.register_opt(
-            cfg.IntOpt('cache_time', default=None), group=TEST_GROUP2)
+            cfg.IntOpt('cache_time'), group=TEST_GROUP2)
 
     def _get_cacheable_function(self):
         memoize = cache.get_memoization_decorator(
