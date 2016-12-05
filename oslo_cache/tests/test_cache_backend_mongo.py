@@ -15,9 +15,9 @@
 import collections
 import copy
 import functools
-import uuid
 
 from dogpile.cache import region as dp_region
+from oslo_utils import uuidutils
 import six
 from six.moves import range
 
@@ -177,7 +177,7 @@ class MockCollection(object):
 
     def _insert(self, data):
         if '_id' not in data:
-            data['_id'] = uuid.uuid4().hex
+            data['_id'] = uuidutils.generate_uuid(dashed=False)
         object_id = data['_id']
         self._documents[object_id] = self._internalize_dict(data)
         return object_id
@@ -213,7 +213,7 @@ class MockCollection(object):
             del self._documents[doc_id]
 
         return {
-            "connectionId": uuid.uuid4().hex,
+            "connectionId": uuidutils.generate_uuid(dashed=False),
             "n": len(to_delete),
             "ok": 1.0,
             "err": None,
@@ -327,7 +327,7 @@ class MongoCache(test_cache.BaseTestCase):
         region = dp_region.make_region().configure('oslo_cache.mongo',
                                                    arguments=self.arguments)
 
-        random_key = uuid.uuid4().hex
+        random_key = uuidutils.generate_uuid(dashed=False)
         region.set(random_key, "dummyValue10")
         # There is no proxy so can access MongoCacheBackend directly
         self.assertEqual(1, region.backend.api.w)
@@ -340,7 +340,7 @@ class MongoCache(test_cache.BaseTestCase):
         # still be string and NOT enum
         self.assertEqual('inValidValue', region.backend.api.read_preference)
 
-        random_key = uuid.uuid4().hex
+        random_key = uuidutils.generate_uuid(dashed=False)
         self.assertRaises(ValueError, region.set,
                           random_key, "dummyValue10")
 
@@ -353,7 +353,7 @@ class MongoCache(test_cache.BaseTestCase):
         self.assertEqual('secondaryPreferred',
                          region.backend.api.read_preference)
 
-        random_key = uuid.uuid4().hex
+        random_key = uuidutils.generate_uuid(dashed=False)
         region.set(random_key, "dummyValue10")
 
         # Now as pymongo is loaded so expected read_preference value is enum.
@@ -414,7 +414,7 @@ class MongoCache(test_cache.BaseTestCase):
         # Should be None because of delayed initialization
         self.assertIsNone(region1.backend.api._data_manipulator)
 
-        random_key1 = uuid.uuid4().hex
+        random_key1 = uuidutils.generate_uuid(dashed=False)
         region1.set(random_key1, "dummyValue10")
         self.assertEqual("dummyValue10", region1.get(random_key1))
         # Now should have initialized
@@ -437,7 +437,7 @@ class MongoCache(test_cache.BaseTestCase):
         # Should be None because of delayed initialization
         self.assertIsNone(region2.backend.api._data_manipulator)
 
-        random_key = uuid.uuid4().hex
+        random_key = uuidutils.generate_uuid(dashed=False)
         region2.set(random_key, "dummyValue20")
         self.assertEqual("dummyValue20", region2.get(random_key))
         # Now should have initialized
@@ -462,7 +462,7 @@ class MongoCache(test_cache.BaseTestCase):
             arguments=self.arguments
         )
 
-        random_key = uuid.uuid4().hex
+        random_key = uuidutils.generate_uuid(dashed=False)
         # should return NO_VALUE as key does not exist in cache
         self.assertEqual(NO_VALUE, region.get(random_key))
 
@@ -473,7 +473,7 @@ class MongoCache(test_cache.BaseTestCase):
             arguments=self.arguments
         )
 
-        random_key = uuid.uuid4().hex
+        random_key = uuidutils.generate_uuid(dashed=False)
         region.set(random_key, "dummyValue")
         self.assertEqual("dummyValue", region.get(random_key))
 
@@ -483,7 +483,7 @@ class MongoCache(test_cache.BaseTestCase):
         region = dp_region.make_region().configure('oslo_cache.mongo',
                                                    arguments=self.arguments)
         self.assertEqual(3600, region.backend.api.ttl_seconds)
-        random_key = uuid.uuid4().hex
+        random_key = uuidutils.generate_uuid(dashed=False)
         region.set(random_key, "dummyValue")
         self.assertEqual("dummyValue", region.get(random_key))
 
@@ -493,7 +493,7 @@ class MongoCache(test_cache.BaseTestCase):
         region = dp_region.make_region().configure('oslo_cache.mongo',
                                                    arguments=self.arguments)
         self.assertEqual(1800, region.backend.api.ttl_seconds)
-        random_key = uuid.uuid4().hex
+        random_key = uuidutils.generate_uuid(dashed=False)
         region.set(random_key, "dummyValue")
         self.assertEqual("dummyValue", region.get(random_key))
 
@@ -504,7 +504,7 @@ class MongoCache(test_cache.BaseTestCase):
             arguments=self.arguments
         )
 
-        random_key = uuid.uuid4().hex
+        random_key = uuidutils.generate_uuid(dashed=False)
         region.set(random_key, None)
         self.assertIsNone(region.get(random_key))
 
@@ -515,7 +515,7 @@ class MongoCache(test_cache.BaseTestCase):
             arguments=self.arguments
         )
 
-        random_key = uuid.uuid4().hex
+        random_key = uuidutils.generate_uuid(dashed=False)
         region.set(random_key, "")
         self.assertEqual("", region.get(random_key))
 
@@ -526,7 +526,7 @@ class MongoCache(test_cache.BaseTestCase):
             arguments=self.arguments
         )
 
-        random_key = uuid.uuid4().hex
+        random_key = uuidutils.generate_uuid(dashed=False)
         region.set(random_key, "dummyValue")
         self.assertEqual("dummyValue", region.get(random_key))
 
@@ -543,10 +543,10 @@ class MongoCache(test_cache.BaseTestCase):
             'oslo_cache.mongo',
             arguments=self.arguments
         )
-        random_key = uuid.uuid4().hex
-        random_key1 = uuid.uuid4().hex
-        random_key2 = uuid.uuid4().hex
-        random_key3 = uuid.uuid4().hex
+        random_key = uuidutils.generate_uuid(dashed=False)
+        random_key1 = uuidutils.generate_uuid(dashed=False)
+        random_key2 = uuidutils.generate_uuid(dashed=False)
+        random_key3 = uuidutils.generate_uuid(dashed=False)
         mapping = {random_key1: 'dummyValue1',
                    random_key2: 'dummyValue2',
                    random_key3: 'dummyValue3'}
@@ -564,10 +564,10 @@ class MongoCache(test_cache.BaseTestCase):
             'oslo_cache.mongo',
             arguments=self.arguments
         )
-        random_key = uuid.uuid4().hex
-        random_key1 = uuid.uuid4().hex
-        random_key2 = uuid.uuid4().hex
-        random_key3 = uuid.uuid4().hex
+        random_key = uuidutils.generate_uuid(dashed=False)
+        random_key1 = uuidutils.generate_uuid(dashed=False)
+        random_key2 = uuidutils.generate_uuid(dashed=False)
+        random_key3 = uuidutils.generate_uuid(dashed=False)
         mapping = {random_key1: 'dummyValue1',
                    random_key2: '',
                    random_key3: 'dummyValue3'}
@@ -587,10 +587,10 @@ class MongoCache(test_cache.BaseTestCase):
             'oslo_cache.mongo',
             arguments=self.arguments
         )
-        random_key = uuid.uuid4().hex
-        random_key1 = uuid.uuid4().hex
-        random_key2 = uuid.uuid4().hex
-        random_key3 = uuid.uuid4().hex
+        random_key = uuidutils.generate_uuid(dashed=False)
+        random_key1 = uuidutils.generate_uuid(dashed=False)
+        random_key2 = uuidutils.generate_uuid(dashed=False)
+        random_key3 = uuidutils.generate_uuid(dashed=False)
         mapping = {random_key1: 'dummyValue1',
                    random_key2: 'dummyValue2',
                    random_key3: 'dummyValue3'}
@@ -615,11 +615,11 @@ class MongoCache(test_cache.BaseTestCase):
             'oslo_cache.mongo',
             arguments=self.arguments
         )
-        random_key = uuid.uuid4().hex
-        random_key1 = uuid.uuid4().hex
-        random_key2 = uuid.uuid4().hex
-        random_key3 = uuid.uuid4().hex
-        random_key4 = uuid.uuid4().hex
+        random_key = uuidutils.generate_uuid(dashed=False)
+        random_key1 = uuidutils.generate_uuid(dashed=False)
+        random_key2 = uuidutils.generate_uuid(dashed=False)
+        random_key3 = uuidutils.generate_uuid(dashed=False)
+        random_key4 = uuidutils.generate_uuid(dashed=False)
         mapping = {random_key1: 'dummyValue1',
                    random_key2: None,
                    random_key3: '',
@@ -657,7 +657,7 @@ class MongoCache(test_cache.BaseTestCase):
             arguments=self.arguments
         )
 
-        random_key = uuid.uuid4().hex
+        random_key = uuidutils.generate_uuid(dashed=False)
         region.set(random_key, "dummyValue")
         self.assertEqual("dummyValue", region.get(random_key))
 
@@ -671,10 +671,10 @@ class MongoCache(test_cache.BaseTestCase):
             'oslo_cache.mongo',
             arguments=self.arguments
         )
-        random_key = uuid.uuid4().hex
-        random_key1 = uuid.uuid4().hex
-        random_key2 = uuid.uuid4().hex
-        random_key3 = uuid.uuid4().hex
+        random_key = uuidutils.generate_uuid(dashed=False)
+        random_key1 = uuidutils.generate_uuid(dashed=False)
+        random_key2 = uuidutils.generate_uuid(dashed=False)
+        random_key3 = uuidutils.generate_uuid(dashed=False)
         mapping = {random_key1: 'dummyValue1',
                    random_key2: 'dummyValue2',
                    random_key3: 'dummyValue3'}
@@ -715,13 +715,13 @@ class MongoCache(test_cache.BaseTestCase):
         self.assertEqual(True, api_methargs['continue_on_error'])
         self.assertEqual(60, api_methargs['secondary_acceptable_latency_ms'])
 
-        random_key = uuid.uuid4().hex
+        random_key = uuidutils.generate_uuid(dashed=False)
         region.set(random_key, "dummyValue1")
         self.assertEqual("dummyValue1", region.get(random_key))
 
         region.set(random_key, "dummyValue2")
         self.assertEqual("dummyValue2", region.get(random_key))
 
-        random_key = uuid.uuid4().hex
+        random_key = uuidutils.generate_uuid(dashed=False)
         region.set(random_key, "dummyValue3")
         self.assertEqual("dummyValue3", region.get(random_key))

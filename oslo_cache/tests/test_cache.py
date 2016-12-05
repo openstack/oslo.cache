@@ -15,12 +15,12 @@
 
 import copy
 import time
-import uuid
 
 from dogpile.cache import proxy
 import mock
 from oslo_config import cfg
 from oslo_config import fixture as config_fixture
+from oslo_utils import uuidutils
 from oslotest import base
 
 from oslo_cache import _opts
@@ -29,8 +29,8 @@ from oslo_cache import exception
 
 
 NO_VALUE = cache.NO_VALUE
-TEST_GROUP = uuid.uuid4().hex
-TEST_GROUP2 = uuid.uuid4().hex
+TEST_GROUP = uuidutils.generate_uuid(dashed=False)
+TEST_GROUP2 = uuidutils.generate_uuid(dashed=False)
 
 
 class BaseTestCase(base.BaseTestCase):
@@ -135,7 +135,8 @@ class CacheRegionTest(BaseTestCase):
             self.assertEqual(value.value, cached_value.value)
             self.assertEqual(cached_value.value, test_obj.test_value.value)
             # Change the underlying value on the test object.
-            test_obj.test_value = TestProxyValue(uuid.uuid4().hex)
+            test_obj.test_value = TestProxyValue(
+                uuidutils.generate_uuid(dashed=False))
             self.assertEqual(cached_value.value,
                              test_obj.get_test_value().value)
             # override the system time to ensure the non-cached new value
@@ -163,7 +164,7 @@ class CacheRegionTest(BaseTestCase):
         # Run the test with the dummy group cache_time value
         self.config_fixture.config(cache_time=cache_time,
                                    group=TEST_GROUP)
-        test_value = TestProxyValue(uuid.uuid4().hex)
+        test_value = TestProxyValue(uuidutils.generate_uuid(dashed=False))
         self.assertEqual(cache_time, expiration_time())
         do_test(value=test_value)
 
@@ -179,7 +180,8 @@ class CacheRegionTest(BaseTestCase):
         # Run the test with the dummy group cache_time value set to None and
         # the global value set.
         self.config_fixture.config(cache_time=None, group=TEST_GROUP)
-        test_value = TestProxyValue(uuid.uuid4().hex)
+        test_value = TestProxyValue(
+            uuidutils.generate_uuid(dashed=False))
         self.assertIsNone(expiration_time())
         do_test(value=test_value)
 
