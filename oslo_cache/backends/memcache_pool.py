@@ -20,10 +20,6 @@ import functools
 from dogpile.cache.backends import memcached as memcached_backend
 
 from oslo_cache import _memcache_pool
-from oslo_log import log as logging
-
-
-LOG = logging.getLogger(__name__)
 
 
 # Helper to ease backend refactoring
