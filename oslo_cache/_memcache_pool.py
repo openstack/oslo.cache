@@ -21,7 +21,6 @@
 import collections
 import contextlib
 import itertools
-import logging
 import threading
 import time
 
@@ -32,6 +31,7 @@ from six.moves import zip
 
 from oslo_cache._i18n import _
 from oslo_cache import exception
+from oslo_log import log as logging
 
 
 LOG = log.getLogger(__name__)

@@ -16,11 +16,11 @@
 """dogpile.cache backend that uses Memcached connection pool"""
 
 import functools
-import logging
 
 from dogpile.cache.backends import memcached as memcached_backend
 
 from oslo_cache import _memcache_pool
+from oslo_log import log as logging
 
 
 LOG = logging.getLogger(__name__)
