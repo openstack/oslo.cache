@@ -31,7 +31,6 @@ from six.moves import zip
 
 from oslo_cache._i18n import _
 from oslo_cache import exception
-from oslo_log import log as logging
 
 
 LOG = log.getLogger(__name__)
@@ -116,7 +115,7 @@ class ConnectionPool(queue.Queue):
             LOG.log(level, prefix + msg, *args, **kwargs)
 
     def _debug_logger(self, msg, *args, **kwargs):
-        self._do_log(logging.DEBUG, msg, *args, **kwargs)
+        self._do_log(log.DEBUG, msg, *args, **kwargs)
 
     def _trace_logger(self, msg, *args, **kwargs):
         self._do_log(log.TRACE, msg, *args, **kwargs)
