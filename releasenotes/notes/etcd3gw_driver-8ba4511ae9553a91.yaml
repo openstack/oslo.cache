@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Added a new etcd3gw driver that uses the etcd 3.x grpc-gateway
+    HTTP "/v3alpha" API to cache key/value pairs.
