@@ -15,9 +15,9 @@
 """dogpile.cache backend that uses etcd 3.x for storage"""
 
 from __future__ import absolute_import
-import ast
 from dogpile.cache import api
 import etcd3gw
+import json
 
 from oslo_cache import core
 
@@ -50,7 +50,7 @@ class Etcd3gwCacheBackend(api.CacheBackend):
         values = self._client.get(key, False)
         if not values:
             return core.NO_VALUE
-        (value, metadata) = ast.literal_eval(values[0])
+        value, metadata = json.loads(values[0])
         return api.CachedValue(value, metadata)
 
     def get_multi(self, keys):
@@ -65,7 +65,7 @@ class Etcd3gwCacheBackend(api.CacheBackend):
         if self.timeout:
             lease = self._client.lease(ttl=self.timeout)
         for key, value in mapping.items():
-            self._client.put(key, value, lease)
+            self._client.put(key, json.dumps(value), lease)
 
     def delete(self, key):
         self._client.delete(key)
