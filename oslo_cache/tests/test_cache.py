@@ -74,6 +74,11 @@ class CacheRegionTest(BaseTestCase):
         self.region = cache.create_region()
         cache.configure_cache_region(self.config_fixture.conf, self.region)
         self.region.wrap(TestProxy)
+        self.region_kwargs = cache.create_region(
+            function=cache.kwarg_function_key_generator)
+        cache.configure_cache_region(self.config_fixture.conf,
+                                     self.region_kwargs)
+        self.region_kwargs.wrap(TestProxy)
         self.test_value = TestProxyValue('Decorator Test')
 
     def _add_test_caching_option(self):
@@ -86,12 +91,13 @@ class CacheRegionTest(BaseTestCase):
         self.config_fixture.register_opt(
             cfg.IntOpt('cache_time'), group=TEST_GROUP2)
 
-    def _get_cacheable_function(self):
+    def _get_cacheable_function(self, region=None):
+        region = region if region else self.region
         memoize = cache.get_memoization_decorator(
-            self.config_fixture.conf, self.region, group='cache')
+            self.config_fixture.conf, region, group='cache')
 
         @memoize
-        def cacheable_function(value):
+        def cacheable_function(value=0):
             return value
 
         return cacheable_function
@@ -308,6 +314,32 @@ class CacheRegionTest(BaseTestCase):
                           cache.configure_cache_region,
                           self.config_fixture.conf,
                           "bogus")
+
+    def test_function_key_generator_with_kwargs(self):
+        cacheable_function = self._get_cacheable_function()
+
+        self.config_fixture.config(group='cache', enabled=True)
+        self.assertRaises(ValueError,
+                          cacheable_function,
+                          value=self.test_value)
+
+    def test_kwarg_function_key_generator_no_kwargs(self):
+        cacheable_function = self._get_cacheable_function(
+            region=self.region_kwargs)
+
+        self.config_fixture.config(group='cache', enabled=True)
+        cacheable_function(self.test_value)
+        cached_value = cacheable_function(self.test_value)
+        self.assertTrue(cached_value.cached)
+
+    def test_kwarg_function_key_generator_with_kwargs(self):
+        cacheable_function = self._get_cacheable_function(
+            region=self.region_kwargs)
+
+        self.config_fixture.config(group='cache', enabled=True)
+        cacheable_function(value=self.test_value)
+        cached_value = cacheable_function(value=self.test_value)
+        self.assertTrue(cached_value.cached)
 
 
 class UTF8KeyManglerTests(BaseTestCase):

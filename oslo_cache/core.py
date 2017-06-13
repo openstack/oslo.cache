@@ -151,7 +151,28 @@ def _sha1_mangle_key(key):
     return util.sha1_mangle_key(key)
 
 
-def create_region():
+def _key_generate_to_str(s):
+    # NOTE(morganfainberg): Since we need to stringify all arguments, attempt
+    # to stringify and handle the Unicode error explicitly as needed.
+    try:
+        return str(s)
+    except UnicodeEncodeError:
+        return s.encode('utf-8')
+
+
+def function_key_generator(namespace, fn, to_str=_key_generate_to_str):
+    # NOTE(morganfainberg): This wraps dogpile.cache's default
+    # function_key_generator to change the default to_str mechanism.
+    return util.function_key_generator(namespace, fn, to_str=to_str)
+
+
+def kwarg_function_key_generator(namespace, fn, to_str=_key_generate_to_str):
+    # NOTE(ralonsoh): This wraps dogpile.cache's default
+    # kwarg_function_key_generator to change the default to_str mechanism.
+    return util.kwarg_function_key_generator(namespace, fn, to_str=to_str)
+
+
+def create_region(function=function_key_generator):
     """Create a region.
 
     This is just dogpile.cache.make_region, but the key generator has a
@@ -162,13 +183,15 @@ def create_region():
         You must call :func:`configure_cache_region` with this region before
         a memoized method is called.
 
+    :param function: function used to generate a unique key depending on the
+                     arguments of the decorated function
+    :type function: function
     :returns: The new region.
     :rtype: :class:`dogpile.cache.region.CacheRegion`
 
     """
 
-    return dogpile.cache.make_region(
-        function_key_generator=_function_key_generator)
+    return dogpile.cache.make_region(function_key_generator=function)
 
 
 def configure_cache_region(conf, region):
@@ -274,21 +297,6 @@ def _get_expiration_time_fn(conf, group):
         conf_group = getattr(conf, group)
         return getattr(conf_group, 'cache_time', None)
     return get_expiration_time
-
-
-def _key_generate_to_str(s):
-    # NOTE(morganfainberg): Since we need to stringify all arguments, attempt
-    # to stringify and handle the Unicode error explicitly as needed.
-    try:
-        return str(s)
-    except UnicodeEncodeError:
-        return s.encode('utf-8')
-
-
-def _function_key_generator(namespace, fn, to_str=_key_generate_to_str):
-    # NOTE(morganfainberg): This wraps dogpile.cache's default
-    # function_key_generator to change the default to_str mechanism.
-    return util.function_key_generator(namespace, fn, to_str=to_str)
 
 
 def get_memoization_decorator(conf, region, group, expiration_group=None):
