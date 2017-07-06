@@ -257,7 +257,7 @@ class CacheRegionTest(BaseTestCase):
         """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    config_prefix='test_prefix',
-                                   backend='some_test_backend',
+                                   backend='oslo_cache.dict',
                                    expiration_time=86400,
                                    backend_argument=['arg1:test',
                                                      'arg2:test:test',
@@ -280,7 +280,7 @@ class CacheRegionTest(BaseTestCase):
         self.config_fixture.config(group='cache',
                                    enabled=False,
                                    config_prefix='test_prefix',
-                                   backend='some_test_backend')
+                                   backend='oslo_cache.dict')
 
         self.assertFalse(self.config_fixture.conf.cache.enabled)
         config_dict = cache._build_cache_config(self.config_fixture.conf)

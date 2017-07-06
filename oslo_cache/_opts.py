@@ -34,15 +34,20 @@ FILE_OPTIONS = {
         # prevent issues with the memory cache ending up in "production"
         # unintentionally, we register a no-op as the default caching backend.
         cfg.StrOpt('backend', default=_DEFAULT_BACKEND,
-                   help='Dogpile.cache backend module. It is recommended '
-                        'that Memcache or Redis (dogpile.cache.redis) be used '
-                        'in production deployments. For eventlet-based or '
-                        'highly threaded servers, Memcache with pooling '
-                        '(oslo_cache.memcache_pool) is recommended. For low '
-                        'thread servers, dogpile.cache.memcached is '
-                        'recommended. Test environments with a single '
-                        'instance of the server can use the '
-                        'dogpile.cache.memory backend.'),
+                   choices=['oslo_cache.memcache_pool',
+                            'oslo_cache.dict',
+                            'dogpile.cache.memcached',
+                            'dogpile.cache.redis',
+                            'dogpile.cache.memory',
+                            'dogpile.cache.null'],
+                   help='Cache backend module. For eventlet-based or '
+                   'environments with hundreds of threaded servers, Memcache '
+                   'with pooling (oslo_cache.memcache_pool) is recommended. '
+                   'For environments with less than 100 threaded servers, '
+                   'Memcached (dogpile.cache.memcached) or Redis '
+                   '(dogpile.cache.redis) is recommended. Test environments '
+                   'with a single instance of the server can use the '
+                   'dogpile.cache.memory backend.'),
         cfg.MultiStrOpt('backend_argument', default=[], secret=True,
                         help='Arguments supplied to the backend module. '
                              'Specify this option once per argument to be '
