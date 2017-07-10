@@ -85,6 +85,6 @@ latex_documents = [
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/', None),
-    'osloconfig': ('http://docs.openstack.org/developer/oslo.config/', None),
+    'osloconfig': ('http://docs.openstack.org/oslo.config/latest/', None),
     'dogpilecache': ('https://dogpilecache.readthedocs.io/en/latest/', None),
 }
