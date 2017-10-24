@@ -1,0 +1,52 @@
+# ByungYeol Woo <wby1089@gmail.com>, 2017. #zanata
+msgid ""
+msgstr ""
+"Project-Id-Version: oslo.cache Release Notes 1.26.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-10-09 03:24+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2017-10-18 02:15+0000\n"
+"Last-Translator: ByungYeol Woo <wby1089@gmail.com>\n"
+"Language-Team: Korean (South Korea)\n"
+"Language: ko-KR\n"
+"X-Generator: Zanata 3.9.6\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+
+msgid "1.22.0"
+msgstr "1.22.0"
+
+msgid "1.9.0"
+msgstr "1.9.0"
+
+msgid ""
+"Added a new etcd3gw driver that uses the etcd 3.x grpc-gateway HTTP \"/"
+"v3alpha\" API to cache key/value pairs."
+msgstr ""
+"etcd 3.x grpc-gateway HTTP \"/v3alpha\" API to cache key/value pairs를 사용하"
+"는 새로운 etcd3gw 드라이버가 추가되었습니다."
+
+msgid "New Features"
+msgstr "새로운 기능"
+
+msgid "Newton Series Release Notes"
+msgstr "Newton 시리즈 릴리즈 노트"
+
+msgid "Ocata Series Release Notes"
+msgstr "Ocata 시리즈 릴리즈 노트"
+
+msgid "Other Notes"
+msgstr "기타 노트"
+
+msgid "Pike Series Release Notes"
+msgstr "Pike 시리즈 릴리즈 노트"
+
+msgid "Switch to reno for managing release notes."
+msgstr "릴리즈 노트를 관리하려면 reno로 전환하십시오."
+
+msgid "Unreleased Release Notes"
+msgstr "릴리즈되지 않은 릴리즈 노트"
+
+msgid "oslo.cache Release Notes"
+msgstr "oslo.cache 릴리즈 노트"
