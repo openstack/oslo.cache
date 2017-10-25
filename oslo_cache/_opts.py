@@ -36,9 +36,15 @@ FILE_OPTIONS = {
         cfg.StrOpt('backend', default=_DEFAULT_BACKEND,
                    choices=['oslo_cache.memcache_pool',
                             'oslo_cache.dict',
+                            'oslo_cache.mongo',
+                            'oslo_cache.etcd3gw',
                             'dogpile.cache.memcached',
+                            'dogpile.cache.pylibmc',
+                            'dogpile.cache.bmemcached',
+                            'dogpile.cache.dbm',
                             'dogpile.cache.redis',
                             'dogpile.cache.memory',
+                            'dogpile.cache.memory_pickle',
                             'dogpile.cache.null'],
                    help='Cache backend module. For eventlet-based or '
                    'environments with hundreds of threaded servers, Memcache '
