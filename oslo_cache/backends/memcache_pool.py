@@ -45,7 +45,7 @@ class PooledMemcachedBackend(memcached_backend.MemcachedBackend):
             self.url,
             arguments={
                 'dead_retry': arguments.get('dead_retry', 5 * 60),
-                'socket_timeout': arguments.get('socket_timeout', 3),
+                'socket_timeout': arguments.get('socket_timeout', 3.0),
             },
             maxsize=arguments.get('pool_maxsize', 10),
             unused_timeout=arguments.get('pool_unused_timeout', 60),

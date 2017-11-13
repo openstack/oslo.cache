@@ -76,11 +76,11 @@ FILE_OPTIONS = {
                    help='Number of seconds memcached server is considered dead'
                    ' before it is tried again. (dogpile.cache.memcache and'
                    ' oslo_cache.memcache_pool backends only).'),
-        cfg.IntOpt('memcache_socket_timeout',
-                   default=3,
-                   help='Timeout in seconds for every call to a server.'
-                   ' (dogpile.cache.memcache and oslo_cache.memcache_pool'
-                   ' backends only).'),
+        cfg.FloatOpt('memcache_socket_timeout',
+                     default=3.0,
+                     help='Timeout in seconds for every call to a server.'
+                     ' (dogpile.cache.memcache and oslo_cache.memcache_pool'
+                     ' backends only).'),
         cfg.IntOpt('memcache_pool_maxsize',
                    default=10,
                    help='Max total number of open connections to every'
