@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    `memcache_socket_timeout` is changed to float, given the same default value
+    '3.0'.
