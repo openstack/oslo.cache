@@ -12,11 +12,11 @@ oslo.cache
 ==========
 
 .. image:: https://img.shields.io/pypi/v/oslo.cache.svg
-    :target: https://pypi.python.org/pypi/oslo.cache/
+    :target: https://pypi.org/project/oslo.cache/
     :alt: Latest Version
 
 .. image:: https://img.shields.io/pypi/dm/oslo.cache.svg
-    :target: https://pypi.python.org/pypi/oslo.cache/
+    :target: https://pypi.org/project/oslo.cache/
     :alt: Downloads
 
 `oslo.cache` aims to provide a generic caching mechanism for OpenStack projects
