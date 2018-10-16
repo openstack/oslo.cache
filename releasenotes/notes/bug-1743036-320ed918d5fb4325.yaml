@@ -1,0 +1,10 @@
+---
+other:
+  - >
+    [`bug 1743036 <https://bugs.launchpad.net/oslo.cache+bug/1743036>`_]
+    The `backend_argument` value(s) for `url` when configuring memcache did not
+    properly handle multiple servers. This is because the URL was passed as
+    a string (comma delimited) instead of a list to the memcache
+    library/client. The `url` argument is now special cased and will split
+    the string on a comma so that it mirrors the behavior of the ListOpt used
+    by `memcache_servers` option.
