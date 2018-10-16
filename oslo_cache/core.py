@@ -120,6 +120,8 @@ def _build_cache_config(conf):
             continue
 
         arg_key = '.'.join([prefix, 'arguments', argname])
+        if argname == 'url':
+            argvalue = argvalue.split(',')
         conf_dict[arg_key] = argvalue
 
         _LOG.debug('Oslo Cache Config: %s', conf_dict)
