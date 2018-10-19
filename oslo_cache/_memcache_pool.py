@@ -123,6 +123,7 @@ class ConnectionPool(queue.Queue):
     @contextlib.contextmanager
     def acquire(self):
         self._trace_logger('Acquiring connection')
+        self._drop_expired_connections()
         try:
             conn = self.get(timeout=self._connection_get_timeout)
         except queue.Empty:
@@ -135,7 +136,6 @@ class ConnectionPool(queue.Queue):
             yield conn
         finally:
             self._trace_logger('Releasing connection %s', id(conn))
-            self._drop_expired_connections()
             try:
                 # super() cannot be used here because Queue in stdlib is an
                 # old-style class
