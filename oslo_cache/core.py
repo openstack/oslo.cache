@@ -120,7 +120,17 @@ def _build_cache_config(conf):
             continue
 
         arg_key = '.'.join([prefix, 'arguments', argname])
-        if argname == 'url':
+        # NOTE(morgan): The handling of the URL data in memcache is bad and
+        # only takes cases where the values are a list. This explicitly
+        # checks for the base dogpile.cache.memcached backend and does the
+        # split if needed. Other backends such as redis get the same
+        # previous behavior. Overall the fact that the backends opaquely
+        # take data and do not handle processing/validation as expected
+        # directly makes for odd behaviors when wrapping dogpile.cache in
+        # a library like oslo.cache
+        if (conf.cache.backend
+                in ('dogpile.cache.memcached', 'oslo_cache.memcache_pool')
+                and argname == 'url'):
             argvalue = argvalue.split(',')
         conf_dict[arg_key] = argvalue
 
