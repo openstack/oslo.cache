@@ -46,6 +46,7 @@ psutil==5.4.3
 pycparser==2.18
 pyflakes==0.8.1
 pyinotify==0.9.6
+pymemcache==2.1.1
 pymongo==3.0.2
 pyparsing==2.2.0
 python-dateutil==2.7.0

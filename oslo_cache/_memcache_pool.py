@@ -13,7 +13,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""Thread-safe connection pool for python-memcached."""
+"""Thread-safe connection pool for pymemcache."""
 
 import collections
 import contextlib
@@ -21,13 +21,12 @@ import itertools
 import threading
 import time
 
-try:
-    import eventlet
-except ImportError:
-    eventlet = None
-import memcache
+
 from oslo_log import log
+from pymemcache.client import hash as pymemcache_hash
+from pymemcache import serde
 from six.moves import queue
+from six.moves.urllib.parse import urlparse
 from six.moves import zip
 
 from oslo_cache._i18n import _
@@ -37,31 +36,10 @@ from oslo_cache import exception
 LOG = log.getLogger(__name__)
 
 
-class _MemcacheClient(memcache.Client):
-    """Thread global memcache client
-
-    As client is inherited from threading.local we have to restore object
-    methods overloaded by threading.local so we can reuse clients in
-    different threads
-    """
-    __delattr__ = object.__delattr__
-    __getattribute__ = object.__getattribute__
-    __setattr__ = object.__setattr__
-
-    # Hack for lp 1812935
-    if eventlet and eventlet.patcher.is_monkey_patched('thread'):
-        # NOTE(bnemec): I'm not entirely sure why this works in a
-        # monkey-patched environment and not with vanilla stdlib, but it does.
-        def __new__(cls, *args, **kwargs):
-            return object.__new__(cls)
-    else:
-        __new__ = object.__new__
-
-    def __del__(self):
-        pass
-
-
 _PoolItem = collections.namedtuple('_PoolItem', ['ttl', 'connection'])
+DEFAULT_MEMCACHEPORT = 11211
+DEFAULT_SERIALIZER = serde.python_memcache_serializer
+DEFAULT_DESERIALIZER = serde.python_memcache_deserializer
 
 
 class ConnectionPool(queue.Queue):
@@ -204,35 +182,46 @@ class MemcacheClientPool(ConnectionPool):
         # super() cannot be used here because Queue in stdlib is an
         # old-style class
         ConnectionPool.__init__(self, **kwargs)
-        self.urls = urls
+        self._format_urls(urls)
         self._arguments = arguments
+        self._init_arguments()
         # NOTE(morganfainberg): The host objects expect an int for the
         # deaduntil value. Initialize this at 0 for each host with 0 indicating
         # the host is not dead.
         self._hosts_deaduntil = [0] * len(urls)
 
+    def _init_arguments(self):
+        if 'serializer' not in self._arguments:
+            self._arguments['serializer'] = DEFAULT_SERIALIZER
+        if 'deserializer' not in self._arguments:
+            self._arguments['deserializer'] = DEFAULT_DESERIALIZER
+        if 'socket_timeout' in self._arguments:
+            timeout = self._arguments['socket_timeout']
+            self._arguments['connection_timeout'] = timeout
+            del self._arguments['socket_timeout']
+
+    def _format_urls(self, urls):
+        self.urls = []
+        for url in urls:
+            parsed = urlparse(url)
+            if not parsed.port:
+                port = DEFAULT_MEMCACHEPORT
+                self._trace_logger(
+                    "Using port ({port}) with {url}".format(url=url, port=port)
+                )
+            else:
+                # NOTE(hberaud) removing port information from url to avoid
+                # pymemcache to concat twice. Don't use string replace to avoid
+                # ipv6 format override. Some port values can already be used
+                # inside the ipv6 format and we don't want to replace them.
+                # (example: https://[2620:52:0:13b8:8080:ff:fe3e:1]:8080)
+                port_info = len(str(parsed.port)) + 1
+                url = url[:-port_info]
+                port = parsed.port
+            self.urls.append((url, int(port)))
+
     def _create_connection(self):
-        # NOTE(morgan): Explicitly set flush_on_reconnect for pooled
-        # connections. This should ensure that stale data is never consumed
-        # from a server that pops in/out due to a network partition
-        # or disconnect.
-        #
-        # See the help from python-memcached:
-        #
-        # param flush_on_reconnect: optional flag which prevents a
-        #        scenario that can cause stale data to be read: If there's more
-        #        than one memcached server and the connection to one is
-        #        interrupted, keys that mapped to that server will get
-        #        reassigned to another. If the first server comes back, those
-        #        keys will map to it again. If it still has its data, get()s
-        #        can read stale data that was overwritten on another
-        #        server. This flag is off by default for backwards
-        #        compatibility.
-        #
-        # The normal non-pooled clients connect explicitly on each use and
-        # does not need the explicit flush_on_reconnect
-        return _MemcacheClient(self.urls, flush_on_reconnect=True,
-                               **self._arguments)
+        return pymemcache_hash.HashClient(self.urls, **self._arguments)
 
     def _destroy_connection(self, conn):
         conn.disconnect_all()

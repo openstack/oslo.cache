@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Switch from python-memcached to pymemcached for memcache_pool.
+    This avoids issues with thread.local usage and fixes errors
+    seen with inheritance. This is only applicable with dogpile.cache
+    memcached backend.

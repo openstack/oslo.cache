@@ -10,11 +10,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import threading
 import time
 
 import mock
-import six
+from pymemcache.client import hash as pymemcache_hash
 from six.moves import queue
 import testtools
 from testtools import matchers
@@ -133,32 +132,34 @@ class TestConnectionPool(test_cache.BaseTestCase):
         _acquire_connection()
 
 
-class TestMemcacheClientOverrides(test_cache.BaseTestCase):
+class TestMemcacheClientPool(test_cache.BaseTestCase):
 
-    def test_client_stripped_of_threading_local(self):
-        """threading.local overrides are restored for _MemcacheClient"""
-        client_class = _memcache_pool._MemcacheClient
-        # get the genuine thread._local from MRO
-        thread_local = client_class.__mro__[2]
-        self.assertTrue(thread_local is threading.local)
-        for field in six.iterkeys(thread_local.__dict__):
-            if field not in ('__dict__', '__weakref__'):
-                self.assertNotEqual(id(getattr(thread_local, field, None)),
-                                    id(getattr(client_class, field, None)))
-
-    def test_can_create_with_kwargs(self):
-        """Test for lp 1812935
-
-        Note that in order to reproduce the bug, it is necessary to add the
-        following to the top of oslo_cache/tests/__init__.py::
-
-            import eventlet
-            eventlet.monkey_patch()
-
-        This should happen before any other imports in that file.
-        """
-        client = _memcache_pool._MemcacheClient('foo', check_keys=False)
-        # Make sure kwargs are properly processed by the client
-        self.assertFalse(client.do_check_key)
-        # Make sure our __new__ override still results in the right type
-        self.assertIsInstance(client, _memcache_pool._MemcacheClient)
+    def test_memcache_client_pool_create_connection(self):
+        urls = [
+            "foo",
+            "http://foo",
+            "http://bar:11211",
+            "http://bar:8080",
+            "https://[2620:52:0:13b8:5054:ff:fe3e:1]:8080",
+            # testing port format is already in use in ipv6 format
+            "https://[2620:52:0:13b8:8080:ff:fe3e:1]:8080",
+            "https://[2620:52:0:13b8:5054:ff:fe3e:1]",
+            "https://[::192.9.5.5]",
+        ]
+        mcp = _memcache_pool.MemcacheClientPool(urls=urls,
+                                                arguments={},
+                                                maxsize=10,
+                                                unused_timeout=10)
+        mc = mcp._create_connection()
+        self.assertTrue(type(mc) is pymemcache_hash.HashClient)
+        self.assertTrue("foo:11211" in mc.clients)
+        self.assertTrue("http://foo:11211" in mc.clients)
+        self.assertTrue("http://bar:11211" in mc.clients)
+        self.assertTrue("http://bar:8080" in mc.clients)
+        self.assertTrue("https://[2620:52:0:13b8:5054:ff:fe3e:1]:8080" in
+                        mc.clients)
+        self.assertTrue("https://[2620:52:0:13b8:8080:ff:fe3e:1]:8080" in
+                        mc.clients)
+        self.assertTrue("https://[2620:52:0:13b8:5054:ff:fe3e:1]:11211" in
+                        mc.clients)
+        self.assertTrue("https://[::192.9.5.5]:11211" in mc.clients)
