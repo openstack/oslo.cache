@@ -315,14 +315,6 @@ class CacheRegionTest(BaseTestCase):
                           self.config_fixture.conf,
                           "bogus")
 
-    def test_function_key_generator_with_kwargs(self):
-        cacheable_function = self._get_cacheable_function()
-
-        self.config_fixture.config(group='cache', enabled=True)
-        self.assertRaises(ValueError,
-                          cacheable_function,
-                          value=0, foo=self.test_value)
-
     def test_kwarg_function_key_generator_no_kwargs(self):
         cacheable_function = self._get_cacheable_function(
             region=self.region_kwargs)
