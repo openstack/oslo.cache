@@ -97,7 +97,7 @@ class CacheRegionTest(BaseTestCase):
             self.config_fixture.conf, region, group='cache')
 
         @memoize
-        def cacheable_function(value=0):
+        def cacheable_function(value=0, **kw):
             return value
 
         return cacheable_function
@@ -321,7 +321,7 @@ class CacheRegionTest(BaseTestCase):
         self.config_fixture.config(group='cache', enabled=True)
         self.assertRaises(ValueError,
                           cacheable_function,
-                          value=self.test_value)
+                          value=0, foo=self.test_value)
 
     def test_kwarg_function_key_generator_no_kwargs(self):
         cacheable_function = self._get_cacheable_function(
