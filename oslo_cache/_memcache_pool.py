@@ -24,6 +24,10 @@ import itertools
 import threading
 import time
 
+try:
+    import eventlet
+except ImportError:
+    eventlet = None
 import memcache
 from oslo_log import log
 from six.moves import queue
@@ -45,8 +49,16 @@ class _MemcacheClient(memcache.Client):
     """
     __delattr__ = object.__delattr__
     __getattribute__ = object.__getattribute__
-    __new__ = object.__new__
     __setattr__ = object.__setattr__
+
+    # Hack for lp 1812935
+    if eventlet and eventlet.patcher.is_monkey_patched('thread'):
+        # NOTE(bnemec): I'm not entirely sure why this works in a
+        # monkey-patched environment and not with vanilla stdlib, but it does.
+        def __new__(cls, *args, **kwargs):
+            return object.__new__(cls)
+    else:
+        __new__ = object.__new__
 
     def __del__(self):
         pass

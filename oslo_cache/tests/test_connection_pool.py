@@ -145,3 +145,20 @@ class TestMemcacheClientOverrides(test_cache.BaseTestCase):
             if field not in ('__dict__', '__weakref__'):
                 self.assertNotEqual(id(getattr(thread_local, field, None)),
                                     id(getattr(client_class, field, None)))
+
+    def test_can_create_with_kwargs(self):
+        """Test for lp 1812935
+
+        Note that in order to reproduce the bug, it is necessary to add the
+        following to the top of oslo_cache/tests/__init__.py::
+
+            import eventlet
+            eventlet.monkey_patch()
+
+        This should happen before any other imports in that file.
+        """
+        client = _memcache_pool._MemcacheClient('foo', check_keys=False)
+        # Make sure kwargs are properly processed by the client
+        self.assertFalse(client.do_check_key)
+        # Make sure our __new__ override still results in the right type
+        self.assertIsInstance(client, _memcache_pool._MemcacheClient)
