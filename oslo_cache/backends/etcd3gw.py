@@ -17,9 +17,9 @@
 from __future__ import absolute_import
 from dogpile.cache import api
 import etcd3gw
-import json
 
 from oslo_cache import core
+from oslo_serialization import jsonutils
 
 __all__ = [
     'Etcd3gwCacheBackend'
@@ -50,7 +50,7 @@ class Etcd3gwCacheBackend(api.CacheBackend):
         values = self._client.get(key, False)
         if not values:
             return core.NO_VALUE
-        value, metadata = json.loads(values[0])
+        value, metadata = jsonutils.loads(values[0])
         return api.CachedValue(value, metadata)
 
     def get_multi(self, keys):
@@ -65,7 +65,7 @@ class Etcd3gwCacheBackend(api.CacheBackend):
         if self.timeout:
             lease = self._client.lease(ttl=self.timeout)
         for key, value in mapping.items():
-            self._client.put(key, json.dumps(value), lease)
+            self._client.put(key, jsonutils.dumps(value), lease)
 
     def delete(self, key):
         self._client.delete(key)
