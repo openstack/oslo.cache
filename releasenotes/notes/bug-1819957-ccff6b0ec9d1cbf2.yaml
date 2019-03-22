@@ -1,0 +1,24 @@
+---
+fixes:
+  - |
+    [`bug 1819957 <https://bugs.launchpad.net/keystone/+bug/1819957>`_]
+    If a memcache server disappears and then reconnects when multiple memcache
+    servers are used (specific to the python-memcached based backends) it is
+    possible that the server will contain stale data. The default is now to
+    supply the ``flush_on_reconnect`` optional argument to the backend. This
+    means that when the service connects to a memcache server, it will flush
+    all cached data in the server. This change only impacts the pooled backend
+    as it is the most likely (with heavy use of greenlet) to be impacted
+    by the problem and is the recommended production configuration.
+
+    See the help from python-memcached:
+
+    @param flush_on_reconnect: optional flag which prevents a
+            scenario that can cause stale data to be read: If there's more
+            than one memcached server and the connection to one is
+            interrupted, keys that mapped to that server will get
+            reassigned to another. If the first server comes back, those
+            keys will map to it again. If it still has its data, get()s
+            can read stale data that was overwritten on another
+            server. This flag is off by default for backwards
+            compatibility.
