@@ -129,8 +129,8 @@ def _build_cache_config(conf):
         # directly makes for odd behaviors when wrapping dogpile.cache in
         # a library like oslo.cache
         if (conf.cache.backend
-                in ('dogpile.cache.memcached', 'oslo_cache.memcache_pool')
-                and argname == 'url'):
+                in ('dogpile.cache.memcached', 'oslo_cache.memcache_pool') and
+                argname == 'url'):
             argvalue = argvalue.split(',')
         conf_dict[arg_key] = argvalue
 
