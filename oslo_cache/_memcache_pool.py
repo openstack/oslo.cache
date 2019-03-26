@@ -15,9 +15,6 @@
 
 """Thread-safe connection pool for python-memcached."""
 
-# NOTE(yorik-sar): this file is copied between keystone and keystonemiddleware
-# and should be kept in sync until we can use external library for this.
-
 import collections
 import contextlib
 import itertools
