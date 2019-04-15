@@ -212,7 +212,27 @@ class MemcacheClientPool(ConnectionPool):
         self._hosts_deaduntil = [0] * len(urls)
 
     def _create_connection(self):
-        return _MemcacheClient(self.urls, **self._arguments)
+        # NOTE(morgan): Explicitly set flush_on_reconnect for pooled
+        # connections. This should ensure that stale data is never consumed
+        # from a server that pops in/out due to a network partition
+        # or disconnect.
+        #
+        # See the help from python-memcached:
+        #
+        # param flush_on_reconnect: optional flag which prevents a
+        #        scenario that can cause stale data to be read: If there's more
+        #        than one memcached server and the connection to one is
+        #        interrupted, keys that mapped to that server will get
+        #        reassigned to another. If the first server comes back, those
+        #        keys will map to it again. If it still has its data, get()s
+        #        can read stale data that was overwritten on another
+        #        server. This flag is off by default for backwards
+        #        compatibility.
+        #
+        # The normal non-pooled clients connect explicitly on each use and
+        # does not need the explicit flush_on_reconnect
+        return _MemcacheClient(self.urls, flush_on_reconnect=True,
+                               **self._arguments)
 
     def _destroy_connection(self, conn):
         conn.disconnect_all()
