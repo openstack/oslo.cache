@@ -1,6 +1,6 @@
-=======
- Usage
-=======
+=====
+Usage
+=====
 
 A simple example of oslo.cache in use::
 
