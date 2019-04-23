@@ -1,6 +1,6 @@
-============
- oslo.cache
-============
+==========
+oslo.cache
+==========
 
 Cache storage for OpenStack projects.
 
