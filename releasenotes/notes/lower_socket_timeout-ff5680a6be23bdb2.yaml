@@ -1,0 +1,9 @@
+---
+upgrade:
+  - |
+    The default value for ``memcache_socket_timeout`` has been lowered from 3
+    seconds to 1 second. The positive side-effect of this can be found in
+    downstream `changes
+    <https://github.com/crowbar/crowbar-openstack/pull/1429>`_. If you
+    deployment relies explicitly on a timeout of 3 seconds, please set that
+    override in your configuration.

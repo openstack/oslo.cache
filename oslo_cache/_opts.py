@@ -83,7 +83,7 @@ FILE_OPTIONS = {
                    ' before it is tried again. (dogpile.cache.memcache and'
                    ' oslo_cache.memcache_pool backends only).'),
         cfg.FloatOpt('memcache_socket_timeout',
-                     default=3.0,
+                     default=1.0,
                      help='Timeout in seconds for every call to a server.'
                      ' (dogpile.cache.memcache and oslo_cache.memcache_pool'
                      ' backends only).'),
