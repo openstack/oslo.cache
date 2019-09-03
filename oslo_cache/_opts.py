@@ -75,7 +75,7 @@ FILE_OPTIONS = {
                          'to false.'),
         cfg.ListOpt('memcache_servers', default=['localhost:11211'],
                     help='Memcache servers in the format of "host:port".'
-                    ' (dogpile.cache.memcache and oslo_cache.memcache_pool'
+                    ' (dogpile.cache.memcached and oslo_cache.memcache_pool'
                     ' backends only).'),
         cfg.IntOpt('memcache_dead_retry',
                    default=5 * 60,
