@@ -25,7 +25,7 @@ A simple example of oslo.cache in use::
 
     @MEMOIZE
     def f(x):
-        print x
+        print(x)
         return x
 
 An example config file for this is::
