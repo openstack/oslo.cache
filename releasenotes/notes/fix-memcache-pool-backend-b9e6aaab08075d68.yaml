@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fix the memcache_pool backend broken in oslo.cache's version 2.1.0
+    by switching from a python-memcache based client to a pymemcache based
+    client. Reintroducing the client based on python-memcached as the
+    default client for the memcache_pool dogpile backend.
