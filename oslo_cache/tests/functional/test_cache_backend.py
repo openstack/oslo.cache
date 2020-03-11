@@ -12,38 +12,51 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import os
+
 from dogpile.cache import region as dp_region
 from oslo_utils import uuidutils
-import urllib3
 
-from oslo_cache import core
-from oslo_cache.tests import test_cache
+from oslotest import base
 
-
-NO_VALUE = core.NO_VALUE
+from oslo_cache import core as cache
 
 
-class Etcd3gwCache(test_cache.BaseTestCase):
-    arguments = {
-        'host': '127.0.0.1',
-        'port': 2379,
-    }
+NO_VALUE = cache.NO_VALUE
+
+TESTABLE_BACKENDS = [
+    'etcd3gw',
+]
+
+
+class TestCacheBackend(base.BaseTestCase):
+    arguments = {}
 
     def setUp(self):
-        test_cache.BaseTestCase.setUp(self)
-        try:
-            urllib3.PoolManager().request(
-                'GET',
-                '%s:%d' % (self.arguments['host'], self.arguments['port'])
-            )
-            return True
-        except urllib3.exceptions.HTTPError:
-            self.skipTest("skipping this test")
+        super(TestCacheBackend, self).setUp()
+        self.backend = os.getenv('OSLO_CACHE_BACKEND')
+        if self.backend not in TESTABLE_BACKENDS:
+            raise Exception(
+                "Backend (%s) not supported in tests" % self.backend)
+        if self.backend == 'etcd3gw':
+            self.backend = "oslo_cache.etcd3gw"
+            # TODO(hberaud): Ideally functional tests should be similar
+            # to the usage examples given in the oslo.cache documentation [1].
+            # Config [2] should be used to pass arguments to the backend
+            # rather than using direct usage like below.
+            # It could help us to made the tests interoperable between
+            # the different backends in use in tests.
+            # [1] https://docs.openstack.org/oslo.cache/latest/user/usage.html
+            # [2] https://docs.openstack.org/oslo.cache/latest/configuration/index.html  # noqa
+            self.arguments = {
+                'host': '127.0.0.1',
+                'port': 2379,
+            }
 
     def test_typical_configuration(self):
 
         dp_region.make_region().configure(
-            'oslo_cache.etcd3gw',
+            self.backend,
             arguments=self.arguments
         )
         self.assertTrue(True)  # reached here means no initialization error
@@ -51,7 +64,7 @@ class Etcd3gwCache(test_cache.BaseTestCase):
     def test_backend_get_missing_data(self):
 
         region = dp_region.make_region().configure(
-            'oslo_cache.etcd3gw',
+            self.backend,
             arguments=self.arguments
         )
 
@@ -61,7 +74,7 @@ class Etcd3gwCache(test_cache.BaseTestCase):
 
     def test_backend_set_data(self):
         region = dp_region.make_region().configure(
-            'oslo_cache.etcd3gw',
+            self.backend,
             arguments=self.arguments
         )
 
@@ -72,7 +85,7 @@ class Etcd3gwCache(test_cache.BaseTestCase):
     def test_backend_set_none_as_data(self):
 
         region = dp_region.make_region().configure(
-            'oslo_cache.etcd3gw',
+            self.backend,
             arguments=self.arguments
         )
 
@@ -83,7 +96,7 @@ class Etcd3gwCache(test_cache.BaseTestCase):
     def test_backend_set_blank_as_data(self):
 
         region = dp_region.make_region().configure(
-            'oslo_cache.etcd3gw',
+            self.backend,
             arguments=self.arguments
         )
 
@@ -94,7 +107,7 @@ class Etcd3gwCache(test_cache.BaseTestCase):
     def test_backend_set_same_key_multiple_times(self):
 
         region = dp_region.make_region().configure(
-            'oslo_cache.etcd3gw',
+            self.backend,
             arguments=self.arguments
         )
 
@@ -112,7 +125,7 @@ class Etcd3gwCache(test_cache.BaseTestCase):
     def test_backend_multi_set_data(self):
 
         region = dp_region.make_region().configure(
-            'oslo_cache.etcd3gw',
+            self.backend,
             arguments=self.arguments
         )
         random_key = uuidutils.generate_uuid(dashed=False)
@@ -133,7 +146,7 @@ class Etcd3gwCache(test_cache.BaseTestCase):
     def test_backend_multi_get_data(self):
 
         region = dp_region.make_region().configure(
-            'oslo_cache.etcd3gw',
+            self.backend,
             arguments=self.arguments
         )
         random_key = uuidutils.generate_uuid(dashed=False)
@@ -156,7 +169,7 @@ class Etcd3gwCache(test_cache.BaseTestCase):
     def test_backend_multi_set_should_update_existing(self):
 
         region = dp_region.make_region().configure(
-            'oslo_cache.etcd3gw',
+            self.backend,
             arguments=self.arguments
         )
         random_key = uuidutils.generate_uuid(dashed=False)
@@ -184,7 +197,7 @@ class Etcd3gwCache(test_cache.BaseTestCase):
     def test_backend_multi_set_get_with_blanks_none(self):
 
         region = dp_region.make_region().configure(
-            'oslo_cache.etcd3gw',
+            self.backend,
             arguments=self.arguments
         )
         random_key = uuidutils.generate_uuid(dashed=False)
@@ -225,7 +238,7 @@ class Etcd3gwCache(test_cache.BaseTestCase):
     def test_backend_delete_data(self):
 
         region = dp_region.make_region().configure(
-            'oslo_cache.etcd3gw',
+            self.backend,
             arguments=self.arguments
         )
 
@@ -240,7 +253,7 @@ class Etcd3gwCache(test_cache.BaseTestCase):
     def test_backend_multi_delete_data(self):
 
         region = dp_region.make_region().configure(
-            'oslo_cache.etcd3gw',
+            self.backend,
             arguments=self.arguments
         )
         random_key = uuidutils.generate_uuid(dashed=False)

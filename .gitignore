@@ -58,3 +58,5 @@ releasenotes/build
 RELEASENOTES.rst
 releasenotes/notes/reno.cache
 
+# pifpaf and testing artifacts
+etcd-v*

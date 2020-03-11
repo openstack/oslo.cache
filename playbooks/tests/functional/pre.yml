@@ -1,0 +1,17 @@
+- hosts: all
+  vars:
+    oslo_cache_backend_daemon: "{{ tox_environment.OSLO_CACHE_BACKEND_DAEMON | default(tox_environment.OSLO_CACHE_BACKEND) }}"
+  roles:
+    - role: bindep
+      bindep_profile: "tests-functional-{{ oslo_cache_backend_daemon }}"
+  tasks:
+    # NOTE(yoctozepto): Debian and Ubuntu have this nasty policy of starting
+    # installed services for us. We don't rely on system-wide service and use
+    # pifpaf. Unfortunately, default port may conflict with system-wide service.
+    # So, for sanity and resource conservation, let's stop it before tests run.
+    - name: "Stop {{ oslo_cache_backend_daemon }}"
+      service:
+        name: "{{ oslo_cache_backend_daemon }}"
+        state: stopped
+        enabled: no
+      become: yes
