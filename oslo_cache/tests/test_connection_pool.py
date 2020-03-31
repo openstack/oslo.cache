@@ -12,8 +12,8 @@
 
 import threading
 import time
+from unittest import mock
 
-import mock
 import six
 from six.moves import queue
 import testtools

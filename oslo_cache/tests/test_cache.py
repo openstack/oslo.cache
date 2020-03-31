@@ -15,9 +15,9 @@
 
 import copy
 import time
+from unittest import mock
 
 from dogpile.cache import proxy
-import mock
 from oslo_config import cfg
 from oslo_config import fixture as config_fixture
 from oslo_utils import uuidutils
