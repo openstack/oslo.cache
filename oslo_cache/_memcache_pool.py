@@ -18,9 +18,9 @@
 import collections
 import contextlib
 import itertools
+import queue
 import threading
 import time
-import queue
 
 try:
     import eventlet
