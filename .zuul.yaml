@@ -37,6 +37,13 @@
       tox_environment:
           OSLO_BACKEND: dogpile_cache_bmemcached
 
+- job:
+    name: oslo.cache-functional-memcache_pool
+    parent: oslo.cache-functional-memcached
+    vars:
+      tox_environment:
+        OSLO_BACKEND: memcache_pool
+
 - project:
     templates:
       - check-requirements
@@ -50,3 +57,4 @@
       jobs:
         - oslo.cache-functional-etcd3gw
         - oslo.cache-functional-dogpile.cache.bmemcached
+        - oslo.cache-functional-memcache_pool
