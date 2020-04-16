@@ -16,6 +16,14 @@ Contents
    user/index
    reference/index
 
+
+Release Notes
+=============
+
+Read also the `oslo.cache Release Notes
+<https://docs.openstack.org/releasenotes/oslo.cache/>`_.
+
+
 Indices and tables
 ==================
 
