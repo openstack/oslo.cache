@@ -110,6 +110,36 @@ FILE_OPTIONS = {
                    default=10,
                    help='Number of seconds that an operation will wait to get '
                         'a memcache client connection.'),
+        cfg.BoolOpt('tls_enabled',
+                    default=False,
+                    help='Global toggle for TLS usage when comunicating with'
+                    ' the caching servers.'),
+        cfg.StrOpt('tls_cafile',
+                   default=None,
+                   help='Path to a file of concatenated CA certificates in PEM'
+                   ' format necessary to establish the caching servers\''
+                   ' authenticity. If tls_enabled is False, this option is'
+                   ' ignored.'),
+        cfg.StrOpt('tls_certfile',
+                   default=None,
+                   help='Path to a single file in PEM format containing the'
+                   ' client\'s certificate as well as any number of CA'
+                   ' certificates needed to establish the certificate\'s'
+                   ' authenticity. This file is only required when client side'
+                   ' authentication is necessary. If tls_enabled is False,'
+                   ' this option is ignored.'),
+        cfg.StrOpt('tls_keyfile',
+                   default=None,
+                   help='Path to a single file containing the client\'s'
+                   ' private key in. Otherwhise the private key will be taken'
+                   ' from the file specified in tls_certfile. If tls_enabled'
+                   ' is False, this option is ignored.'),
+        cfg.StrOpt('tls_allowed_ciphers',
+                   default=None,
+                   help='Set the available ciphers for sockets created with'
+                   ' the TLS context. It should be a string in the OpenSSL'
+                   ' cipher list format. If not specified, all OpenSSL enabled'
+                   ' ciphers will be available.'),
     ],
 }
 
