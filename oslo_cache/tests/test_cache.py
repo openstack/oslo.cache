@@ -14,6 +14,7 @@
 # under the License.
 
 import copy
+import ssl
 import time
 
 from dogpile.cache import proxy
@@ -287,6 +288,83 @@ class CacheRegionTest(BaseTestCase):
         self.assertEqual(
             _opts._DEFAULT_BACKEND,
             config_dict['test_prefix.backend'])
+
+    def test_cache_dictionary_config_builder_tls_disabled(self):
+        """Validate the backend is reset to default if caching is disabled."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='oslo_cache.dict',
+                                   tls_cafile='path_to_ca_file',
+                                   tls_keyfile='path_to_key_file',
+                                   tls_certfile='path_to_cert_file',
+                                   tls_allowed_ciphers='allowed_ciphers')
+
+        with mock.patch.object(ssl, 'create_default_context'):
+            config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+            self.assertFalse(self.config_fixture.conf.cache.tls_enabled)
+            ssl.create_default_context.assert_not_called()
+            self.assertNotIn('test_prefix.arguments.tls_context', config_dict)
+
+    def test_cache_dictionary_config_builder_tls_enabled(self):
+        """Validate the backend is reset to default if caching is disabled."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='oslo_cache.dict',
+                                   tls_enabled=True)
+
+        fake_context = mock.Mock()
+        with mock.patch.object(ssl, 'create_default_context',
+                               return_value=fake_context):
+            config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+            self.assertTrue(self.config_fixture.conf.cache.tls_enabled)
+
+            ssl.create_default_context.assert_called_with(cafile=None)
+            fake_context.load_cert_chain.assert_not_called()
+            fake_context.set_ciphers.assert_not_called()
+
+            self.assertEqual(
+                fake_context,
+                config_dict['test_prefix.arguments.tls_context'],
+            )
+
+    def test_cache_dictionary_config_builder_tls_enabled_with_config(self):
+        """Validate the backend is reset to default if caching is disabled."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='oslo_cache.dict',
+                                   tls_enabled=True,
+                                   tls_cafile='path_to_ca_file',
+                                   tls_keyfile='path_to_key_file',
+                                   tls_certfile='path_to_cert_file',
+                                   tls_allowed_ciphers='allowed_ciphers')
+
+        fake_context = mock.Mock()
+        with mock.patch.object(ssl, 'create_default_context',
+                               return_value=fake_context):
+            config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+            self.assertTrue(self.config_fixture.conf.cache.tls_enabled)
+
+            ssl.create_default_context.assert_called_with(
+                cafile='path_to_ca_file',
+            )
+            fake_context.load_cert_chain.assert_called_with(
+                'path_to_cert_file',
+                'path_to_key_file',
+            )
+            fake_context.set_ciphers.assert_called_with(
+                'allowed_ciphers'
+            )
+
+            self.assertEqual(
+                fake_context,
+                config_dict['test_prefix.arguments.tls_context'],
+            )
 
     def test_cache_debug_proxy(self):
         single_value = 'Test Value'

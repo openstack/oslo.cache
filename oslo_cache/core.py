@@ -34,6 +34,7 @@ The library has special public value for nonexistent or expired keys called
     from oslo_cache import core
     NO_VALUE = core.NO_VALUE
 """
+import ssl
 
 import dogpile.cache
 from dogpile.cache import api
@@ -144,6 +145,27 @@ def _build_cache_config(conf):
                 'pool_unused_timeout', 'pool_connection_get_timeout'):
         value = getattr(conf.cache, 'memcache_' + arg)
         conf_dict['%s.arguments.%s' % (prefix, arg)] = value
+
+    if conf.cache.tls_enabled:
+        _LOG.debug('Oslo Cache TLS - CA: %s', conf.cache.tls_cafile)
+        tls_context = ssl.create_default_context(cafile=conf.cache.tls_cafile)
+
+        if conf.cache.tls_certfile is not None:
+            _LOG.debug('Oslo Cache TLS - cert: %s', conf.cache.tls_certfile)
+            _LOG.debug('Oslo Cache TLS - key: %s', conf.cache.tls_keyfile)
+            tls_context.load_cert_chain(
+                conf.cache.tls_certfile,
+                conf.cache.tls_keyfile,
+            )
+
+        if conf.cache.tls_allowed_ciphers is not None:
+            _LOG.debug(
+                'Oslo Cache TLS - ciphers: %s',
+                conf.cache.tls_allowed_ciphers,
+            )
+            tls_context.set_ciphers(conf.cache.tls_allowed_ciphers)
+
+        conf_dict['%s.arguments.tls_context' % prefix] = tls_context
 
     return conf_dict
 
