@@ -21,7 +21,6 @@ from oslo_cache import core
 from oslo_log import log
 from oslo_utils import importutils
 from oslo_utils import timeutils
-import six
 
 from oslo_cache._i18n import _
 from oslo_cache import exception
@@ -416,7 +415,7 @@ class MongoApi(object):
         Refer to MongoDB documentation around TTL index for further details.
         """
         indexes = collection.index_information()
-        for indx_name, index_data in six.iteritems(indexes):
+        for indx_name, index_data in indexes.items():
             if all(k in index_data for k in ('key', 'expireAfterSeconds')):
                 existing_value = index_data['expireAfterSeconds']
                 fld_present = 'doc_date' in index_data['key'][0]
@@ -439,7 +438,7 @@ class MongoApi(object):
 
     def get_multi(self, keys):
         db_results = self._get_results_as_dict(keys)
-        return {doc['_id']: doc['value'] for doc in six.itervalues(db_results)}
+        return {doc['_id']: doc['value'] for doc in db_results.values()}
 
     def _get_results_as_dict(self, keys):
         criteria = {'_id': {'$in': keys}}
@@ -495,8 +494,7 @@ class MongoApi(object):
                                            **self.meth_kwargs)
 
 
-@six.add_metaclass(abc.ABCMeta)
-class AbstractManipulator(object):
+class AbstractManipulator(object, metaclass=abc.ABCMeta):
     """Abstract class with methods which need to be implemented for custom
     manipulation.
 

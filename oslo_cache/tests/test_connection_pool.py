@@ -10,12 +10,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import queue
 import threading
 import time
 from unittest import mock
 
-import six
-from six.moves import queue
 import testtools
 from testtools import matchers
 
@@ -141,7 +140,7 @@ class TestMemcacheClientOverrides(test_cache.BaseTestCase):
         # get the genuine thread._local from MRO
         thread_local = client_class.__mro__[2]
         self.assertTrue(thread_local is threading.local)
-        for field in six.iterkeys(thread_local.__dict__):
+        for field in thread_local.__dict__.keys():
             if field not in ('__dict__', '__weakref__'):
                 self.assertNotEqual(id(getattr(thread_local, field, None)),
                                     id(getattr(client_class, field, None)))
