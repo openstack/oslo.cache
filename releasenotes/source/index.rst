@@ -1,16 +1,16 @@
-==========================
- oslo.cache Release Notes
-==========================
+========================
+oslo.cache Release Notes
+========================
 
- .. toctree::
-    :maxdepth: 1
+.. toctree::
+   :maxdepth: 1
 
-    unreleased
-    ussuri
-    train
-    stein
-    rocky
-    queens
-    pike
-    ocata
-    newton
+   unreleased
+   ussuri
+   train
+   stein
+   rocky
+   queens
+   pike
+   ocata
+   newton
