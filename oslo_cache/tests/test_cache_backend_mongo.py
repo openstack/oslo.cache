@@ -18,8 +18,6 @@ import functools
 
 from dogpile.cache import region as dp_region
 from oslo_utils import uuidutils
-import six
-from six.moves import range
 
 from oslo_cache.backends import mongo
 from oslo_cache import core
@@ -136,17 +134,17 @@ class MockCollection(object):
 
     def _iter_documents(self, spec=None):
         return (SON_MANIPULATOR.transform_outgoing(document, self) for
-                document in six.itervalues(self._documents)
+                document in self._documents.values()
                 if self._apply_filter(document, spec))
 
     def _apply_filter(self, document, query):
-        for key, search in six.iteritems(query):
+        for key, search in query.items():
             doc_val = document.get(key)
             if isinstance(search, dict):
                 op_dict = {'$in': lambda dv, sv: dv in sv}
                 is_match = all(
                     op_str in op_dict and op_dict[op_str](doc_val, search_val)
-                    for op_str, search_val in six.iteritems(search)
+                    for op_str, search_val in search.items()
                 )
             else:
                 is_match = doc_val == search
@@ -187,7 +185,7 @@ class MockCollection(object):
 
     def update(self, spec, document, upsert=False, **kwargs):
 
-        existing_docs = [doc for doc in six.itervalues(self._documents)
+        existing_docs = [doc for doc in self._documents.values()
                          if self._apply_filter(doc, spec)]
         if existing_docs:
             existing_doc = existing_docs[0]  # should find only 1 match
@@ -199,7 +197,7 @@ class MockCollection(object):
             existing_doc = self._documents[self._insert(document)]
 
     def _internalize_dict(self, d):
-        return {k: copy.deepcopy(v) for k, v in six.iteritems(d)}
+        return {k: copy.deepcopy(v) for k, v in d.items()}
 
     def remove(self, spec_or_id=None, search_filter=None):
         """Remove objects matching spec_or_id from the collection."""
