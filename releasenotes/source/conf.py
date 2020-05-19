@@ -40,12 +40,10 @@ extensions = [
 ]
 
 # openstackdocstheme options
-repository_name = 'openstack/oslo.cache'
-bug_project = 'oslo.cache'
-bug_tag = ''
-
-# Must set this variable to include year, month, day, hours, and minutes.
-html_last_updated_fmt = '%Y-%m-%d %H:%M'
+openstackdocs_repo_name = 'openstack/oslo.cache'
+openstackdocs_bug_project = 'oslo.cache'
+openstackdocs_bug_tag = ''
+openstackdocs_auto_name = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

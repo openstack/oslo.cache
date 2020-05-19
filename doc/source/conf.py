@@ -28,9 +28,9 @@ extensions = [
 ]
 
 # openstackdocstheme options
-repository_name = 'openstack/oslo.cache'
-bug_project = 'oslo.cache'
-bug_tag = ''
+openstackdocs_repo_name = 'openstack/oslo.cache'
+openstackdocs_bug_project = 'oslo.cache'
+openstackdocs_bug_tag = ''
 
 # sphinxcontrib.apidoc options
 apidoc_module_dir = '../../oslo_cache'
@@ -38,9 +38,6 @@ apidoc_output_dir = 'reference/api'
 apidoc_excluded_paths = [
     'tests'
 ]
-
-# Must set this variable to include year, month, day, hours, and minutes.
-html_last_updated_fmt = '%Y-%m-%d %H:%M'
 
 # The suffix of source filenames.
 source_suffix = '.rst'
