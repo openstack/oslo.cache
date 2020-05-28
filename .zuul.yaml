@@ -1,12 +1,18 @@
 - job:
-    name: oslo.cache-tempest-full-py3-memcached-pool
-    parent: tempest-full-py3
-    voting: false
-    description: |
-      Base integration test with memcache_pool backend.
+    name: oslo.cache-functional-tox-py38
+    parent: openstack-tox-py38
+    abstract: true
+    pre-run: playbooks/tests/functional/pre.yml
     vars:
-      devstack_localrc:
-        CACHE_BACKEND: oslo_cache.memcache_pool
+      tox_envlist: functional
+
+- job:
+    name: oslo.cache-functional-tox-py38-etcd3gw
+    parent: oslo.cache-functional-tox-py38
+    vars:
+      tox_environment:
+        OSLO_CACHE_BACKEND: etcd3gw
+        OSLO_CACHE_BACKEND_DAEMON: etcd
 
 - project:
     templates:
@@ -19,4 +25,4 @@
       - release-notes-jobs-python3
     check:
       jobs:
-        - oslo.cache-tempest-full-py3-memcached-pool
+        - oslo.cache-functional-tox-py38-etcd3gw
