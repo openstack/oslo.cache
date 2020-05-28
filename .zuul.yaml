@@ -11,8 +11,10 @@
     parent: oslo.cache-functional-tox-py38
     vars:
       tox_environment:
-        OSLO_CACHE_BACKEND: etcd3gw
-        OSLO_CACHE_BACKEND_DAEMON: etcd
+        PIFPAF_DAEMON: etcd
+        # The next env var correspond to the functional test
+        # directory to pass to STESTR_TEST_PATH
+        OSLO_BACKEND: etcd3gw
 
 - project:
     templates:
