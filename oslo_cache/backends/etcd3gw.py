@@ -13,8 +13,6 @@
 # under the License.
 
 """dogpile.cache backend that uses etcd 3.x for storage"""
-
-from __future__ import absolute_import
 from dogpile.cache import api
 import etcd3gw
 
