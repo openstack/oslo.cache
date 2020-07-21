@@ -110,6 +110,11 @@ FILE_OPTIONS = {
                    default=10,
                    help='Number of seconds that an operation will wait to get '
                         'a memcache client connection.'),
+        cfg.BoolOpt('memcache_pool_flush_on_reconnect',
+                    default=False,
+                    help='Global toggle if memcache will be flushed'
+                    ' on reconnect.'
+                    ' (oslo_cache.memcache_pool backend only).'),
         cfg.BoolOpt('tls_enabled',
                     default=False,
                     help='Global toggle for TLS usage when comunicating with'
@@ -148,6 +153,25 @@ def configure(conf):
     for section in FILE_OPTIONS:
         for option in FILE_OPTIONS[section]:
             conf.register_opt(option, group=section)
+
+
+def set_defaults(conf, memcache_pool_flush_on_reconnect=False):
+    """Set defaults for configuration variables.
+
+    Overrides default options values.
+
+    :param conf: Configuration object, managed by the caller.
+    :type conf: oslo.config.cfg.ConfigOpts
+
+    :param memcache_pool_flush_on_reconnect: The default state for the
+        ``flush_on_reconnect`` flag. By default deactivated
+    :type memcache_pool_flush_on_reconnect: bool
+    """
+    conf.register_opt(FILE_OPTIONS, group='cache')
+
+    cfg.set_defaults(
+        FILE_OPTIONS,
+        memcache_pool_flush_on_reconnect=memcache_pool_flush_on_reconnect)
 
 
 def list_opts():

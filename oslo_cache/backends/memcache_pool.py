@@ -48,6 +48,8 @@ class PooledMemcachedBackend(memcached_backend.MemcachedBackend):
                 'socket_timeout': arguments.get('socket_timeout', 3.0),
                 'server_max_value_length':
                     arguments.get('server_max_value_length'),
+                'flush_on_reconnect': arguments.get('pool_flush_on_reconnect',
+                                                    False),
             },
             maxsize=arguments.get('pool_maxsize', 10),
             unused_timeout=arguments.get('pool_unused_timeout', 60),

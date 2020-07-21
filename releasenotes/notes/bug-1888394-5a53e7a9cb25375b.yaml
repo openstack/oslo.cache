@@ -1,0 +1,22 @@
+---
+fixes:
+  - |
+    [`bug 1888394 <https://bugs.launchpad.net/oslo.cache/+bug/1888394>`_]
+    If a memcache server disappears and then reconnects when multiple memcache
+    servers are used (specific to the python-memcached based backends) it is
+    possible that the server will contain stale data. To avoid this, param
+    flush_on_reconnect was used in code.
+
+    But unfortunatelly this option is causing another issue.
+    If memcache server disappears, or client had broken connection to memcache server,
+    clients start to flush server on reconnect.
+
+    This means that network connections will go UP and can cause server to be overloaded
+    until memcache will be unresponsive.
+
+    Simply said this option can cause loop of flushs and overloaded memcached servers.
+    This change is moving optional parameter `flush_on_reconnect` to oslo.cache config.
+
+features:
+  - Configuration option ``memcache_pool_flush_on_reconnect`` added to control
+    if flush will be sent to memcached server after reconnect.
