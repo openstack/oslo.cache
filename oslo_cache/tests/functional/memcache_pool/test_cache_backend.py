@@ -30,3 +30,20 @@ class TestMemcachePoolCacheBackend(test_base.BaseTestCaseCacheBackend):
         # config fixture is properly initialized with value related to
         # the current backend in use.
         super(TestMemcachePoolCacheBackend, self).setUp()
+
+
+class TestBMemcachePoolCacheBackend(test_base.BaseTestCaseCacheBackend):
+    def setUp(self):
+        MEMCACHED_PORT = os.getenv("OSLO_CACHE_TEST_MEMCACHED_PORT", "11211")
+        # If the cache support the sasl, the memcache_sasl_enabled
+        # should be True.
+        self.config_fixture.config(
+            group='cache',
+            backend='oslo_cache.memcache_pool',
+            enabled=True,
+            memcache_servers=[f'localhost:{MEMCACHED_PORT}'],
+            memcache_sasl_enabled=False,
+            memcache_username='sasl_name',
+            memcache_password='sasl_pswd'
+        )
+        super(TestBMemcachePoolCacheBackend, self).setUp()

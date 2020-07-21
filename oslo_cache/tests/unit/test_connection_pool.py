@@ -18,6 +18,7 @@ from unittest import mock
 import testtools
 from testtools import matchers
 
+from oslo_cache import _bmemcache_pool
 from oslo_cache import _memcache_pool
 from oslo_cache import exception
 from oslo_cache.tests import test_cache
@@ -161,3 +162,13 @@ class TestMemcacheClientOverrides(test_cache.BaseTestCase):
         self.assertFalse(client.do_check_key)
         # Make sure our __new__ override still results in the right type
         self.assertIsInstance(client, _memcache_pool._MemcacheClient)
+
+
+class TestBMemcacheClient(test_cache.BaseTestCase):
+
+    def test_can_create_with_kwargs(self):
+        client = _bmemcache_pool._BMemcacheClient('foo', password='123456')
+        # Make sure kwargs are properly processed by the client
+        self.assertEqual('123456', client.password)
+        # Make sure our __new__ override still results in the right type
+        self.assertIsInstance(client, _bmemcache_pool._BMemcacheClient)
