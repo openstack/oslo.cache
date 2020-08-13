@@ -1,14 +1,14 @@
 - job:
-    name: oslo.cache-functional-tox-py38
-    parent: openstack-tox-py38
+    name: oslo.cache-functional
+    parent: openstack-tox
     abstract: true
     pre-run: playbooks/tests/functional/pre.yml
     vars:
       tox_envlist: functional
 
 - job:
-    name: oslo.cache-functional-tox-py38-etcd3gw
-    parent: oslo.cache-functional-tox-py38
+    name: oslo.cache-functional-etcd3gw
+    parent: oslo.cache-functional
     vars:
       tox_environment:
         PIFPAF_DAEMON: etcd
@@ -27,4 +27,4 @@
       - release-notes-jobs-python3
     check:
       jobs:
-        - oslo.cache-functional-tox-py38-etcd3gw
+        - oslo.cache-functional-etcd3gw
