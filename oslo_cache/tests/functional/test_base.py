@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from oslo_config import fixture
 from oslo_utils import uuidutils
 from oslotest import base
 
@@ -22,23 +23,31 @@ NO_VALUE = cache.NO_VALUE
 
 
 class BaseTestCaseCacheBackend(base.BaseTestCase):
-
     def setUp(self):
-        super(BaseTestCaseCacheBackend, self).setUp()
-        if not hasattr(self, 'config_fixture'):
-            raise Exception("Functional tests base class can't be used "
-                            "directly first you should define a test class "
-                            "backend wrapper to init the related "
-                            "config fixture")
+        super().setUp()
+
+        self.conf = self.config_fixture.conf
+
         self.region = cache.create_region()
-        cache.configure_cache_region(self.config_fixture.conf, self.region)
         self.region_kwargs = cache.create_region(
             function=cache.kwarg_function_key_generator
         )
-        cache.configure_cache_region(
-            self.config_fixture.conf,
-            self.region_kwargs
-        )
+
+        cache.configure_cache_region(self.conf, self.region)
+        cache.configure_cache_region(self.conf, self.region_kwargs)
+
+    @property
+    def config_fixture(self):
+        if not hasattr(self, "_config_fixture"):
+            self._config_fixture = self.useFixture(fixture.Config())
+
+            # default config for all tests
+            self._config_fixture.config(
+                group="cache",
+                enabled=True,
+            )
+
+        return self._config_fixture
 
     def test_backend_get_missing_data(self):
         random_key = uuidutils.generate_uuid(dashed=False)

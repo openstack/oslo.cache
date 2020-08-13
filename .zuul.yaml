@@ -1,3 +1,12 @@
+## Functional Tests env vars
+#
+# PIFPAF_DAEMON:
+#   The binary to be installed by bindep filtered with
+#   [tests-functional-{PIFPAF_DAEMON}] and executed by pifpaf.
+#
+# OSLO_BACKEND:
+#   The functional test directory to pass to STESTR_TEST_PATH
+
 - job:
     name: oslo.cache-functional
     parent: openstack-tox
@@ -12,9 +21,21 @@
     vars:
       tox_environment:
         PIFPAF_DAEMON: etcd
-        # The next env var correspond to the functional test
-        # directory to pass to STESTR_TEST_PATH
         OSLO_BACKEND: etcd3gw
+
+- job:
+    name: oslo.cache-functional-memcached
+    parent: oslo.cache-functional
+    vars:
+      tox_environment:
+        PIFPAF_DAEMON: memcached
+
+- job:
+    name: oslo.cache-functional-dogpile.cache.bmemcached
+    parent: oslo.cache-functional-memcached
+    vars:
+      tox_environment:
+          OSLO_BACKEND: dogpile_cache_bmemcached
 
 - project:
     templates:
@@ -28,3 +49,4 @@
     check:
       jobs:
         - oslo.cache-functional-etcd3gw
+        - oslo.cache-functional-dogpile.cache.bmemcached

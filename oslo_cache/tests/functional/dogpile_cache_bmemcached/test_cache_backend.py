@@ -1,4 +1,4 @@
-#    Copyright 2020 OpenStack Foundation
+#    Copyright 2020 Red Hat, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -15,12 +15,12 @@
 from oslo_cache.tests.functional import test_base
 
 
-class TestEtcdCacheBackend(test_base.BaseTestCaseCacheBackend):
+class TestDogpileCacheBMemcachedBackend(test_base.BaseTestCaseCacheBackend):
     def setUp(self):
         self.config_fixture.config(
-            group='cache',
-            backend='oslo_cache.etcd3gw',
-            backend_argument=['host:127.0.0.1', 'port:2379']
+            group="cache",
+            backend="dogpile.cache.bmemcached",
+            memcache_servers="localhost:11212",
         )
 
         # NOTE(hberaud): super must be called after all to ensure that
