@@ -140,9 +140,9 @@ def _build_cache_config(conf):
     # backends. Use setdefault for url to support old-style setting through
     # backend_argument=url:127.0.0.1:11211
     #
-    # NOTE(morgan): Explicitly set flush_on_reconnect for pooled
-    # connections. This should ensure that stale data is never consumed
-    # from a server that pops in/out due to a network partition
+    # NOTE(morgan): If requested by config, 'flush_on_reconnect' will be set
+    # for pooled connections. This can ensure that stale data is never
+    # consumed from a server that pops in/out due to a network partition
     # or disconnect.
     #
     # See the help from python-memcached:
