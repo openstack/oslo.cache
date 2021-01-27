@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Added a new memcached driver that uses pymemcache through dogpile.cache.

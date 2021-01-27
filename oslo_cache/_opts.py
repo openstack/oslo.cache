@@ -38,6 +38,7 @@ FILE_OPTIONS = {
                             'oslo_cache.dict',
                             'oslo_cache.mongo',
                             'oslo_cache.etcd3gw',
+                            'dogpile.cache.pymemcache',
                             'dogpile.cache.memcached',
                             'dogpile.cache.pylibmc',
                             'dogpile.cache.bmemcached',

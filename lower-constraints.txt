@@ -6,7 +6,7 @@ cliff==3.1.0
 cmd2==0.8.9
 debtcollector==2.1.0
 decorator==4.4.2
-dogpile.cache==1.0.2
+dogpile.cache==1.1.2
 entrypoints==0.3
 etcd3gw==0.2.0
 extras==1.0.0
@@ -37,6 +37,7 @@ pifpaf==0.10.0
 prettytable==0.7.2
 pycparser==2.18
 pyinotify==0.9.6
+pymemcache==3.4.0
 pymongo==3.0.2
 pyparsing==2.2.0
 pyperclip==1.8.0
