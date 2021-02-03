@@ -352,6 +352,36 @@ class CacheRegionTest(test_cache.BaseTestCase):
                 config_dict['test_prefix.arguments.tls_context'],
             )
 
+    def test_cache_dictionary_config_builder_flush_on_reconnect_enabled(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='oslo_cache.dict',
+                                   memcache_pool_flush_on_reconnect=True)
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertTrue(self.config_fixture.conf.cache.
+                        memcache_pool_flush_on_reconnect)
+        self.assertTrue(config_dict['test_prefix.arguments'
+                                    '.pool_flush_on_reconnect'])
+
+    def test_cache_dictionary_config_builder_flush_on_reconnect_disabled(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='oslo_cache.dict',
+                                   memcache_pool_flush_on_reconnect=False)
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertFalse(self.config_fixture.conf.cache.
+                         memcache_pool_flush_on_reconnect)
+        self.assertFalse(config_dict['test_prefix.arguments'
+                                     '.pool_flush_on_reconnect'])
+
     def test_cache_debug_proxy(self):
         single_value = 'Test Value'
         single_key = 'testkey'
