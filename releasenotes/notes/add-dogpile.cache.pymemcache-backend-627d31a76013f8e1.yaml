@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Added a new memcached driver that uses pymemcache through dogpile.cache.
+
+    If willing to use this driver, make sure you have both
+    dogpile.cache>=1.1.2 and pymemcache>=3.4.0 installed.
