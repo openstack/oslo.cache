@@ -12,10 +12,33 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import dogpile
+
 from oslo_config import cfg
 
 
 _DEFAULT_BACKEND = 'dogpile.cache.null'
+
+_backend_choices = [
+    'oslo_cache.memcache_pool',
+    'oslo_cache.dict',
+    'oslo_cache.mongo',
+    'oslo_cache.etcd3gw',
+    'dogpile.cache.memcached',
+    'dogpile.cache.pylibmc',
+    'dogpile.cache.bmemcached',
+    'dogpile.cache.dbm',
+    'dogpile.cache.redis',
+    'dogpile.cache.memory',
+    'dogpile.cache.memory_pickle',
+    'dogpile.cache.null'
+]
+
+# NOTE(moguimar): dogpile.cache.pymemcache is currently the best
+# driver for using Memcached with TLS. This backport is intent for
+# security purposes.
+if dogpile.__version__ >= '1.1.2':
+    _backend_choices.append('dogpile.cache.pymemcache')
 
 FILE_OPTIONS = {
     'cache': [
@@ -34,18 +57,7 @@ FILE_OPTIONS = {
         # prevent issues with the memory cache ending up in "production"
         # unintentionally, we register a no-op as the default caching backend.
         cfg.StrOpt('backend', default=_DEFAULT_BACKEND,
-                   choices=['oslo_cache.memcache_pool',
-                            'oslo_cache.dict',
-                            'oslo_cache.mongo',
-                            'oslo_cache.etcd3gw',
-                            'dogpile.cache.memcached',
-                            'dogpile.cache.pylibmc',
-                            'dogpile.cache.bmemcached',
-                            'dogpile.cache.dbm',
-                            'dogpile.cache.redis',
-                            'dogpile.cache.memory',
-                            'dogpile.cache.memory_pickle',
-                            'dogpile.cache.null'],
+                   choices=_backend_choices,
                    help='Cache backend module. For eventlet-based or '
                    'environments with hundreds of threaded servers, Memcache '
                    'with pooling (oslo_cache.memcache_pool) is recommended. '
