@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import collections
+import collections.abc
 import copy
 import functools
 
@@ -116,7 +116,7 @@ class MockCollection(object):
     def find_one(self, spec_or_id=None, *args, **kwargs):
         if spec_or_id is None:
             spec_or_id = {}
-        if not isinstance(spec_or_id, collections.Mapping):
+        if not isinstance(spec_or_id, collections.abc.Mapping):
             spec_or_id = {'_id': spec_or_id}
 
         try:
