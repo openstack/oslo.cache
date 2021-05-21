@@ -16,7 +16,6 @@
 
 from __future__ import absolute_import
 from dogpile.cache import api
-import etcd3gw
 
 from oslo_cache import core
 from oslo_serialization import jsonutils
@@ -42,6 +41,8 @@ class Etcd3gwCacheBackend(api.CacheBackend):
         self.host = arguments.get('host', self.DEFAULT_HOST)
         self.port = arguments.get('port', self.DEFAULT_PORT)
         self.timeout = int(arguments.get('timeout', self.DEFAULT_TIMEOUT))
+        # module etcd3gw is only required when etcd3gw backend is used
+        import etcd3gw
         self._client = etcd3gw.client(host=self.host,
                                       port=self.port,
                                       timeout=self.timeout)
