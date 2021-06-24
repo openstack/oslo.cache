@@ -318,6 +318,45 @@ class CacheRegionTest(test_cache.BaseTestCase):
                 config_dict['test_prefix.arguments.tls_context'],
             )
 
+    @mock.patch('oslo_cache.core._LOG')
+    def test_cache_dictionary_config_builder_fips_mode_supported(self, log):
+        """Validate the FIPS mode is supported."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='oslo_cache.dict',
+                                   tls_enabled=True,
+                                   enforce_fips_mode=True)
+
+        # Ensure that we emulate FIPS_mode even if it doesn't exist
+        with mock.patch.object(ssl, 'FIPS_mode',
+                               create=True, return_value=True):
+            # Ensure that we are able to set FIPS_mode
+            with mock.patch.object(ssl, 'FIPS_mode_set', create=True):
+
+                cache._build_cache_config(self.config_fixture.conf)
+                log.info.assert_called_once_with(
+                    "Enforcing the use of the OpenSSL FIPS mode")
+
+    @mock.patch('oslo_cache.core._LOG')
+    def test_cache_dictionary_config_builder_fips_mode_unsupported(self, log):
+        """Validate the FIPS mode is not supported."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='oslo_cache.dict',
+                                   tls_enabled=True,
+                                   enforce_fips_mode=True)
+
+        with mock.patch.object(cache, 'ssl') as ssl_:
+            del ssl_.FIPS_mode
+
+            # We do this test only if FIPS mode is not supported to
+            # ensure that we hard fail.
+            self.assertRaises(exception.ConfigurationError,
+                              cache._build_cache_config,
+                              self.config_fixture.conf,)
+
     def test_cache_dictionary_config_builder_tls_enabled_with_config(self):
         """Validate the backend is reset to default if caching is disabled."""
         self.config_fixture.config(group='cache',

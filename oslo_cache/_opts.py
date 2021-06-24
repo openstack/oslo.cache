@@ -217,6 +217,15 @@ FILE_OPTIONS = {
             default=60,
             help='Time in seconds before attempting to add a node '
             'back in the pool in the HashClient\'s internal mechanisms.'),
+        cfg.BoolOpt('enforce_fips_mode',
+                    default=False,
+                    help='Global toggle for enforcing the OpenSSL FIPS mode. '
+                    'This feature requires Python support. '
+                    'This is available in Python 3.9 in all '
+                    'environments and may have been backported to older '
+                    'Python versions on select environments. If the Python '
+                    'executable used does not support OpenSSL FIPS mode, '
+                    'an exception will be raised.'),
     ],
 }
 

@@ -172,6 +172,18 @@ def _build_cache_config(conf):
         _LOG.debug('Oslo Cache TLS - CA: %s', conf.cache.tls_cafile)
         tls_context = ssl.create_default_context(cafile=conf.cache.tls_cafile)
 
+        if conf.cache.enforce_fips_mode:
+            if hasattr(ssl, 'FIPS_mode'):
+                _LOG.info("Enforcing the use of the OpenSSL FIPS mode")
+                ssl.FIPS_mode_set(1)
+            else:
+                raise exception.ConfigurationError(
+                    "OpenSSL FIPS mode is not supported by your Python "
+                    "version. You must either change the Python executable "
+                    "used to a version with FIPS mode support or disable "
+                    "FIPS mode by setting the '[cache] enforce_fips_mode' "
+                    "configuration option to 'False'.")
+
         if conf.cache.tls_certfile is not None:
             _LOG.debug('Oslo Cache TLS - cert: %s', conf.cache.tls_certfile)
             _LOG.debug('Oslo Cache TLS - key: %s', conf.cache.tls_keyfile)

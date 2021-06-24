@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Adding a new option, ``[cache] enforce_fips_mode``, to the rabbitmq driver
+    to enforce the OpenSSL FIPS mode if supported by the version of Python.
+security:
+  - |
+    We are now able to enforce the OpenSSL FIPS mode by using
+    ``[cache] enforce_fips_mode``.
