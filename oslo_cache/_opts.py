@@ -137,7 +137,7 @@ FILE_OPTIONS = {
         cfg.StrOpt('tls_keyfile',
                    default=None,
                    help='Path to a single file containing the client\'s'
-                   ' private key in. Otherwhise the private key will be taken'
+                   ' private key in. Otherwise the private key will be taken'
                    ' from the file specified in tls_certfile. If tls_enabled'
                    ' is False, this option is ignored.'),
         cfg.StrOpt('tls_allowed_ciphers',
