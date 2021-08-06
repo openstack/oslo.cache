@@ -172,6 +172,22 @@ FILE_OPTIONS = {
             help='The maximum number of keepalive probes TCP should '
             'send before dropping the connection. Should be a '
             'positive integer greater than zero.'),
+        cfg.BoolOpt(
+            'enable_retry_client',
+            default=False,
+            help='Enable retry client mechanisms to handle failure. '
+            'Those mechanisms can be used to wrap all kind of pymemcache '
+            'clients. The wrapper allows you to define how many attempts '
+            'to make and how long to wait between attemots.'),
+        cfg.IntOpt(
+            'retry_attempts',
+            min=1,
+            default=2,
+            help='Number of times to attempt an action before failing.'),
+        cfg.FloatOpt(
+            'retry_delay',
+            default=0,
+            help='Number of seconds to sleep between each attempt.'),
     ],
 }
 
