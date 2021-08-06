@@ -190,6 +190,25 @@ def _build_cache_config(conf):
         # oslo.cache and pymemcache.
         conf_dict['%s.arguments.socket_keepalive' % prefix] = socket_keepalive
 
+    # NOTE(hberaud): The pymemcache library comes with retry mechanisms that
+    # can be used to wrap all kind of pymemcache clients. The retry wrapper
+    # allow you to define how many attempts to make and how long to wait
+    # between attempts. The section below will pass our config
+    # to dogpile.cache to setup the pymemcache retry client wrapper.
+    if conf.cache.enable_retry_client:
+        if conf.cache.backend != 'dogpile.cache.pymemcache':
+            msg = _(
+                "Retry client is only supported by the "
+                "'dogpile.cache.pymemcache' backend."
+            )
+            raise exception.ConfigurationError(msg)
+        import pymemcache
+        conf_dict['%s.arguments.enable_retry_client' % prefix] = True
+        conf_dict['%s.arguments.retry_attempts' % prefix] = \
+            conf.cache.retry_attempts
+        conf_dict['%s.arguments.retry_delay' % prefix] = \
+            conf.cache.retry_delay
+
     return conf_dict
 
 
