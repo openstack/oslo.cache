@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    New options (``enable_socket_keepalive``, ``socket_keepalive_idle``,
+    ``socket_keepalive_interval``, ``socket_keepalive_count``) allow to use
+    and configure pymemcache's socket keepalive capabilities.
