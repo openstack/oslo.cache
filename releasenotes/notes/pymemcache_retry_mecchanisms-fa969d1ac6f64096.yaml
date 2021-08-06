@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Add new options (``enable_retry_client``, ``retry_attempts``,
+    ``retry_delay``) to add retry mechanisms to the pymemcache backend.
