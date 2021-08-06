@@ -437,6 +437,83 @@ class CacheRegionTest(test_cache.BaseTestCase):
             config_dict['test_prefix.arguments.socket_keepalive'].cnt
         )
 
+    def test_cache_pymemcache_retry_enabled_with_wrong_backend(self):
+        """Validate we build a config without the retry option when retry
+        is disabled.
+        """
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='oslo_cache.dict',
+                                   enable_retry_client=True,
+                                   retry_attempts=2,
+                                   retry_delay=2)
+
+        self.assertRaises(
+            exception.ConfigurationError,
+            cache._build_cache_config,
+            self.config_fixture.conf
+        )
+
+    def test_cache_pymemcache_retry_disabled(self):
+        """Validate we build a config without the retry option when retry
+        is disabled.
+        """
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.pymemcache',
+                                   retry_attempts=2,
+                                   retry_delay=2)
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        opts = ['enable_retry_client', 'retry_attempts', 'retry_delay']
+
+        for el in opts:
+            self.assertNotIn('test_prefix.arguments.{}'.format(el),
+                             config_dict)
+
+    def test_cache_pymemcache_retry_enabled(self):
+        """Validate we build a dogpile.cache dict config with retry."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.pymemcache',
+                                   enable_retry_client=True)
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        opts = ['enable_retry_client', 'retry_attempts', 'retry_delay']
+
+        for el in opts:
+            self.assertIn('test_prefix.arguments.{}'.format(el), config_dict)
+
+    def test_cache_pymemcache_retry_with_opts(self):
+        """Validate we build a valid config for the retry client."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.pymemcache',
+                                   enable_retry_client=True,
+                                   retry_attempts=42,
+                                   retry_delay=42)
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertTrue(
+            self.config_fixture.conf.cache.enable_retry_client)
+
+        self.assertEqual(
+            config_dict['test_prefix.arguments.retry_attempts'],
+            42
+        )
+
+        self.assertEqual(
+            config_dict['test_prefix.arguments.retry_delay'],
+            42
+        )
+
     def test_cache_dictionary_config_builder_flush_on_reconnect_enabled(self):
         """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
