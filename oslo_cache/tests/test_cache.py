@@ -16,12 +16,18 @@
 import copy
 import ssl
 import time
+from unittest import skipIf
 
+import dogpile
 from dogpile.cache import proxy
 import mock
 from oslo_config import cfg
 from oslo_config import fixture as config_fixture
 from oslo_utils import uuidutils
+try:
+    import pymemcache
+except ImportError:
+    pymemcache = None
 from oslotest import base
 
 from oslo_cache import _opts
@@ -365,6 +371,110 @@ class CacheRegionTest(BaseTestCase):
                 fake_context,
                 config_dict['test_prefix.arguments.tls_context'],
             )
+
+    def test_cache_pymemcache_socket_kalive_enabled_with_wrong_backend(self):
+        """Validate we build a config without the retry option when retry
+        is disabled.
+        """
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='oslo_cache.dict',
+                                   enable_socket_keepalive=True)
+
+        self.assertRaises(
+            exception.ConfigurationError,
+            cache._build_cache_config,
+            self.config_fixture.conf
+        )
+
+    @skipIf(dogpile.__version__ < '1.1.4', "the dogpile.cache.pymemcache "
+            "socket keepalive is not supported before dogpile.cache 1.1.4")
+    @skipIf(pymemcache is None, "the dogpile.cache.pymemcache "
+            "socket keepalive is not supported")
+    @skipIf(getattr(pymemcache, 'KeepaliveOpts', None) is None,
+            "the dogpile.cache.pymemcache socket keepalive is not supported")
+    def test_cache_pymemcache_socket_keepalive_disabled(self):
+        """Validate we build a dogpile.cache dict config without keepalive."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.pymemcache',
+                                   socket_keepalive_idle=2,
+                                   socket_keepalive_interval=2,
+                                   socket_keepalive_count=2)
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertFalse(
+            self.config_fixture.conf.cache.enable_socket_keepalive)
+        self.assertNotIn(
+            'test_prefix.arguments.socket_keepalive', config_dict)
+
+    @skipIf(dogpile.__version__ < '1.1.4', "the dogpile.cache.pymemcache "
+            "socket keepalive is not supported before dogpile.cache 1.1.4")
+    @skipIf(pymemcache is None, "the dogpile.cache.pymemcache "
+            "socket keepalive is not supported")
+    @skipIf(getattr(pymemcache, 'KeepaliveOpts', None) is None,
+            "the dogpile.cache.pymemcache socket keepalive is not supported")
+    def test_cache_pymemcache_socket_keepalive_enabled(self):
+        """Validate we build a dogpile.cache dict config with keepalive."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.pymemcache',
+                                   enable_socket_keepalive=True)
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertTrue(
+            self.config_fixture.conf.cache.enable_socket_keepalive)
+
+        from pymemcache import KeepaliveOpts
+        self.assertIsInstance(
+            config_dict['test_prefix.arguments.socket_keepalive'],
+            KeepaliveOpts
+        )
+
+    @skipIf(dogpile.__version__ < '1.1.4', "the dogpile.cache.pymemcache "
+            "socket keepalive is not supported before dogpile.cache 1.1.4")
+    @skipIf(pymemcache is None, "the dogpile.cache.pymemcache "
+            "socket keepalive is not supported")
+    @skipIf(getattr(pymemcache, 'KeepaliveOpts', None) is None,
+            "the dogpile.cache.pymemcache socket keepalive is not supported")
+    def test_cache_pymemcache_socket_keepalive_with_config(self):
+        """Validate we build a socket keepalive with the right config."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.pymemcache',
+                                   enable_socket_keepalive=True,
+                                   socket_keepalive_idle=12,
+                                   socket_keepalive_interval=38,
+                                   socket_keepalive_count=42)
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertTrue(
+            self.config_fixture.conf.cache.enable_socket_keepalive)
+
+        from pymemcache import KeepaliveOpts
+        self.assertTrue(
+            config_dict['test_prefix.arguments.socket_keepalive'],
+            KeepaliveOpts
+        )
+        self.assertEqual(
+            12,
+            config_dict['test_prefix.arguments.socket_keepalive'].idle
+        )
+        self.assertEqual(
+            38,
+            config_dict['test_prefix.arguments.socket_keepalive'].intvl
+        )
+        self.assertEqual(
+            42,
+            config_dict['test_prefix.arguments.socket_keepalive'].cnt
+        )
 
     def test_cache_debug_proxy(self):
         single_value = 'Test Value'

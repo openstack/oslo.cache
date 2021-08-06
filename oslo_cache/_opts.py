@@ -143,6 +143,32 @@ FILE_OPTIONS = {
                    ' the TLS context. It should be a string in the OpenSSL'
                    ' cipher list format. If not specified, all OpenSSL enabled'
                    ' ciphers will be available.'),
+        cfg.BoolOpt(
+            'enable_socket_keepalive',
+            default=False,
+            help="Global toggle for the socket keepalive of "
+            "dogpile's pymemcache backend"),
+        cfg.IntOpt(
+            'socket_keepalive_idle',
+            default=1,
+            min=0,
+            help='The time (in seconds) the connection needs to '
+            'remain idle before TCP starts sending keepalive probes. '
+            'Should be a positive integer most greater than zero.'),
+        cfg.IntOpt(
+            'socket_keepalive_interval',
+            default=1,
+            min=0,
+            help='The time (in seconds) between individual keepalive '
+            'probes. Should be a positive integer greater '
+            'than zero.'),
+        cfg.IntOpt(
+            'socket_keepalive_count',
+            default=1,
+            min=0,
+            help='The maximum number of keepalive probes TCP should '
+            'send before dropping the connection. Should be a '
+            'positive integer greater than zero.'),
     ],
 }
 
