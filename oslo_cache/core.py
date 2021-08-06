@@ -188,6 +188,29 @@ def _build_cache_config(conf):
 
         conf_dict['%s.arguments.tls_context' % prefix] = tls_context
 
+    # NOTE(hberaud): Pymemcache support socket keepalive, If it is enable in
+    # our config then configure it to enable this feature.
+    # The socket keepalive feature means that pymemcache will be able to check
+    # your connected socket and determine whether the connection is still up
+    # and running or if it has broken.
+    # This could be used by users who want to handle fine grained failures.
+    if conf.cache.enable_socket_keepalive:
+        if conf.cache.backend != 'dogpile.cache.pymemcache':
+            msg = _(
+                "Socket keepalive is only supported by the "
+                "'dogpile.cache.pymemcache' backend."
+            )
+            raise exception.ConfigurationError(msg)
+        import pymemcache
+        socket_keepalive = pymemcache.KeepaliveOpts(
+            idle=conf.cache.socket_keepalive_idle,
+            intvl=conf.cache.socket_keepalive_interval,
+            cnt=conf.cache.socket_keepalive_count)
+        # As with the TLS context above, the config dict below will be
+        # consumed by dogpile.cache that will be used as a proxy between
+        # oslo.cache and pymemcache.
+        conf_dict['%s.arguments.socket_keepalive' % prefix] = socket_keepalive
+
     return conf_dict
 
 

@@ -21,6 +21,7 @@ from unittest import mock
 from dogpile.cache import proxy
 from oslo_config import cfg
 from oslo_utils import uuidutils
+from pymemcache import KeepaliveOpts
 
 from oslo_cache import _opts
 from oslo_cache import core as cache
@@ -351,6 +352,90 @@ class CacheRegionTest(test_cache.BaseTestCase):
                 fake_context,
                 config_dict['test_prefix.arguments.tls_context'],
             )
+
+    def test_cache_pymemcache_socket_kalive_enabled_with_wrong_backend(self):
+        """Validate we build a config without the retry option when retry
+        is disabled.
+        """
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='oslo_cache.dict',
+                                   enable_socket_keepalive=True)
+
+        self.assertRaises(
+            exception.ConfigurationError,
+            cache._build_cache_config,
+            self.config_fixture.conf
+        )
+
+    def test_cache_pymemcache_socket_keepalive_disabled(self):
+        """Validate we build a dogpile.cache dict config without keepalive."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.pymemcache',
+                                   socket_keepalive_idle=2,
+                                   socket_keepalive_interval=2,
+                                   socket_keepalive_count=2)
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertFalse(
+            self.config_fixture.conf.cache.enable_socket_keepalive)
+        self.assertNotIn(
+            'test_prefix.arguments.socket_keepalive', config_dict)
+
+    def test_cache_pymemcache_socket_keepalive_enabled(self):
+        """Validate we build a dogpile.cache dict config with keepalive."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.pymemcache',
+                                   enable_socket_keepalive=True)
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertTrue(
+            self.config_fixture.conf.cache.enable_socket_keepalive)
+
+        self.assertIsInstance(
+            config_dict['test_prefix.arguments.socket_keepalive'],
+            KeepaliveOpts
+        )
+
+    def test_cache_pymemcache_socket_keepalive_with_config(self):
+        """Validate we build a socket keepalive with the right config."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.pymemcache',
+                                   enable_socket_keepalive=True,
+                                   socket_keepalive_idle=12,
+                                   socket_keepalive_interval=38,
+                                   socket_keepalive_count=42)
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertTrue(
+            self.config_fixture.conf.cache.enable_socket_keepalive)
+
+        self.assertTrue(
+            config_dict['test_prefix.arguments.socket_keepalive'],
+            KeepaliveOpts
+        )
+        self.assertEqual(
+            12,
+            config_dict['test_prefix.arguments.socket_keepalive'].idle
+        )
+        self.assertEqual(
+            38,
+            config_dict['test_prefix.arguments.socket_keepalive'].intvl
+        )
+        self.assertEqual(
+            42,
+            config_dict['test_prefix.arguments.socket_keepalive'].cnt
+        )
 
     def test_cache_dictionary_config_builder_flush_on_reconnect_enabled(self):
         """Validate we build a sane dogpile.cache dictionary config."""
