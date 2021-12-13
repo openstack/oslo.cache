@@ -261,8 +261,6 @@ def pymongo_override():
     import pymongo
     if pymongo.MongoClient is not MockMongoClient:
         pymongo.MongoClient = MockMongoClient
-    if pymongo.MongoReplicaSetClient is not MockMongoClient:
-        pymongo.MongoClient = MockMongoClient
 
 
 class MyTransformer(mongo.BaseTransform):
