@@ -260,13 +260,6 @@ class MemcacheClientPool(ConnectionPool):
                             self.urls[i], host.deaduntil)
                     else:
                         self._hosts_deaduntil[i] = 0
-            # If all hosts are dead we should forget that they're dead. This
-            # way we won't get completely shut off until dead_retry seconds
-            # pass, but will be checking servers as frequent as we can (over
-            # way smaller socket_timeout)
-            if all(deaduntil > now for deaduntil in self._hosts_deaduntil):
-                self._debug_logger('All hosts are dead. Marking them as live.')
-                self._hosts_deaduntil[:] = [0] * len(self._hosts_deaduntil)
         finally:
             # super() cannot be used here because Queue in stdlib is an
             # old-style class
