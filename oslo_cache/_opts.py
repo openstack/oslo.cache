@@ -185,6 +185,23 @@ FILE_OPTIONS = {
             'retry_delay',
             default=0,
             help='Number of seconds to sleep between each attempt.'),
+        cfg.IntOpt(
+            'hashclient_retry_attempts',
+            min=1,
+            default=2,
+            help='Amount of times a client should be tried '
+            'before it is marked dead and removed from the pool in '
+            'the HashClient\'s internal mechanisms.'),
+        cfg.FloatOpt(
+            'hashclient_retry_delay',
+            default=1,
+            help='Time in seconds that should pass between '
+            'retry attempts in the HashClient\'s internal mechanisms.'),
+        cfg.FloatOpt(
+            'dead_timeout',
+            default=60,
+            help='Time in seconds before attempting to add a node '
+            'back in the pool in the HashClient\'s internal mechanisms.'),
     ],
 }
 
