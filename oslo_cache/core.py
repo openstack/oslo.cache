@@ -208,6 +208,12 @@ def _build_cache_config(conf):
             conf.cache.retry_attempts
         conf_dict['%s.arguments.retry_delay' % prefix] = \
             conf.cache.retry_delay
+        conf_dict['%s.arguments.hashclient_retry_attempts' % prefix] = \
+            conf.cache.hashclient_retry_attempts
+        conf_dict['%s.arguments.hashclient_retry_delay' % prefix] = \
+            conf.cache.hashclient_retry_delay
+        conf_dict['%s.arguments.dead_timeout' % prefix] = \
+            conf.cache.dead_timeout
 
     return conf_dict
 

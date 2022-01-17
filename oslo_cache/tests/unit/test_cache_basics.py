@@ -531,6 +531,51 @@ class CacheRegionTest(test_cache.BaseTestCase):
             42
         )
 
+    @skipIf(dogpile.__version__ >= '1.1.5', "the dogpile.cache.pymemcache "
+            "retry extra config are not supported before dogpile.cache 1.1.5")
+    def test_cache_pymemcache_retry_with_extra_opts(self):
+        """Validate we build a valid config for the retry client."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.pymemcache',
+                                   enable_retry_client=True,
+                                   retry_attempts=42,
+                                   retry_delay=42,
+                                   hashclient_retry_attempts=100,
+                                   hashclient_retry_delay=100,
+                                   dead_timeout=100)
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertTrue(
+            self.config_fixture.conf.cache.enable_retry_client)
+
+        self.assertEqual(
+            config_dict['test_prefix.arguments.retry_attempts'],
+            42
+        )
+
+        self.assertEqual(
+            config_dict['test_prefix.arguments.retry_delay'],
+            42
+        )
+
+        self.assertEqual(
+            config_dict['test_prefix.arguments.hashclient_retry_attempts'],
+            100
+        )
+
+        self.assertEqual(
+            config_dict['test_prefix.arguments.hashclient_retry_delay'],
+            100
+        )
+
+        self.assertEqual(
+            config_dict['test_prefix.arguments.dead_timeout'],
+            100
+        )
+
     def test_cache_debug_proxy(self):
         single_value = 'Test Value'
         single_key = 'testkey'
