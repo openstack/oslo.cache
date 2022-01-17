@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Add new options (``hashclient_retry_attempts``, ``hashclient_retry_delay``,
+    ``dead_timeout``) to allow to configure pymemcache's HashClient use
+    through dogpile.cache's pymemcache backend. Those options expose
+    pymemcache params that allow to configure the failover for memcached
+    cluster.
