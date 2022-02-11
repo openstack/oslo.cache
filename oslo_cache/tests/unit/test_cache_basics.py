@@ -281,7 +281,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.config_fixture.config(group='cache',
                                    enabled=True,
                                    config_prefix='test_prefix',
-                                   backend='oslo_cache.dict',
+                                   backend='dogpile.cache.pymemcache',
                                    tls_cafile='path_to_ca_file',
                                    tls_keyfile='path_to_key_file',
                                    tls_certfile='path_to_cert_file',
@@ -299,7 +299,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.config_fixture.config(group='cache',
                                    enabled=True,
                                    config_prefix='test_prefix',
-                                   backend='oslo_cache.dict',
+                                   backend='dogpile.cache.pymemcache',
                                    tls_enabled=True)
 
         fake_context = mock.Mock()
@@ -323,7 +323,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.config_fixture.config(group='cache',
                                    enabled=True,
                                    config_prefix='test_prefix',
-                                   backend='oslo_cache.dict',
+                                   backend='dogpile.cache.pymemcache',
                                    tls_enabled=True,
                                    tls_cafile='path_to_ca_file',
                                    tls_keyfile='path_to_key_file',
