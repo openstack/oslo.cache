@@ -23,6 +23,10 @@ import dogpile
 from dogpile.cache import proxy
 from oslo_config import cfg
 from oslo_utils import uuidutils
+try:
+    import pymemcache
+except ImportError:
+    pymemcache = None
 
 from oslo_cache import _opts
 from oslo_cache import core as cache
@@ -370,8 +374,12 @@ class CacheRegionTest(test_cache.BaseTestCase):
             self.config_fixture.conf
         )
 
-    @skipIf(dogpile.__version__ >= '1.1.4', "the dogpile.cache.pymemcache "
+    @skipIf(dogpile.__version__ < '1.1.4', "the dogpile.cache.pymemcache "
             "socket keepalive is not supported before dogpile.cache 1.1.4")
+    @skipIf(pymemcache is None, "the dogpile.cache.pymemcache "
+            "socket keepalive is not supported")
+    @skipIf(getattr(pymemcache, 'KeepaliveOpts', None) is None,
+            "the dogpile.cache.pymemcache socket keepalive is not supported")
     def test_cache_pymemcache_socket_keepalive_disabled(self):
         """Validate we build a dogpile.cache dict config without keepalive."""
         self.config_fixture.config(group='cache',
@@ -389,8 +397,12 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertNotIn(
             'test_prefix.arguments.socket_keepalive', config_dict)
 
-    @skipIf(dogpile.__version__ >= '1.1.4', "the dogpile.cache.pymemcache "
+    @skipIf(dogpile.__version__ < '1.1.4', "the dogpile.cache.pymemcache "
             "socket keepalive is not supported before dogpile.cache 1.1.4")
+    @skipIf(pymemcache is None, "the dogpile.cache.pymemcache "
+            "socket keepalive is not supported")
+    @skipIf(getattr(pymemcache, 'KeepaliveOpts', None) is None,
+            "the dogpile.cache.pymemcache socket keepalive is not supported")
     def test_cache_pymemcache_socket_keepalive_enabled(self):
         """Validate we build a dogpile.cache dict config with keepalive."""
         self.config_fixture.config(group='cache',
@@ -410,8 +422,12 @@ class CacheRegionTest(test_cache.BaseTestCase):
             KeepaliveOpts
         )
 
-    @skipIf(dogpile.__version__ >= '1.1.4', "the dogpile.cache.pymemcache "
+    @skipIf(dogpile.__version__ < '1.1.4', "the dogpile.cache.pymemcache "
             "socket keepalive is not supported before dogpile.cache 1.1.4")
+    @skipIf(pymemcache is None, "the dogpile.cache.pymemcache "
+            "socket keepalive is not supported")
+    @skipIf(getattr(pymemcache, 'KeepaliveOpts', None) is None,
+            "the dogpile.cache.pymemcache socket keepalive is not supported")
     def test_cache_pymemcache_socket_keepalive_with_config(self):
         """Validate we build a socket keepalive with the right config."""
         self.config_fixture.config(group='cache',
@@ -446,8 +462,12 @@ class CacheRegionTest(test_cache.BaseTestCase):
             config_dict['test_prefix.arguments.socket_keepalive'].cnt
         )
 
-    @skipIf(dogpile.__version__ >= '1.1.4', "the dogpile.cache.pymemcache "
+    @skipIf(dogpile.__version__ < '1.1.4', "the dogpile.cache.pymemcache "
             "retry options are not supported before dogpile.cache 1.1.4")
+    @skipIf(pymemcache is None, "the dogpile.cache.pymemcache "
+            "socket keepalive is not supported")
+    @skipIf(getattr(pymemcache, 'KeepaliveOpts', None) is None,
+            "the dogpile.cache.pymemcache socket keepalive is not supported")
     def test_cache_pymemcache_retry_enabled_with_wrong_backend(self):
         """Validate we build a config without the retry option when retry
         is disabled.
@@ -466,7 +486,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
             self.config_fixture.conf
         )
 
-    @skipIf(dogpile.__version__ >= '1.1.4', "the dogpile.cache.pymemcache "
+    @skipIf(dogpile.__version__ < '1.1.4', "the dogpile.cache.pymemcache "
             "retry options are not supported before dogpile.cache 1.1.4")
     def test_cache_pymemcache_retry_disabled(self):
         """Validate we build a config without the retry option when retry
@@ -487,8 +507,12 @@ class CacheRegionTest(test_cache.BaseTestCase):
             self.assertNotIn('test_prefix.arguments.{}'.format(el),
                              config_dict)
 
-    @skipIf(dogpile.__version__ >= '1.1.4', "the dogpile.cache.pymemcache "
+    @skipIf(dogpile.__version__ < '1.1.4', "the dogpile.cache.pymemcache "
             "retry options are not supported before dogpile.cache 1.1.4")
+    @skipIf(pymemcache is None, "the dogpile.cache.pymemcache "
+            "socket keepalive is not supported")
+    @skipIf(getattr(pymemcache, 'KeepaliveOpts', None) is None,
+            "the dogpile.cache.pymemcache socket keepalive is not supported")
     def test_cache_pymemcache_retry_enabled(self):
         """Validate we build a dogpile.cache dict config with retry."""
         self.config_fixture.config(group='cache',
@@ -504,8 +528,12 @@ class CacheRegionTest(test_cache.BaseTestCase):
         for el in opts:
             self.assertIn('test_prefix.arguments.{}'.format(el), config_dict)
 
-    @skipIf(dogpile.__version__ >= '1.1.4', "the dogpile.cache.pymemcache "
+    @skipIf(dogpile.__version__ < '1.1.4', "the dogpile.cache.pymemcache "
             "retry options are not supported before dogpile.cache 1.1.4")
+    @skipIf(pymemcache is None, "the dogpile.cache.pymemcache "
+            "socket keepalive is not supported")
+    @skipIf(getattr(pymemcache, 'KeepaliveOpts', None) is None,
+            "the dogpile.cache.pymemcache socket keepalive is not supported")
     def test_cache_pymemcache_retry_with_opts(self):
         """Validate we build a valid config for the retry client."""
         self.config_fixture.config(group='cache',
@@ -531,8 +559,12 @@ class CacheRegionTest(test_cache.BaseTestCase):
             42
         )
 
-    @skipIf(dogpile.__version__ >= '1.1.5', "the dogpile.cache.pymemcache "
+    @skipIf(dogpile.__version__ < '1.1.5', "the dogpile.cache.pymemcache "
             "retry extra config are not supported before dogpile.cache 1.1.5")
+    @skipIf(pymemcache is None, "the dogpile.cache.pymemcache "
+            "socket keepalive is not supported")
+    @skipIf(getattr(pymemcache, 'KeepaliveOpts', None) is None,
+            "the dogpile.cache.pymemcache socket keepalive is not supported")
     def test_cache_pymemcache_retry_with_extra_opts(self):
         """Validate we build a valid config for the retry client."""
         self.config_fixture.config(group='cache',
