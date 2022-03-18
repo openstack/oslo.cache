@@ -76,17 +76,18 @@ FILE_OPTIONS = {
                          'to false.'),
         cfg.ListOpt('memcache_servers', default=['localhost:11211'],
                     help='Memcache servers in the format of "host:port". '
-                         '(dogpile.cache.memcached and '
-                         'oslo_cache.memcache_pool backends only). '
-                         'If a given host refer to an IPv6 or a given domain '
-                         'refer to IPv6 then you should prefix the given '
-                         'address with the address family (``inet6``) '
+                         'This is used by backends dependent on Memcached.'
+                         'If ``dogpile.cache.memcached`` or '
+                         '``oslo_cache.memcache_pool`` is used and a given '
+                         'host refer to an IPv6 or a given domain refer to '
+                         'IPv6 then you should prefix the given address with'
+                         'the address family (``inet6``) '
                          '(e.g ``inet6[::1]:11211``, '
                          '``inet6:[fd12:3456:789a:1::1]:11211``, '
                          '``inet6:[controller-0.internalapi]:11211``). '
-                         'If the address family is not given then default '
-                         'address family used will be ``inet`` which '
-                         'correspond to IPv4'),
+                         'If the address family is not given then these '
+                         'backends will use the default ``inet`` address '
+                         'family which corresponds to IPv4'),
         cfg.IntOpt('memcache_dead_retry',
                    default=5 * 60,
                    help='Number of seconds memcached server is considered dead'
