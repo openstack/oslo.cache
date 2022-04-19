@@ -636,7 +636,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
 class UTF8KeyManglerTests(test_cache.BaseTestCase):
 
     def test_key_is_utf8_encoded(self):
-        key = u'fäké1'
+        key = 'fäké1'
         encoded = cache._sha1_mangle_key(key)
         self.assertIsNotNone(encoded)
 

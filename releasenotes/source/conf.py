@@ -58,8 +58,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'oslo.cache Release Notes'
-copyright = u'2016, oslo.cache Developers'
+project = 'oslo.cache Release Notes'
+copyright = '2016, oslo.cache Developers'
 
 # Release notes do not need a version in the title, they span
 # multiple versions.
@@ -208,8 +208,8 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     ('index', 'oslo.cacheReleaseNotes.tex',
-     u'oslo.cache Release Notes Documentation',
-     u'oslo.cache Developers', 'manual'),
+     'oslo.cache Release Notes Documentation',
+     'oslo.cache Developers', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -238,8 +238,8 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'oslo.cacheReleaseNotes',
-     u'oslo.cache Release Notes Documentation',
-     [u'oslo.cache Developers'], 1)
+     'oslo.cache Release Notes Documentation',
+     ['oslo.cache Developers'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -252,8 +252,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     ('index', 'oslo.cacheReleaseNotes',
-     u'oslo.cache Release Notes Documentation',
-     u'oslo.cache Developers', 'oslo.cacheReleaseNotes',
+     'oslo.cache Release Notes Documentation',
+     'oslo.cache Developers', 'oslo.cacheReleaseNotes',
      'One line description of project.',
      'Miscellaneous'),
 ]
