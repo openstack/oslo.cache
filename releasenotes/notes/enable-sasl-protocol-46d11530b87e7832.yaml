@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Add the feature to support SASL for olso.cache to improve the security
+    of authority.

@@ -204,7 +204,14 @@ class MemcacheClientPool(ConnectionPool):
         # old-style class
         ConnectionPool.__init__(self, **kwargs)
         self.urls = urls
-        self._arguments = arguments
+        self._arguments = {
+            'dead_retry': arguments.get('dead_retry', 5 * 60),
+            'socket_timeout': arguments.get('socket_timeout', 3.0),
+            'server_max_value_length':
+                arguments.get('server_max_value_length'),
+            'flush_on_reconnect': arguments.get(
+                'pool_flush_on_reconnect', False),
+        }
         # NOTE(morganfainberg): The host objects expect an int for the
         # deaduntil value. Initialize this at 0 for each host with 0 indicating
         # the host is not dead.

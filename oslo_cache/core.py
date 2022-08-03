@@ -163,7 +163,8 @@ def _build_cache_config(conf):
                          conf.cache.memcache_servers)
     for arg in ('dead_retry', 'socket_timeout', 'pool_maxsize',
                 'pool_unused_timeout', 'pool_connection_get_timeout',
-                'pool_flush_on_reconnect'):
+                'pool_flush_on_reconnect', 'sasl_enabled', 'username',
+                'password'):
         value = getattr(conf.cache, 'memcache_' + arg)
         conf_dict['%s.arguments.%s' % (prefix, arg)] = value
 

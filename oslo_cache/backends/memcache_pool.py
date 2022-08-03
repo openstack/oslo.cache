@@ -19,6 +19,7 @@ import functools
 
 from dogpile.cache.backends import memcached as memcached_backend
 
+from oslo_cache import _bmemcache_pool
 from oslo_cache import _memcache_pool
 
 
@@ -55,20 +56,24 @@ class PooledMemcachedBackend(memcached_backend.MemcachedBackend):
     # Composed from GenericMemcachedBackend's and MemcacheArgs's __init__
     def __init__(self, arguments):
         super(PooledMemcachedBackend, self).__init__(arguments)
-        self.client_pool = _memcache_pool.MemcacheClientPool(
-            self.url,
-            arguments={
-                'dead_retry': arguments.get('dead_retry', 5 * 60),
-                'socket_timeout': arguments.get('socket_timeout', 3.0),
-                'server_max_value_length':
-                    arguments.get('server_max_value_length'),
-                'flush_on_reconnect': arguments.get('pool_flush_on_reconnect',
-                                                    False),
-            },
-            maxsize=arguments.get('pool_maxsize', 10),
-            unused_timeout=arguments.get('pool_unused_timeout', 60),
-            conn_get_timeout=arguments.get('pool_connection_get_timeout', 10),
-        )
+        if arguments.get('sasl_enabled', False):
+            self.client_pool = _bmemcache_pool.BMemcacheClientPool(
+                self.url,
+                arguments,
+                maxsize=arguments.get('pool_maxsize', 10),
+                unused_timeout=arguments.get('pool_unused_timeout', 60),
+                conn_get_timeout=arguments.get('pool_connection_get_timeout',
+                                               10),
+            )
+        else:
+            self.client_pool = _memcache_pool.MemcacheClientPool(
+                self.url,
+                arguments,
+                maxsize=arguments.get('pool_maxsize', 10),
+                unused_timeout=arguments.get('pool_unused_timeout', 60),
+                conn_get_timeout=arguments.get('pool_connection_get_timeout',
+                                               10),
+            )
 
     # Since all methods in backend just call one of methods of client, this
     # lets us avoid need to hack it too much
