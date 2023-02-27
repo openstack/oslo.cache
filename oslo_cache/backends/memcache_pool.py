@@ -19,7 +19,13 @@ import functools
 
 from dogpile.cache.backends import memcached as memcached_backend
 
-from oslo_cache import _bmemcache_pool
+try:
+    from oslo_cache import _bmemcache_pool
+except ImportError as e:
+    if str(e) == "No module named 'bmemcached'":
+        _bmemcache_pool = None
+    else:
+        raise
 from oslo_cache import _memcache_pool
 
 
@@ -57,6 +63,8 @@ class PooledMemcachedBackend(memcached_backend.MemcachedBackend):
     def __init__(self, arguments):
         super(PooledMemcachedBackend, self).__init__(arguments)
         if arguments.get('sasl_enabled', False):
+            if not _bmemcache_pool:
+                raise ImportError("python-binary-memcached package is missing")
             self.client_pool = _bmemcache_pool.BMemcacheClientPool(
                 self.url,
                 arguments,

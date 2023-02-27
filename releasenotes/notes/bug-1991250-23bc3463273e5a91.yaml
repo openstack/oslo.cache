@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    [`bug 1991250 <https://bugs.launchpad.net/oslo.cache/+bug/1991250>`_]
+    The python-binary-memcached package is only required if sasl_enabled=True.
+    When sasl_enabled=False (default), the memcache_pool backend can be used
+    without the python-binary-memcached package installed.
