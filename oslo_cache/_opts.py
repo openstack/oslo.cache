@@ -126,6 +126,7 @@ FILE_OPTIONS = {
                    help='the user name for the memcached which SASL enabled'),
         cfg.StrOpt('memcache_password',
                    default='',
+                   secret=True,
                    help='the password for the memcached which SASL enabled'),
         cfg.BoolOpt('tls_enabled',
                     default=False,
