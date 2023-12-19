@@ -1,7 +1,7 @@
 [run]
 branch = True
-source = cache
-omit = cache/tests/*,cache/openstack/*
+source = oslo_cache
+omit = oslo_cache/tests/*
 
 [report]
 ignore_errors = True
