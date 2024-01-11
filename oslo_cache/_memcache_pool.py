@@ -93,6 +93,27 @@ class ConnectionPool(queue.Queue):
         self._connection_get_timeout = conn_get_timeout
         self._acquired = 0
 
+    def __del__(self):
+        """Delete the connection pool.
+
+        Destory all connections left in the queue.
+        """
+        while True:
+            # As per https://docs.python.org/3/library/collections.html
+            # self.queue.pop() will raise IndexError when no elements are
+            # present, ending the while True: loop.
+            # The logic loops over all connections in the queue but it does
+            # not retry for a single one in case a connection closure fails
+            # then it leaves that one and process the next.
+            try:
+                conn = self.queue.pop().connection
+                self._destroy_connection(conn)
+            except IndexError:
+                break
+            except Exception as e:
+                self._do_log(
+                    LOG.warning, "Unable to cleanup a connection: %s", e)
+
     def _create_connection(self):
         """Returns a connection instance.
 
