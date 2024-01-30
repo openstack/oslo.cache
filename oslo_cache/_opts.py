@@ -80,7 +80,7 @@ FILE_OPTIONS = {
                          'If ``dogpile.cache.memcached`` or '
                          '``oslo_cache.memcache_pool`` is used and a given '
                          'host refer to an IPv6 or a given domain refer to '
-                         'IPv6 then you should prefix the given address with'
+                         'IPv6 then you should prefix the given address with '
                          'the address family (``inet6``) '
                          '(e.g ``inet6[::1]:11211``, '
                          '``inet6:[fd12:3456:789a:1::1]:11211``, '
@@ -130,7 +130,7 @@ FILE_OPTIONS = {
                    help='the password for the memcached which SASL enabled'),
         cfg.BoolOpt('tls_enabled',
                     default=False,
-                    help='Global toggle for TLS usage when comunicating with'
+                    help='Global toggle for TLS usage when communicating with'
                     ' the caching servers.'),
         cfg.StrOpt('tls_cafile',
                    default=None,
