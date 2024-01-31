@@ -294,6 +294,23 @@ class CacheRegionTest(test_cache.BaseTestCase):
             ssl.create_default_context.assert_not_called()
             self.assertNotIn('test_prefix.arguments.tls_context', config_dict)
 
+    def test_cache_dictionary_config_builder_tls_disabled_redis(self):
+        """Validate the backend is reset to default if caching is disabled."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.redis',
+                                   tls_cafile='path_to_ca_file',
+                                   tls_keyfile='path_to_key_file',
+                                   tls_certfile='path_to_cert_file',
+                                   tls_allowed_ciphers='allowed_ciphers')
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertFalse(self.config_fixture.conf.cache.tls_enabled)
+        self.assertNotIn('test_prefix.arguments.connection_kwargs',
+                         config_dict)
+
     def test_cache_dictionary_config_builder_tls_enabled(self):
         """Validate the backend is reset to default if caching is disabled."""
         self.config_fixture.config(group='cache',
@@ -317,6 +334,30 @@ class CacheRegionTest(test_cache.BaseTestCase):
                 fake_context,
                 config_dict['test_prefix.arguments.tls_context'],
             )
+
+    def test_cache_dictionary_config_builder_tls_enabled_redis(self):
+        """Validate the backend is reset to default if caching is disabled."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.redis',
+                                   tls_enabled=True,
+                                   tls_cafile='path_to_ca_file',
+                                   tls_keyfile='path_to_key_file',
+                                   tls_certfile='path_to_cert_file')
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertTrue(self.config_fixture.conf.cache.tls_enabled)
+        self.assertIn('test_prefix.arguments.connection_kwargs',
+                      config_dict)
+        self.assertEqual(
+            {
+                'ssl_ca_certs': 'path_to_ca_file',
+                'ssl_keyfile': 'path_to_key_file',
+                'ssl_certfile': 'path_to_cert_file'
+            },
+            config_dict['test_prefix.arguments.connection_kwargs'])
 
     @mock.patch('oslo_cache.core._LOG')
     def test_cache_dictionary_config_builder_fips_mode_supported(self, log):
@@ -356,6 +397,19 @@ class CacheRegionTest(test_cache.BaseTestCase):
             self.assertRaises(exception.ConfigurationError,
                               cache._build_cache_config,
                               self.config_fixture.conf)
+
+    def test_cache_dictionary_config_builder_fips_mode_unsupported_redis(self):
+        """Validate the FIPS mode is not supported."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.redis',
+                                   tls_enabled=True,
+                                   enforce_fips_mode=True)
+
+        self.assertRaises(exception.ConfigurationError,
+                          cache._build_cache_config,
+                          self.config_fixture.conf)
 
     def test_cache_dictionary_config_builder_tls_enabled_unsupported(self):
         """Validate the tls_enabled opiton is not supported.."""

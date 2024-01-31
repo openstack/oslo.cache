@@ -206,6 +206,29 @@ def _build_cache_config(conf):
                 tls_context.set_ciphers(conf.cache.tls_allowed_ciphers)
 
             conf_dict['%s.arguments.tls_context' % prefix] = tls_context
+        elif conf.cache.backend in ('dogpile.cache.redis',):
+            if conf.cache.tls_allowed_ciphers is not None:
+                raise exception.ConfigurationError(
+                    "Limiting allowed ciphers is not supported by "
+                    "the %s backend" % conf.cache.backend)
+            if conf.cache.enforce_fips_mode:
+                raise exception.ConfigurationError(
+                    "FIPS mode is not supported by the %s backend" %
+                    conf.cache.backend)
+
+            conn_kwargs = {}
+            if conf.cache.tls_cafile is not None:
+                _LOG.debug('Oslo Cache TLS - CA: %s', conf.cache.tls_cafile)
+                conn_kwargs['ssl_ca_certs'] = conf.cache.tls_cafile
+            if conf.cache.tls_certfile is not None:
+                _LOG.debug('Oslo Cache TLS - cert: %s',
+                           conf.cache.tls_certfile)
+                _LOG.debug('Oslo Cache TLS - key: %s', conf.cache.tls_keyfile)
+                conn_kwargs.update({
+                    'ssl_certfile': conf.cache.tls_certfile,
+                    'ssl_keyfile': conf.cache.tls_keyfile
+                })
+            conf_dict['%s.arguments.connection_kwargs' % prefix] = conn_kwargs
         else:
             msg = _(
                 "TLS setting via [cache] tls_enabled is not supported by this "
