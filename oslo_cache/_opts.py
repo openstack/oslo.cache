@@ -122,10 +122,8 @@ FILE_OPTIONS = {
                     help='Enable the SASL(Simple Authentication and Security'
                          'Layer) if the SASL_enable is true, else disable.'),
         cfg.StrOpt('memcache_username',
-                   default='',
                    help='the user name for the memcached which SASL enabled'),
         cfg.StrOpt('memcache_password',
-                   default='',
                    secret=True,
                    help='the password for the memcached which SASL enabled'),
         cfg.BoolOpt('tls_enabled',
