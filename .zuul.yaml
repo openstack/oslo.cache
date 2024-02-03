@@ -35,14 +35,14 @@
     parent: oslo.cache-functional-memcached
     vars:
       tox_environment:
-          OSLO_BACKEND: dogpile_cache_bmemcached
+        OSLO_BACKEND: dogpile_cache_bmemcached
 
 - job:
     name: oslo.cache-functional-dogpile.cache.pymemcache
     parent: oslo.cache-functional-memcached
     vars:
       tox_environment:
-          OSLO_BACKEND: dogpile_cache_pymemcache
+        OSLO_BACKEND: dogpile_cache_pymemcache
 
 - job:
     name: oslo.cache-functional-memcache_pool
@@ -50,6 +50,28 @@
     vars:
       tox_environment:
         OSLO_BACKEND: memcache_pool
+
+- job:
+    name: oslo.cache-functional-redis
+    parent: oslo.cache-functional
+    vars:
+      tox_environment:
+        PIFPAF_DAEMON: redis
+
+- job:
+    name: oslo.cache-functional-dogpile.cache.redis
+    parent: oslo.cache-functional-redis
+    vars:
+      tox_environment:
+        OSLO_BACKEND: dogpile_cache_redis
+
+- job:
+    name: oslo.cache-functional-dogpile.cache.redis_sentinel
+    parent: oslo.cache-functional-redis
+    vars:
+      tox_environment:
+        OSLO_BACKEND: dogpile_cache_redis_sentinel
+        PIFPAF_OPTS: --sentinel
 
 - project:
     templates:
@@ -65,3 +87,5 @@
         - oslo.cache-functional-dogpile.cache.bmemcached
         - oslo.cache-functional-dogpile.cache.pymemcache
         - oslo.cache-functional-memcache_pool
+        - oslo.cache-functional-dogpile.cache.redis
+        - oslo.cache-functional-dogpile.cache.redis_sentinel
