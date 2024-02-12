@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    When the ``dogpile.cache.redis`` backend is used and
+    the ``[cache] tls_enable`` option is set to True, now the following
+    ``[cache]`` options set tls certificates and keys used for TLS
+    communication with Redis.
+
+    - ``tls_cafile``
+    - ``tls_certfile``
+    - ``tls_keyfile``
