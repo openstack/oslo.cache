@@ -152,7 +152,12 @@ FILE_OPTIONS = {
         cfg.BoolOpt('tls_enabled',
                     default=False,
                     help='Global toggle for TLS usage when communicating with'
-                    ' the caching servers.'),
+                    ' the caching servers. Currently supported by '
+                    '``dogpile.cache.bmemcache``, '
+                    '``dogpile.cache.pymemcache``, '
+                    '``oslo_cache.memcache_pool``, '
+                    '``dogpile.cache.redis`` and '
+                    '``dogpile.cache.redis_sentinel``.'),
         cfg.StrOpt('tls_cafile',
                    default=None,
                    help='Path to a file of concatenated CA certificates in PEM'
@@ -178,7 +183,10 @@ FILE_OPTIONS = {
                    help='Set the available ciphers for sockets created with'
                    ' the TLS context. It should be a string in the OpenSSL'
                    ' cipher list format. If not specified, all OpenSSL enabled'
-                   ' ciphers will be available.'),
+                   ' ciphers will be available. Currently supported by '
+                   '``dogpile.cache.bmemcache``, '
+                   '``dogpile.cache.pymemcache`` and '
+                   '``oslo_cache.memcache_pool``.'),
         cfg.BoolOpt(
             'enable_socket_keepalive',
             default=False,
@@ -246,7 +254,10 @@ FILE_OPTIONS = {
                     'environments and may have been backported to older '
                     'Python versions on select environments. If the Python '
                     'executable used does not support OpenSSL FIPS mode, '
-                    'an exception will be raised.'),
+                    'an exception will be raised. Currently supported by '
+                    '``dogpile.cache.bmemcache``, '
+                    '``dogpile.cache.pymemcache`` and '
+                    '``oslo_cache.memcache_pool``.'),
     ],
 }
 

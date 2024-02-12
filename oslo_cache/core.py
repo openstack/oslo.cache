@@ -299,7 +299,8 @@ def _build_cache_config(conf):
                     {}).update(conn_kwargs)
         else:
             msg = _(
-                "TLS setting via [cache] tls_enabled is not supported by this "
+                "TLS setting via [cache] tls_enabled is not supported by the "
+                "%s backend. Set [cache] tls_enabled=False or use a different "
                 "backend."
             )
             raise exception.ConfigurationError(msg)
