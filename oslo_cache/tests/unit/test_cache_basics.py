@@ -324,7 +324,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.config_fixture.config(group='cache',
                                    enabled=True,
                                    config_prefix='test_prefix',
-                                   backend='oslo_cache.dict',
+                                   backend='dogpile.cache.pymemcache',
                                    tls_enabled=True,
                                    enforce_fips_mode=True)
 
@@ -344,7 +344,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.config_fixture.config(group='cache',
                                    enabled=True,
                                    config_prefix='test_prefix',
-                                   backend='oslo_cache.dict',
+                                   backend='dogpile.cache.pymemcache',
                                    tls_enabled=True,
                                    enforce_fips_mode=True)
 
@@ -355,7 +355,21 @@ class CacheRegionTest(test_cache.BaseTestCase):
             # ensure that we hard fail.
             self.assertRaises(exception.ConfigurationError,
                               cache._build_cache_config,
-                              self.config_fixture.conf,)
+                              self.config_fixture.conf)
+
+    def test_cache_dictionary_config_builder_tls_enabled_unsupported(self):
+        """Validate the tls_enabled opiton is not supported.."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='oslo_cache.dict',
+                                   tls_enabled=True)
+
+        with mock.patch.object(ssl, 'create_default_context'):
+            self.assertRaises(exception.ConfigurationError,
+                              cache._build_cache_config,
+                              self.config_fixture.conf)
+            ssl.create_default_context.assert_not_called()
 
     def test_cache_dictionary_config_builder_tls_enabled_with_config(self):
         """Validate the backend is reset to default if caching is disabled."""

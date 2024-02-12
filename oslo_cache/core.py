@@ -169,37 +169,49 @@ def _build_cache_config(conf):
         conf_dict['%s.arguments.%s' % (prefix, arg)] = value
 
     if conf.cache.tls_enabled:
-        _LOG.debug('Oslo Cache TLS - CA: %s', conf.cache.tls_cafile)
-        tls_context = ssl.create_default_context(cafile=conf.cache.tls_cafile)
+        if conf.cache.backend in ('dogpile.cache.bmemcache',
+                                  'dogpile.cache.pymemcache',
+                                  'oslo_cache.memcache_pool'):
+            _LOG.debug('Oslo Cache TLS - CA: %s', conf.cache.tls_cafile)
+            tls_context = ssl.create_default_context(
+                cafile=conf.cache.tls_cafile)
 
-        if conf.cache.enforce_fips_mode:
-            if hasattr(ssl, 'FIPS_mode'):
-                _LOG.info("Enforcing the use of the OpenSSL FIPS mode")
-                ssl.FIPS_mode_set(1)
-            else:
-                raise exception.ConfigurationError(
-                    "OpenSSL FIPS mode is not supported by your Python "
-                    "version. You must either change the Python executable "
-                    "used to a version with FIPS mode support or disable "
-                    "FIPS mode by setting the '[cache] enforce_fips_mode' "
-                    "configuration option to 'False'.")
+            if conf.cache.enforce_fips_mode:
+                if hasattr(ssl, 'FIPS_mode'):
+                    _LOG.info("Enforcing the use of the OpenSSL FIPS mode")
+                    ssl.FIPS_mode_set(1)
+                else:
+                    raise exception.ConfigurationError(
+                        "OpenSSL FIPS mode is not supported by your Python "
+                        "version. You must either change the Python "
+                        "executable used to a version with FIPS mode support "
+                        "or disable FIPS mode by setting "
+                        "the '[cache] enforce_fips_mode' configuration option "
+                        "to 'False'.")
 
-        if conf.cache.tls_certfile is not None:
-            _LOG.debug('Oslo Cache TLS - cert: %s', conf.cache.tls_certfile)
-            _LOG.debug('Oslo Cache TLS - key: %s', conf.cache.tls_keyfile)
-            tls_context.load_cert_chain(
-                conf.cache.tls_certfile,
-                conf.cache.tls_keyfile,
+            if conf.cache.tls_certfile is not None:
+                _LOG.debug('Oslo Cache TLS - cert: %s',
+                           conf.cache.tls_certfile)
+                _LOG.debug('Oslo Cache TLS - key: %s', conf.cache.tls_keyfile)
+                tls_context.load_cert_chain(
+                    conf.cache.tls_certfile,
+                    conf.cache.tls_keyfile,
+                )
+
+            if conf.cache.tls_allowed_ciphers is not None:
+                _LOG.debug(
+                    'Oslo Cache TLS - ciphers: %s',
+                    conf.cache.tls_allowed_ciphers,
+                )
+                tls_context.set_ciphers(conf.cache.tls_allowed_ciphers)
+
+            conf_dict['%s.arguments.tls_context' % prefix] = tls_context
+        else:
+            msg = _(
+                "TLS setting via [cache] tls_enabled is not supported by this "
+                "backend."
             )
-
-        if conf.cache.tls_allowed_ciphers is not None:
-            _LOG.debug(
-                'Oslo Cache TLS - ciphers: %s',
-                conf.cache.tls_allowed_ciphers,
-            )
-            tls_context.set_ciphers(conf.cache.tls_allowed_ciphers)
-
-        conf_dict['%s.arguments.tls_context' % prefix] = tls_context
+            raise exception.ConfigurationError(msg)
 
     # NOTE(hberaud): Pymemcache support socket keepalive, If it is enable in
     # our config then configure it to enable this feature.
