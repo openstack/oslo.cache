@@ -1,0 +1,16 @@
+---
+features:
+  - |
+    The following new options are added. These options are used to customize
+    connections in the ``dogpile.cache.redis`` backend.
+
+    - ``redis_server``
+    - ``redis_username``
+    - ``redis_password``
+    - ``redis_socket_timeout``
+
+upgrade:
+  - |
+    The ``[cache] memcache_socket_timeout`` option no longer takes affect in
+    when the ``dogpile.cache.redis`` backend, which is the documented behavior.
+    Use the ``[cache] redis_socket_timeout`` option instead.

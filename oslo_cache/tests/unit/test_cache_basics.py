@@ -306,7 +306,9 @@ class CacheRegionTest(test_cache.BaseTestCase):
                                    tls_allowed_ciphers='allowed_ciphers')
 
         config_dict = cache._build_cache_config(self.config_fixture.conf)
-
+        self.assertEqual(
+            'redis://localhost:6379',
+            config_dict['test_prefix.arguments.url'])
         self.assertFalse(self.config_fixture.conf.cache.tls_enabled)
         self.assertNotIn('test_prefix.arguments.connection_kwargs',
                          config_dict)
@@ -351,6 +353,9 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertTrue(self.config_fixture.conf.cache.tls_enabled)
         self.assertIn('test_prefix.arguments.connection_kwargs',
                       config_dict)
+        self.assertEqual(
+            'rediss://localhost:6379',
+            config_dict['test_prefix.arguments.url'])
         self.assertEqual(
             {
                 'ssl_ca_certs': 'path_to_ca_file',
@@ -693,6 +698,36 @@ class CacheRegionTest(test_cache.BaseTestCase):
                          memcache_pool_flush_on_reconnect)
         self.assertFalse(config_dict['test_prefix.arguments'
                                      '.pool_flush_on_reconnect'])
+
+    def test_cache_dictionary_config_builder_redis(self):
+        """Validate the backend is reset to default if caching is disabled."""
+        self.config_fixture.config(group='cache',
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.redis',
+                                   redis_server='[::1]:6379',
+                                   redis_username='user',
+                                   redis_password='secrete')
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+        self.assertEqual(
+            'redis://user:secrete@[::1]:6379',
+            config_dict['test_prefix.arguments.url'])
+        self.assertEqual(
+            1.0, config_dict['test_prefix.arguments.socket_timeout'])
+
+    def test_cache_dictionary_config_builder_redis_with_auth(self):
+        """Validate the backend is reset to default if caching is disabled."""
+        self.config_fixture.config(group='cache',
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.redis',
+                                   redis_server='[::1]:6379',
+                                   redis_username='user',
+                                   redis_password='secrete')
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+        self.assertEqual(
+            'redis://user:secrete@[::1]:6379',
+            config_dict['test_prefix.arguments.url'])
 
     def test_cache_debug_proxy(self):
         single_value = 'Test Value'

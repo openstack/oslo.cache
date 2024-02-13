@@ -126,6 +126,18 @@ FILE_OPTIONS = {
         cfg.StrOpt('memcache_password',
                    secret=True,
                    help='the password for the memcached which SASL enabled'),
+        cfg.StrOpt('redis_server',
+                   default='localhost:6379',
+                   help='Redis server in the format of "host:port"'),
+        cfg.StrOpt('redis_username',
+                   help='the user name for redis'),
+        cfg.StrOpt('redis_password',
+                   secret=True,
+                   help='the password for redis'),
+        cfg.FloatOpt('redis_socket_timeout',
+                     default=1.0,
+                     help='Timeout in seconds for every call to a server.'
+                     ' (dogpile.cache.redis backend only).'),
         cfg.BoolOpt('tls_enabled',
                     default=False,
                     help='Global toggle for TLS usage when communicating with'

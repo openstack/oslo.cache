@@ -35,6 +35,7 @@ The library has special public value for nonexistent or expired keys called
     NO_VALUE = core.NO_VALUE
 """
 import ssl
+import urllib.parse
 
 import dogpile.cache
 from dogpile.cache import api
@@ -136,37 +137,63 @@ def _build_cache_config(conf):
         conf_dict[arg_key] = argvalue
 
         _LOG.debug('Oslo Cache Config: %s', conf_dict)
-    # NOTE(yorik-sar): these arguments will be used for memcache-related
-    # backends. Use setdefault for url to support old-style setting through
-    # backend_argument=url:127.0.0.1:11211
-    #
-    # NOTE(morgan): If requested by config, 'flush_on_reconnect' will be set
-    # for pooled connections. This can ensure that stale data is never
-    # consumed from a server that pops in/out due to a network partition
-    # or disconnect.
-    #
-    # See the help from python-memcached:
-    #
-    # param flush_on_reconnect: optional flag which prevents a
-    #        scenario that can cause stale data to be read: If there's more
-    #        than one memcached server and the connection to one is
-    #        interrupted, keys that mapped to that server will get
-    #        reassigned to another. If the first server comes back, those
-    #        keys will map to it again. If it still has its data, get()s
-    #        can read stale data that was overwritten on another
-    #        server. This flag is off by default for backwards
-    #        compatibility.
-    #
-    # The normal non-pooled clients connect explicitly on each use and
-    # does not need the explicit flush_on_reconnect
-    conf_dict.setdefault('%s.arguments.url' % prefix,
-                         conf.cache.memcache_servers)
-    for arg in ('dead_retry', 'socket_timeout', 'pool_maxsize',
-                'pool_unused_timeout', 'pool_connection_get_timeout',
-                'pool_flush_on_reconnect', 'sasl_enabled', 'username',
-                'password'):
-        value = getattr(conf.cache, 'memcache_' + arg)
-        conf_dict['%s.arguments.%s' % (prefix, arg)] = value
+
+    if conf.cache.backend == 'dogpile.cache.redis':
+        if conf.cache.redis_password is None:
+            netloc = conf.cache.redis_server
+        else:
+            if conf.cache.redis_username:
+                netloc = '%s:%s@%s' % (conf.cache.redis_username,
+                                       conf.cache.redis_password,
+                                       conf.cache.redis_server)
+            else:
+                netloc = ':%s@%s' % (conf.cache.redis_password,
+                                     conf.cache.redis_server)
+
+        parts = urllib.parse.ParseResult(
+            scheme=('rediss' if conf.cache.tls_enabled else 'redis'),
+            netloc=netloc, path='', params='', query='', fragment='')
+
+        conf_dict.setdefault(
+            '%s.arguments.url' % prefix,
+            urllib.parse.urlunparse(parts)
+        )
+        for arg in ('socket_timeout',):
+            value = getattr(conf.cache, 'redis_' + arg)
+            conf_dict['%s.arguments.%s' % (prefix, arg)] = value
+    else:
+        # NOTE(yorik-sar): these arguments will be used for memcache-related
+        # backends. Use setdefault for url to support old-style setting through
+        # backend_argument=url:127.0.0.1:11211
+        #
+        # NOTE(morgan): If requested by config, 'flush_on_reconnect' will be
+        # set for pooled connections. This can ensure that stale data is never
+        # consumed from a server that pops in/out due to a network partition
+        # or disconnect.
+        #
+        # See the help from python-memcached:
+        #
+        # param flush_on_reconnect: optional flag which prevents a
+        #        scenario that can cause stale data to be read: If there's more
+        #        than one memcached server and the connection to one is
+        #        interrupted, keys that mapped to that server will get
+        #        reassigned to another. If the first server comes back, those
+        #        keys will map to it again. If it still has its data, get()s
+        #        can read stale data that was overwritten on another
+        #        server. This flag is off by default for backwards
+        #        compatibility.
+        #
+        # The normal non-pooled clients connect explicitly on each use and
+        # does not need the explicit flush_on_reconnect
+        conf_dict.setdefault('%s.arguments.url' % prefix,
+                             conf.cache.memcache_servers)
+
+        for arg in ('dead_retry', 'socket_timeout', 'pool_maxsize',
+                    'pool_unused_timeout', 'pool_connection_get_timeout',
+                    'pool_flush_on_reconnect', 'sasl_enabled', 'username',
+                    'password'):
+            value = getattr(conf.cache, 'memcache_' + arg)
+            conf_dict['%s.arguments.%s' % (prefix, arg)] = value
 
     if conf.cache.tls_enabled:
         if conf.cache.backend in ('dogpile.cache.bmemcache',
