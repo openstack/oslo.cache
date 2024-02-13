@@ -27,6 +27,7 @@ except ImportError as e:
     else:
         raise
 from oslo_cache import _memcache_pool
+from oslo_cache import exception
 
 
 # Helper to ease backend refactoring
@@ -63,6 +64,11 @@ class PooledMemcachedBackend(memcached_backend.MemcachedBackend):
     def __init__(self, arguments):
         super(PooledMemcachedBackend, self).__init__(arguments)
         if arguments.get('sasl_enabled', False):
+            if (arguments.get('username') is None or
+                    arguments.get('password') is None):
+                raise exception.ConfigurationError(
+                    'username and password should be configured to use SASL '
+                    'authentication.')
             if not _bmemcache_pool:
                 raise ImportError("python-binary-memcached package is missing")
             self.client_pool = _bmemcache_pool.BMemcacheClientPool(
