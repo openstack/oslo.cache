@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Now Redis Sentinel is supported as a cache backend.

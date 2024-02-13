@@ -34,6 +34,7 @@ The library has special public value for nonexistent or expired keys called
     from oslo_cache import core
     NO_VALUE = core.NO_VALUE
 """
+import re
 import ssl
 import urllib.parse
 
@@ -101,6 +102,18 @@ class _DebugProxy(proxy.ProxyBackend):
         self.proxied.delete_multi(keys)
 
 
+def _parse_sentinel(sentinel):
+    # IPv6 (eg. [::1]:6379 )
+    match = re.search(r'\[(\S+)\]:(\d+)', sentinel)
+    if match:
+        return (match[1], int(match[2]))
+    # IPv4 or hostname (eg. 127.0.0.1:6379 or localhost:6379)
+    match = re.search(r'(\S+):(\d+)', sentinel)
+    if match:
+        return (match[1], int(match[2]))
+    raise exception.ConfigurationError('Malformed sentinel server format')
+
+
 def _build_cache_config(conf):
     """Build the cache region dictionary configuration.
 
@@ -161,6 +174,22 @@ def _build_cache_config(conf):
         for arg in ('socket_timeout',):
             value = getattr(conf.cache, 'redis_' + arg)
             conf_dict['%s.arguments.%s' % (prefix, arg)] = value
+    elif conf.cache.backend == 'dogpile.cache.redis_sentinel':
+        for arg in ('password', 'socket_timeout'):
+            value = getattr(conf.cache, 'redis_' + arg)
+            conf_dict['%s.arguments.%s' % (prefix, arg)] = value
+        if conf.cache.redis_username:
+            # TODO(tkajinam): Update dogpile.cache to add username argument,
+            # similarly to password.
+            conf_dict['%s.arguments.connection_kwargs' % prefix] = \
+                {'username': conf.cache.redis_username}
+            conf_dict['%s.arguments.sentinel_kwargs' % prefix] = \
+                {'username': conf.cache.redis_username}
+        conf_dict['%s.arguments.service_name' % prefix] = \
+            conf.cache.redis_sentinel_service_name
+        if conf.cache.redis_sentinels:
+            conf_dict['%s.arguments.sentinels' % prefix] = [
+                _parse_sentinel(s) for s in conf.cache.redis_sentinels]
     else:
         # NOTE(yorik-sar): these arguments will be used for memcache-related
         # backends. Use setdefault for url to support old-style setting through
@@ -233,7 +262,8 @@ def _build_cache_config(conf):
                 tls_context.set_ciphers(conf.cache.tls_allowed_ciphers)
 
             conf_dict['%s.arguments.tls_context' % prefix] = tls_context
-        elif conf.cache.backend in ('dogpile.cache.redis',):
+        elif conf.cache.backend in ('dogpile.cache.redis',
+                                    'dogpile.cache.redis_sentinel'):
             if conf.cache.tls_allowed_ciphers is not None:
                 raise exception.ConfigurationError(
                     "Limiting allowed ciphers is not supported by "
@@ -255,7 +285,18 @@ def _build_cache_config(conf):
                     'ssl_certfile': conf.cache.tls_certfile,
                     'ssl_keyfile': conf.cache.tls_keyfile
                 })
-            conf_dict['%s.arguments.connection_kwargs' % prefix] = conn_kwargs
+            if conf.cache.backend == 'dogpile.cache.redis_sentinel':
+                conn_kwargs.update({'ssl': True})
+                conf_dict.setdefault(
+                    '%s.arguments.connection_kwargs' % prefix,
+                    {}).update(conn_kwargs)
+                conf_dict.setdefault(
+                    '%s.arguments.sentinel_kwargs' % prefix,
+                    {}).update(conn_kwargs)
+            else:
+                conf_dict.setdefault(
+                    '%s.arguments.connection_kwargs' % prefix,
+                    {}).update(conn_kwargs)
         else:
             msg = _(
                 "TLS setting via [cache] tls_enabled is not supported by this "

@@ -313,6 +313,24 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertNotIn('test_prefix.arguments.connection_kwargs',
                          config_dict)
 
+    def test_cache_dictionary_config_builder_tls_disabled_redis_sentinel(self):
+        """Validate the backend is reset to default if caching is disabled."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.redis_sentinel',
+                                   tls_cafile='path_to_ca_file',
+                                   tls_keyfile='path_to_key_file',
+                                   tls_certfile='path_to_cert_file')
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertFalse(self.config_fixture.conf.cache.tls_enabled)
+        self.assertNotIn('test_prefix.arguments.connection_kwargs',
+                         config_dict)
+        self.assertNotIn('test_prefix.arguments.sentinel_kwargs',
+                         config_dict)
+
     def test_cache_dictionary_config_builder_tls_enabled(self):
         """Validate the backend is reset to default if caching is disabled."""
         self.config_fixture.config(group='cache',
@@ -363,6 +381,42 @@ class CacheRegionTest(test_cache.BaseTestCase):
                 'ssl_certfile': 'path_to_cert_file'
             },
             config_dict['test_prefix.arguments.connection_kwargs'])
+        self.assertNotIn('test_prefix.arguments.sentinel_kwargs', config_dict)
+
+    def test_cache_dictionary_config_builder_tls_enabled_redis_sentinel(self):
+        """Validate the backend is reset to default if caching is disabled."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.redis_sentinel',
+                                   tls_enabled=True,
+                                   tls_cafile='path_to_ca_file',
+                                   tls_keyfile='path_to_key_file',
+                                   tls_certfile='path_to_cert_file')
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertTrue(self.config_fixture.conf.cache.tls_enabled)
+        self.assertIn('test_prefix.arguments.connection_kwargs',
+                      config_dict)
+        self.assertEqual(
+            {
+                'ssl': True,
+                'ssl_ca_certs': 'path_to_ca_file',
+                'ssl_keyfile': 'path_to_key_file',
+                'ssl_certfile': 'path_to_cert_file'
+            },
+            config_dict['test_prefix.arguments.connection_kwargs'])
+        self.assertIn('test_prefix.arguments.sentinel_kwargs',
+                      config_dict)
+        self.assertEqual(
+            {
+                'ssl': True,
+                'ssl_ca_certs': 'path_to_ca_file',
+                'ssl_keyfile': 'path_to_key_file',
+                'ssl_certfile': 'path_to_cert_file'
+            },
+            config_dict['test_prefix.arguments.sentinel_kwargs'])
 
     @mock.patch('oslo_cache.core._LOG')
     def test_cache_dictionary_config_builder_fips_mode_supported(self, log):
@@ -728,6 +782,62 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertEqual(
             'redis://user:secrete@[::1]:6379',
             config_dict['test_prefix.arguments.url'])
+
+    def test_cache_dictionary_config_builder_redis_sentinel(self):
+        """Validate the backend is reset to default if caching is disabled."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.redis_sentinel')
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertFalse(self.config_fixture.conf.cache.tls_enabled)
+        self.assertEqual(
+            'mymaster', config_dict['test_prefix.arguments.service_name'])
+        self.assertEqual([
+            ('localhost', 26379)
+        ], config_dict['test_prefix.arguments.sentinels'])
+        self.assertEqual(
+            1.0, config_dict['test_prefix.arguments.socket_timeout'])
+        self.assertNotIn('test_prefix.arguments.connection_kwargs',
+                         config_dict)
+        self.assertNotIn('test_prefix.arguments.sentinel_kwargs',
+                         config_dict)
+
+    def test_cache_dictionary_config_builder_redis_sentinel_with_auth(self):
+        """Validate the backend is reset to default if caching is disabled."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.redis_sentinel',
+                                   redis_username='user',
+                                   redis_password='secrete',
+                                   redis_sentinels=[
+                                       '127.0.0.1:26379',
+                                       '[::1]:26379',
+                                       'localhost:26379'
+                                   ],
+                                   redis_sentinel_service_name='cluster')
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertFalse(self.config_fixture.conf.cache.tls_enabled)
+        self.assertEqual(
+            'cluster', config_dict['test_prefix.arguments.service_name'])
+        self.assertEqual([
+            ('127.0.0.1', 26379),
+            ('::1', 26379),
+            ('localhost', 26379),
+        ], config_dict['test_prefix.arguments.sentinels'])
+        self.assertEqual(
+            'secrete', config_dict['test_prefix.arguments.password'])
+        self.assertEqual({
+            'username': 'user'
+        }, config_dict['test_prefix.arguments.connection_kwargs'])
+        self.assertEqual({
+            'username': 'user'
+        }, config_dict['test_prefix.arguments.sentinel_kwargs'])
 
     def test_cache_debug_proxy(self):
         single_value = 'Test Value'

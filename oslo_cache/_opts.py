@@ -44,6 +44,7 @@ FILE_OPTIONS = {
                             'dogpile.cache.bmemcached',
                             'dogpile.cache.dbm',
                             'dogpile.cache.redis',
+                            'dogpile.cache.redis_sentinel',
                             'dogpile.cache.memory',
                             'dogpile.cache.memory_pickle',
                             'dogpile.cache.null'],
@@ -134,10 +135,18 @@ FILE_OPTIONS = {
         cfg.StrOpt('redis_password',
                    secret=True,
                    help='the password for redis'),
+        cfg.ListOpt('redis_sentinels',
+                    default=['localhost:26379'],
+                    help='Redis sentinel servers in the format of '
+                         '"host:port"'),
         cfg.FloatOpt('redis_socket_timeout',
                      default=1.0,
                      help='Timeout in seconds for every call to a server.'
-                     ' (dogpile.cache.redis backend only).'),
+                     ' (dogpile.cache.redis and dogpile.cache.redis_sentinel '
+                     'backends only).'),
+        cfg.StrOpt('redis_sentinel_service_name',
+                   default='mymaster',
+                   help='Service name of the redis sentinel cluster.'),
         cfg.BoolOpt('tls_enabled',
                     default=False,
                     help='Global toggle for TLS usage when communicating with'
