@@ -104,11 +104,11 @@ class _DebugProxy(proxy.ProxyBackend):
 
 def _parse_sentinel(sentinel):
     # IPv6 (eg. [::1]:6379 )
-    match = re.search(r'\[(\S+)\]:(\d+)', sentinel)
+    match = re.search(r'^\[(\S+)\]:(\d+)$', sentinel)
     if match:
         return (match[1], int(match[2]))
     # IPv4 or hostname (eg. 127.0.0.1:6379 or localhost:6379)
-    match = re.search(r'(\S+):(\d+)', sentinel)
+    match = re.search(r'^(\S+):(\d+)$', sentinel)
     if match:
         return (match[1], int(match[2]))
     raise exception.ConfigurationError('Malformed sentinel server format')
