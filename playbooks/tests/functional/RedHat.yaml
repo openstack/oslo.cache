@@ -1,0 +1,9 @@
+---
+backend_services_map:
+  redis:
+    - redis
+    - redis-sentinel
+  memcached:
+    - memcached
+  etcd:
+    - etcd

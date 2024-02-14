@@ -3,3 +3,6 @@
 
 etcd [tests-functional-etcd]
 memcached [tests-functional-memcached]
+redis [platform:rpm tests-functional-redis]
+redis-server [platform:dpkg tests-functional-redis]
+redis-sentinel [platform:dpkg tests-functional-redis]
