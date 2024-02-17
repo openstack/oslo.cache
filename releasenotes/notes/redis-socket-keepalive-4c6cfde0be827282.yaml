@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    The ``dogpile.cache.redis`` backend and  ``dogpile.cache.redis_sentinel``
+    backend now supports enabling socket keepalive configurations by
+    setting the ``[cache] enable_socket_keepalive`` option to ``True``. Use
+    the ``socket_keepalive_*`` options to tune keepalive behavior.
