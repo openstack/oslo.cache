@@ -298,12 +298,11 @@ def _build_cache_config(conf):
                     '%s.arguments.connection_kwargs' % prefix,
                     {}).update(conn_kwargs)
         else:
-            msg = _(
+            raise exception.ConfigurationError(
                 "TLS setting via [cache] tls_enabled is not supported by the "
                 "%s backend. Set [cache] tls_enabled=False or use a different "
-                "backend."
+                "backend." % conf.cache.backend
             )
-            raise exception.ConfigurationError(msg)
 
     # NOTE(hberaud): Pymemcache support socket keepalive, If it is enable in
     # our config then configure it to enable this feature.
