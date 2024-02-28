@@ -879,13 +879,9 @@ class CacheRegionTest(test_cache.BaseTestCase):
             ('localhost', 26379),
         ], config_dict['test_prefix.arguments.sentinels'])
         self.assertEqual(
+            'user', config_dict['test_prefix.arguments.username'])
+        self.assertEqual(
             'secrete', config_dict['test_prefix.arguments.password'])
-        self.assertEqual({
-            'username': 'user'
-        }, config_dict['test_prefix.arguments.connection_kwargs'])
-        self.assertEqual({
-            'username': 'user'
-        }, config_dict['test_prefix.arguments.sentinel_kwargs'])
 
     def test_cache_debug_proxy(self):
         single_value = 'Test Value'

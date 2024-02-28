@@ -176,16 +176,9 @@ def _build_cache_config(conf):
             value = getattr(conf.cache, 'redis_' + arg)
             conf_dict['%s.arguments.%s' % (prefix, arg)] = value
     elif conf.cache.backend == 'dogpile.cache.redis_sentinel':
-        for arg in ('password', 'socket_timeout'):
+        for arg in ('username', 'password', 'socket_timeout'):
             value = getattr(conf.cache, 'redis_' + arg)
             conf_dict['%s.arguments.%s' % (prefix, arg)] = value
-        if conf.cache.redis_username:
-            # TODO(tkajinam): Update dogpile.cache to add username argument,
-            # similarly to password.
-            conf_dict['%s.arguments.connection_kwargs' % prefix] = \
-                {'username': conf.cache.redis_username}
-            conf_dict['%s.arguments.sentinel_kwargs' % prefix] = \
-                {'username': conf.cache.redis_username}
         conf_dict['%s.arguments.service_name' % prefix] = \
             conf.cache.redis_sentinel_service_name
         if conf.cache.redis_sentinels:
@@ -288,16 +281,13 @@ def _build_cache_config(conf):
                 })
             if conf.cache.backend == 'dogpile.cache.redis_sentinel':
                 conn_kwargs.update({'ssl': True})
-                conf_dict.setdefault(
-                    '%s.arguments.connection_kwargs' % prefix,
-                    {}).update(conn_kwargs)
-                conf_dict.setdefault(
-                    '%s.arguments.sentinel_kwargs' % prefix,
-                    {}).update(conn_kwargs)
+                conf_dict['%s.arguments.connection_kwargs' % prefix] = \
+                    conn_kwargs
+                conf_dict['%s.arguments.sentinel_kwargs' % prefix] = \
+                    conn_kwargs
             else:
-                conf_dict.setdefault(
-                    '%s.arguments.connection_kwargs' % prefix,
-                    {}).update(conn_kwargs)
+                conf_dict['%s.arguments.connection_kwargs' % prefix] = \
+                    conn_kwargs
         else:
             raise exception.ConfigurationError(
                 "TLS setting via [cache] tls_enabled is not supported by the "
