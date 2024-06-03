@@ -122,10 +122,10 @@ def _build_cache_config(conf):
     """
     prefix = conf.cache.config_prefix
     conf_dict = {}
-    conf_dict['%s.backend' % prefix] = _opts._DEFAULT_BACKEND
+    conf_dict[f'{prefix}.backend'] = _opts._DEFAULT_BACKEND
     if conf.cache.enabled is True:
-        conf_dict['%s.backend' % prefix] = conf.cache.backend
-    conf_dict['%s.expiration_time' % prefix] = conf.cache.expiration_time
+        conf_dict[f'{prefix}.backend'] = conf.cache.backend
+    conf_dict[f'{prefix}.expiration_time'] = conf.cache.expiration_time
     for argument in conf.cache.backend_argument:
         try:
             (argname, argvalue) = argument.split(':', 1)
@@ -169,20 +169,20 @@ def _build_cache_config(conf):
             netloc=netloc, path='', params='', query='', fragment='')
 
         conf_dict.setdefault(
-            '%s.arguments.url' % prefix,
+            f'{prefix}.arguments.url',
             urllib.parse.urlunparse(parts)
         )
         for arg in ('socket_timeout',):
             value = getattr(conf.cache, 'redis_' + arg)
-            conf_dict['%s.arguments.%s' % (prefix, arg)] = value
+            conf_dict[f'{prefix}.arguments.{arg}'] = value
     elif conf.cache.backend == 'dogpile.cache.redis_sentinel':
         for arg in ('username', 'password', 'socket_timeout'):
             value = getattr(conf.cache, 'redis_' + arg)
-            conf_dict['%s.arguments.%s' % (prefix, arg)] = value
-        conf_dict['%s.arguments.service_name' % prefix] = \
+            conf_dict[f'{prefix}.arguments.{arg}'] = value
+        conf_dict[f'{prefix}.arguments.service_name'] = \
             conf.cache.redis_sentinel_service_name
         if conf.cache.redis_sentinels:
-            conf_dict['%s.arguments.sentinels' % prefix] = [
+            conf_dict[f'{prefix}.arguments.sentinels'] = [
                 _parse_sentinel(s) for s in conf.cache.redis_sentinels]
     else:
         # NOTE(yorik-sar): these arguments will be used for memcache-related
@@ -208,7 +208,7 @@ def _build_cache_config(conf):
         #
         # The normal non-pooled clients connect explicitly on each use and
         # does not need the explicit flush_on_reconnect
-        conf_dict.setdefault('%s.arguments.url' % prefix,
+        conf_dict.setdefault(f'{prefix}.arguments.url',
                              conf.cache.memcache_servers)
 
         for arg in ('dead_retry', 'socket_timeout', 'pool_maxsize',
@@ -216,7 +216,7 @@ def _build_cache_config(conf):
                     'pool_flush_on_reconnect', 'sasl_enabled', 'username',
                     'password'):
             value = getattr(conf.cache, 'memcache_' + arg)
-            conf_dict['%s.arguments.%s' % (prefix, arg)] = value
+            conf_dict[f'{prefix}.arguments.{arg}'] = value
 
     if conf.cache.tls_enabled:
         if conf.cache.backend in ('dogpile.cache.bmemcache',
@@ -255,7 +255,7 @@ def _build_cache_config(conf):
                 )
                 tls_context.set_ciphers(conf.cache.tls_allowed_ciphers)
 
-            conf_dict['%s.arguments.tls_context' % prefix] = tls_context
+            conf_dict[f'{prefix}.arguments.tls_context'] = tls_context
         elif conf.cache.backend in ('dogpile.cache.redis',
                                     'dogpile.cache.redis_sentinel'):
             if conf.cache.tls_allowed_ciphers is not None:
@@ -281,12 +281,12 @@ def _build_cache_config(conf):
                 })
             if conf.cache.backend == 'dogpile.cache.redis_sentinel':
                 conn_kwargs.update({'ssl': True})
-                conf_dict['%s.arguments.connection_kwargs' % prefix] = \
+                conf_dict[f'{prefix}.arguments.connection_kwargs'] = \
                     conn_kwargs
-                conf_dict['%s.arguments.sentinel_kwargs' % prefix] = \
+                conf_dict[f'{prefix}.arguments.sentinel_kwargs'] = \
                     conn_kwargs
             else:
-                conf_dict['%s.arguments.connection_kwargs' % prefix] = \
+                conf_dict[f'{prefix}.arguments.connection_kwargs'] = \
                     conn_kwargs
         else:
             raise exception.ConfigurationError(
@@ -312,7 +312,7 @@ def _build_cache_config(conf):
             # As with the TLS context above, the config dict below will be
             # consumed by dogpile.cache that will be used as a proxy between
             # oslo.cache and pymemcache.
-            conf_dict['%s.arguments.socket_keepalive' % prefix] = \
+            conf_dict[f'{prefix}.arguments.socket_keepalive'] = \
                 socket_keepalive
         elif conf.cache.backend in ('dogpile.cache.redis',
                                     'dogpile.cache.redis_sentinel'):
@@ -322,7 +322,7 @@ def _build_cache_config(conf):
                 socket.TCP_KEEPCNT: conf.cache.socket_keepalive_count
             }
             conf_dict.setdefault(
-                '%s.arguments.connection_kwargs' % prefix, {}
+                f'{prefix}.arguments.connection_kwargs', {}
             ).update({
                 'socket_keepalive': True,
                 'socket_keepalive_options': socket_keepalive_options
@@ -346,16 +346,16 @@ def _build_cache_config(conf):
             )
             raise exception.ConfigurationError(msg)
         import pymemcache
-        conf_dict['%s.arguments.enable_retry_client' % prefix] = True
-        conf_dict['%s.arguments.retry_attempts' % prefix] = \
+        conf_dict[f'{prefix}.arguments.enable_retry_client'] = True
+        conf_dict[f'{prefix}.arguments.retry_attempts'] = \
             conf.cache.retry_attempts
-        conf_dict['%s.arguments.retry_delay' % prefix] = \
+        conf_dict[f'{prefix}.arguments.retry_delay'] = \
             conf.cache.retry_delay
-        conf_dict['%s.arguments.hashclient_retry_attempts' % prefix] = \
+        conf_dict[f'{prefix}.arguments.hashclient_retry_attempts'] = \
             conf.cache.hashclient_retry_attempts
-        conf_dict['%s.arguments.hashclient_retry_delay' % prefix] = \
+        conf_dict[f'{prefix}.arguments.hashclient_retry_delay'] = \
             conf.cache.hashclient_retry_delay
-        conf_dict['%s.arguments.dead_timeout' % prefix] = \
+        conf_dict[f'{prefix}.arguments.dead_timeout'] = \
             conf.cache.dead_timeout
 
     return conf_dict
@@ -445,7 +445,7 @@ def configure_cache_region(conf, region):
 
         config_dict = _build_cache_config(conf)
         region.configure_from_config(config_dict,
-                                     '%s.' % conf.cache.config_prefix)
+                                     f'{conf.cache.config_prefix}.')
 
         if conf.cache.debug_cache_backend:
             region.wrap(_DebugProxy)
