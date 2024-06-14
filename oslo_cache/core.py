@@ -35,6 +35,7 @@ The library has special public value for nonexistent or expired keys called
     NO_VALUE = core.NO_VALUE
 """
 import re
+import socket
 import ssl
 import urllib.parse
 
@@ -304,28 +305,43 @@ def _build_cache_config(conf):
                 "backend." % conf.cache.backend
             )
 
-    # NOTE(hberaud): Pymemcache support socket keepalive, If it is enable in
-    # our config then configure it to enable this feature.
-    # The socket keepalive feature means that pymemcache will be able to check
+    # NOTE(hberaud): Pymemcache backend and redis backends support socket
+    # keepalive, If it is enable in our config then configure it to enable this
+    # feature.
+    # The socket keepalive feature means that client will be able to check
     # your connected socket and determine whether the connection is still up
     # and running or if it has broken.
     # This could be used by users who want to handle fine grained failures.
     if conf.cache.enable_socket_keepalive:
-        if conf.cache.backend != 'dogpile.cache.pymemcache':
-            msg = _(
-                "Socket keepalive is only supported by the "
-                "'dogpile.cache.pymemcache' backend."
+        if conf.cache.backend == 'dogpile.cache.pymemcache':
+            import pymemcache
+            socket_keepalive = pymemcache.KeepaliveOpts(
+                idle=conf.cache.socket_keepalive_idle,
+                intvl=conf.cache.socket_keepalive_interval,
+                cnt=conf.cache.socket_keepalive_count)
+            # As with the TLS context above, the config dict below will be
+            # consumed by dogpile.cache that will be used as a proxy between
+            # oslo.cache and pymemcache.
+            conf_dict['%s.arguments.socket_keepalive' % prefix] = \
+                socket_keepalive
+        elif conf.cache.backend in ('dogpile.cache.redis',
+                                    'dogpile.cache.redis_sentinel'):
+            socket_keepalive_options = {
+                socket.TCP_KEEPIDLE: conf.cache.socket_keepalive_idle,
+                socket.TCP_KEEPINTVL: conf.cache.socket_keepalive_interval,
+                socket.TCP_KEEPCNT: conf.cache.socket_keepalive_count
+            }
+            conf_dict.setdefault(
+                '%s.arguments.connection_kwargs' % prefix, {}
+            ).update({
+                'socket_keepalive': True,
+                'socket_keepalive_options': socket_keepalive_options
+            })
+        else:
+            raise exception.ConfigurationError(
+                "Socket keepalive is not supported by the %s backend"
+                % conf.cache.backend
             )
-            raise exception.ConfigurationError(msg)
-        import pymemcache
-        socket_keepalive = pymemcache.KeepaliveOpts(
-            idle=conf.cache.socket_keepalive_idle,
-            intvl=conf.cache.socket_keepalive_interval,
-            cnt=conf.cache.socket_keepalive_count)
-        # As with the TLS context above, the config dict below will be
-        # consumed by dogpile.cache that will be used as a proxy between
-        # oslo.cache and pymemcache.
-        conf_dict['%s.arguments.socket_keepalive' % prefix] = socket_keepalive
 
     # NOTE(hberaud): The pymemcache library comes with retry mechanisms that
     # can be used to wrap all kind of pymemcache clients. The retry wrapper

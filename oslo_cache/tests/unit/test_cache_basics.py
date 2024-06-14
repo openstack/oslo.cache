@@ -14,6 +14,7 @@
 # under the License.
 
 import copy
+import socket
 import ssl
 import time
 from unittest import mock
@@ -768,6 +769,53 @@ class CacheRegionTest(test_cache.BaseTestCase):
             config_dict['test_prefix.arguments.url'])
         self.assertEqual(
             1.0, config_dict['test_prefix.arguments.socket_timeout'])
+
+    def test_cache_dictionary_config_builder_redis_with_keepalive(self):
+        """Validate the backend is reset to default if caching is disabled."""
+        self.config_fixture.config(group='cache',
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.redis',
+                                   redis_server='[::1]:6379',
+                                   enable_socket_keepalive=True)
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+        self.assertEqual(
+            'redis://[::1]:6379',
+            config_dict['test_prefix.arguments.url'])
+        self.assertEqual(
+            1.0, config_dict['test_prefix.arguments.socket_timeout'])
+        self.assertEqual({
+            'socket_keepalive': True,
+            'socket_keepalive_options': {
+                socket.TCP_KEEPIDLE: 1,
+                socket.TCP_KEEPINTVL: 1,
+                socket.TCP_KEEPCNT: 1,
+            }}, config_dict['test_prefix.arguments.connection_kwargs'])
+
+    def test_cache_dictionary_config_builder_redis_with_keepalive_params(self):
+        """Validate the backend is reset to default if caching is disabled."""
+        self.config_fixture.config(group='cache',
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.redis',
+                                   redis_server='[::1]:6379',
+                                   enable_socket_keepalive=True,
+                                   socket_keepalive_idle=2,
+                                   socket_keepalive_interval=3,
+                                   socket_keepalive_count=4)
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+        self.assertEqual(
+            'redis://[::1]:6379',
+            config_dict['test_prefix.arguments.url'])
+        self.assertEqual(
+            1.0, config_dict['test_prefix.arguments.socket_timeout'])
+        self.assertEqual({
+            'socket_keepalive': True,
+            'socket_keepalive_options': {
+                socket.TCP_KEEPIDLE: 2,
+                socket.TCP_KEEPINTVL: 3,
+                socket.TCP_KEEPCNT: 4,
+            }}, config_dict['test_prefix.arguments.connection_kwargs'])
 
     def test_cache_dictionary_config_builder_redis_with_auth(self):
         """Validate the backend is reset to default if caching is disabled."""
