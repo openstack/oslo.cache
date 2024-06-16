@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    The new ``[cache] redis_db`` option has been added, so that a non-default
+    database can be used.

@@ -308,7 +308,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
 
         config_dict = cache._build_cache_config(self.config_fixture.conf)
         self.assertEqual(
-            'redis://localhost:6379',
+            'redis://localhost:6379/0',
             config_dict['test_prefix.arguments.url'])
         self.assertFalse(self.config_fixture.conf.cache.tls_enabled)
         self.assertNotIn('test_prefix.arguments.connection_kwargs',
@@ -373,7 +373,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertIn('test_prefix.arguments.connection_kwargs',
                       config_dict)
         self.assertEqual(
-            'rediss://localhost:6379',
+            'rediss://localhost:6379/0',
             config_dict['test_prefix.arguments.url'])
         self.assertEqual(
             {
@@ -755,23 +755,51 @@ class CacheRegionTest(test_cache.BaseTestCase):
                                      '.pool_flush_on_reconnect'])
 
     def test_cache_dictionary_config_builder_redis(self):
-        """Validate the backend is reset to default if caching is disabled."""
+        """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    config_prefix='test_prefix',
                                    backend='dogpile.cache.redis',
-                                   redis_server='[::1]:6379',
-                                   redis_username='user',
-                                   redis_password='secrete')
+                                   redis_server='[::1]:6379')
 
         config_dict = cache._build_cache_config(self.config_fixture.conf)
         self.assertEqual(
-            'redis://user:secrete@[::1]:6379',
+            'redis://[::1]:6379/0',
             config_dict['test_prefix.arguments.url'])
         self.assertEqual(
             1.0, config_dict['test_prefix.arguments.socket_timeout'])
 
+    def test_cache_dictionary_config_builder_redis_with_db(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(group='cache',
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.redis',
+                                   redis_server='[::1]:6379',
+                                   redis_db=1)
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+        self.assertEqual(
+            'redis://[::1]:6379/1',
+            config_dict['test_prefix.arguments.url'])
+        self.assertEqual(
+            1.0, config_dict['test_prefix.arguments.socket_timeout'])
+
+    def test_cache_dictionary_config_builder_redis_with_sock_to(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(group='cache',
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.redis',
+                                   redis_server='[::1]:6379',
+                                   redis_socket_timeout=10.0)
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+        self.assertEqual(
+            'redis://[::1]:6379/0',
+            config_dict['test_prefix.arguments.url'])
+        self.assertEqual(
+            10.0, config_dict['test_prefix.arguments.socket_timeout'])
+
     def test_cache_dictionary_config_builder_redis_with_keepalive(self):
-        """Validate the backend is reset to default if caching is disabled."""
+        """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    config_prefix='test_prefix',
                                    backend='dogpile.cache.redis',
@@ -780,7 +808,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
 
         config_dict = cache._build_cache_config(self.config_fixture.conf)
         self.assertEqual(
-            'redis://[::1]:6379',
+            'redis://[::1]:6379/0',
             config_dict['test_prefix.arguments.url'])
         self.assertEqual(
             1.0, config_dict['test_prefix.arguments.socket_timeout'])
@@ -793,7 +821,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
             }}, config_dict['test_prefix.arguments.connection_kwargs'])
 
     def test_cache_dictionary_config_builder_redis_with_keepalive_params(self):
-        """Validate the backend is reset to default if caching is disabled."""
+        """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    config_prefix='test_prefix',
                                    backend='dogpile.cache.redis',
@@ -805,7 +833,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
 
         config_dict = cache._build_cache_config(self.config_fixture.conf)
         self.assertEqual(
-            'redis://[::1]:6379',
+            'redis://[::1]:6379/0',
             config_dict['test_prefix.arguments.url'])
         self.assertEqual(
             1.0, config_dict['test_prefix.arguments.socket_timeout'])
@@ -818,7 +846,20 @@ class CacheRegionTest(test_cache.BaseTestCase):
             }}, config_dict['test_prefix.arguments.connection_kwargs'])
 
     def test_cache_dictionary_config_builder_redis_with_auth(self):
-        """Validate the backend is reset to default if caching is disabled."""
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(group='cache',
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.redis',
+                                   redis_server='[::1]:6379',
+                                   redis_password='secrete')
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+        self.assertEqual(
+            'redis://:secrete@[::1]:6379/0',
+            config_dict['test_prefix.arguments.url'])
+
+    def test_cache_dictionary_config_builder_redis_with_auth_and_user(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    config_prefix='test_prefix',
                                    backend='dogpile.cache.redis',
@@ -828,11 +869,11 @@ class CacheRegionTest(test_cache.BaseTestCase):
 
         config_dict = cache._build_cache_config(self.config_fixture.conf)
         self.assertEqual(
-            'redis://user:secrete@[::1]:6379',
+            'redis://user:secrete@[::1]:6379/0',
             config_dict['test_prefix.arguments.url'])
 
     def test_cache_dictionary_config_builder_redis_sentinel(self):
-        """Validate the backend is reset to default if caching is disabled."""
+        """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    enabled=True,
                                    config_prefix='test_prefix',
@@ -841,6 +882,8 @@ class CacheRegionTest(test_cache.BaseTestCase):
         config_dict = cache._build_cache_config(self.config_fixture.conf)
 
         self.assertFalse(self.config_fixture.conf.cache.tls_enabled)
+        self.assertEqual(
+            0, config_dict['test_prefix.arguments.db'])
         self.assertEqual(
             'mymaster', config_dict['test_prefix.arguments.service_name'])
         self.assertEqual([
@@ -853,14 +896,65 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertNotIn('test_prefix.arguments.sentinel_kwargs',
                          config_dict)
 
+    def test_cache_dictionary_config_builder_redis_sentinel_with_db(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.redis_sentinel',
+                                   redis_db=1)
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertFalse(self.config_fixture.conf.cache.tls_enabled)
+        self.assertEqual(
+            1, config_dict['test_prefix.arguments.db'])
+        self.assertEqual(
+            'mymaster', config_dict['test_prefix.arguments.service_name'])
+        self.assertEqual([
+            ('localhost', 26379)
+        ], config_dict['test_prefix.arguments.sentinels'])
+        self.assertEqual(
+            1.0, config_dict['test_prefix.arguments.socket_timeout'])
+        self.assertNotIn('test_prefix.arguments.connection_kwargs',
+                         config_dict)
+        self.assertNotIn('test_prefix.arguments.sentinel_kwargs',
+                         config_dict)
+
+    def test_cache_dictionary_config_builder_redis_sentinel_with_sock_to(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(group='cache',
+                                   enabled=True,
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.redis_sentinel',
+                                   redis_socket_timeout=10.0)
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertFalse(self.config_fixture.conf.cache.tls_enabled)
+        self.assertEqual(
+            0, config_dict['test_prefix.arguments.db'])
+        self.assertEqual(
+            'mymaster', config_dict['test_prefix.arguments.service_name'])
+        self.assertEqual([
+            ('localhost', 26379)
+        ], config_dict['test_prefix.arguments.sentinels'])
+        self.assertEqual(
+            10.0, config_dict['test_prefix.arguments.socket_timeout'])
+        self.assertNotIn('test_prefix.arguments.connection_kwargs',
+                         config_dict)
+        self.assertNotIn('test_prefix.arguments.sentinel_kwargs',
+                         config_dict)
+
     def test_cache_dictionary_config_builder_redis_sentinel_with_auth(self):
-        """Validate the backend is reset to default if caching is disabled."""
+        """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    enabled=True,
                                    config_prefix='test_prefix',
                                    backend='dogpile.cache.redis_sentinel',
                                    redis_username='user',
                                    redis_password='secrete',
+                                   redis_db=1,
                                    redis_sentinels=[
                                        '127.0.0.1:26379',
                                        '[::1]:26379',
@@ -871,6 +965,8 @@ class CacheRegionTest(test_cache.BaseTestCase):
         config_dict = cache._build_cache_config(self.config_fixture.conf)
 
         self.assertFalse(self.config_fixture.conf.cache.tls_enabled)
+        self.assertEqual(
+            1, config_dict['test_prefix.arguments.db'])
         self.assertEqual(
             'cluster', config_dict['test_prefix.arguments.service_name'])
         self.assertEqual([

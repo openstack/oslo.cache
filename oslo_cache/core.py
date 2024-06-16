@@ -166,7 +166,8 @@ def _build_cache_config(conf):
 
         parts = urllib.parse.ParseResult(
             scheme=('rediss' if conf.cache.tls_enabled else 'redis'),
-            netloc=netloc, path='', params='', query='', fragment='')
+            netloc=netloc, path=str(conf.cache.redis_db), params='', query='',
+            fragment='')
 
         conf_dict.setdefault(
             f'{prefix}.arguments.url',
@@ -176,7 +177,7 @@ def _build_cache_config(conf):
             value = getattr(conf.cache, 'redis_' + arg)
             conf_dict[f'{prefix}.arguments.{arg}'] = value
     elif conf.cache.backend == 'dogpile.cache.redis_sentinel':
-        for arg in ('username', 'password', 'socket_timeout'):
+        for arg in ('username', 'password', 'socket_timeout', 'db'):
             value = getattr(conf.cache, 'redis_' + arg)
             conf_dict[f'{prefix}.arguments.{arg}'] = value
         conf_dict[f'{prefix}.arguments.service_name'] = \
