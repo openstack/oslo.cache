@@ -242,7 +242,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
         cached_value = cacheable_function(self.test_value)
         self.assertTrue(cached_value.cached)
 
-    def test_cache_dictionary_config_builder(self):
+    def test_cache_config_builder(self):
         """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    config_prefix='test_prefix',
@@ -264,7 +264,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
                          config_dict['test_prefix.arguments.arg2'])
         self.assertNotIn('test_prefix.arguments.arg3', config_dict)
 
-    def test_cache_dictionary_config_builder_global_disabled(self):
+    def test_cache_config_builder_global_disabled(self):
         """Validate the backend is reset to default if caching is disabled."""
         self.config_fixture.config(group='cache',
                                    enabled=False,
@@ -277,7 +277,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
             _opts._DEFAULT_BACKEND,
             config_dict['test_prefix.backend'])
 
-    def test_cache_dictionary_config_builder_tls_disabled(self):
+    def test_cache_config_builder_tls_disabled(self):
         """Validate the backend is reset to default if caching is disabled."""
         self.config_fixture.config(group='cache',
                                    enabled=True,
@@ -295,7 +295,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
             ssl.create_default_context.assert_not_called()
             self.assertNotIn('test_prefix.arguments.tls_context', config_dict)
 
-    def test_cache_dictionary_config_builder_tls_disabled_redis(self):
+    def test_cache_config_builder_tls_disabled_redis(self):
         """Validate the backend is reset to default if caching is disabled."""
         self.config_fixture.config(group='cache',
                                    enabled=True,
@@ -314,7 +314,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertNotIn('test_prefix.arguments.connection_kwargs',
                          config_dict)
 
-    def test_cache_dictionary_config_builder_tls_disabled_redis_sentinel(self):
+    def test_cache_config_builder_tls_disabled_redis_sentinel(self):
         """Validate the backend is reset to default if caching is disabled."""
         self.config_fixture.config(group='cache',
                                    enabled=True,
@@ -332,7 +332,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertNotIn('test_prefix.arguments.sentinel_kwargs',
                          config_dict)
 
-    def test_cache_dictionary_config_builder_tls_enabled(self):
+    def test_cache_config_builder_tls_enabled(self):
         """Validate the backend is reset to default if caching is disabled."""
         self.config_fixture.config(group='cache',
                                    enabled=True,
@@ -356,7 +356,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
                 config_dict['test_prefix.arguments.tls_context'],
             )
 
-    def test_cache_dictionary_config_builder_tls_enabled_redis(self):
+    def test_cache_config_builder_tls_enabled_redis(self):
         """Validate the backend is reset to default if caching is disabled."""
         self.config_fixture.config(group='cache',
                                    enabled=True,
@@ -384,7 +384,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
             config_dict['test_prefix.arguments.connection_kwargs'])
         self.assertNotIn('test_prefix.arguments.sentinel_kwargs', config_dict)
 
-    def test_cache_dictionary_config_builder_tls_enabled_redis_sentinel(self):
+    def test_cache_config_builder_tls_enabled_redis_sentinel(self):
         """Validate the backend is reset to default if caching is disabled."""
         self.config_fixture.config(group='cache',
                                    enabled=True,
@@ -420,7 +420,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
             config_dict['test_prefix.arguments.sentinel_kwargs'])
 
     @mock.patch('oslo_cache.core._LOG')
-    def test_cache_dictionary_config_builder_fips_mode_supported(self, log):
+    def test_cache_config_builder_fips_mode_supported(self, log):
         """Validate the FIPS mode is supported."""
         self.config_fixture.config(group='cache',
                                    enabled=True,
@@ -440,7 +440,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
                     "Enforcing the use of the OpenSSL FIPS mode")
 
     @mock.patch('oslo_cache.core._LOG')
-    def test_cache_dictionary_config_builder_fips_mode_unsupported(self, log):
+    def test_cache_config_builder_fips_mode_unsupported(self, log):
         """Validate the FIPS mode is not supported."""
         self.config_fixture.config(group='cache',
                                    enabled=True,
@@ -458,7 +458,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
                               cache._build_cache_config,
                               self.config_fixture.conf)
 
-    def test_cache_dictionary_config_builder_fips_mode_unsupported_redis(self):
+    def test_cache_config_builder_fips_mode_unsupported_redis(self):
         """Validate the FIPS mode is not supported."""
         self.config_fixture.config(group='cache',
                                    enabled=True,
@@ -471,7 +471,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
                           cache._build_cache_config,
                           self.config_fixture.conf)
 
-    def test_cache_dictionary_config_builder_tls_enabled_unsupported(self):
+    def test_cache_config_builder_tls_enabled_unsupported(self):
         """Validate the tls_enabled opiton is not supported.."""
         self.config_fixture.config(group='cache',
                                    enabled=True,
@@ -485,7 +485,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
                               self.config_fixture.conf)
             ssl.create_default_context.assert_not_called()
 
-    def test_cache_dictionary_config_builder_tls_enabled_with_config(self):
+    def test_cache_config_builder_tls_enabled_with_config(self):
         """Validate the backend is reset to default if caching is disabled."""
         self.config_fixture.config(group='cache',
                                    enabled=True,
@@ -724,7 +724,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
             100
         )
 
-    def test_cache_dictionary_config_builder_flush_on_reconnect_enabled(self):
+    def test_cache_config_builder_flush_on_reconnect_enabled(self):
         """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    enabled=True,
@@ -739,7 +739,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertTrue(config_dict['test_prefix.arguments'
                                     '.pool_flush_on_reconnect'])
 
-    def test_cache_dictionary_config_builder_flush_on_reconnect_disabled(self):
+    def test_cache_config_builder_flush_on_reconnect_disabled(self):
         """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    enabled=True,
@@ -754,7 +754,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertFalse(config_dict['test_prefix.arguments'
                                      '.pool_flush_on_reconnect'])
 
-    def test_cache_dictionary_config_builder_redis(self):
+    def test_cache_config_builder_redis(self):
         """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    config_prefix='test_prefix',
@@ -768,7 +768,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertEqual(
             1.0, config_dict['test_prefix.arguments.socket_timeout'])
 
-    def test_cache_dictionary_config_builder_redis_with_db(self):
+    def test_cache_config_builder_redis_with_db(self):
         """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    config_prefix='test_prefix',
@@ -783,7 +783,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertEqual(
             1.0, config_dict['test_prefix.arguments.socket_timeout'])
 
-    def test_cache_dictionary_config_builder_redis_with_sock_to(self):
+    def test_cache_config_builder_redis_with_sock_to(self):
         """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    config_prefix='test_prefix',
@@ -798,7 +798,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertEqual(
             10.0, config_dict['test_prefix.arguments.socket_timeout'])
 
-    def test_cache_dictionary_config_builder_redis_with_keepalive(self):
+    def test_cache_config_builder_redis_with_keepalive(self):
         """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    config_prefix='test_prefix',
@@ -820,7 +820,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
                 socket.TCP_KEEPCNT: 1,
             }}, config_dict['test_prefix.arguments.connection_kwargs'])
 
-    def test_cache_dictionary_config_builder_redis_with_keepalive_params(self):
+    def test_cache_config_builder_redis_with_keepalive_params(self):
         """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    config_prefix='test_prefix',
@@ -845,7 +845,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
                 socket.TCP_KEEPCNT: 4,
             }}, config_dict['test_prefix.arguments.connection_kwargs'])
 
-    def test_cache_dictionary_config_builder_redis_with_auth(self):
+    def test_cache_config_builder_redis_with_auth(self):
         """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    config_prefix='test_prefix',
@@ -858,7 +858,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
             'redis://:secrete@[::1]:6379/0',
             config_dict['test_prefix.arguments.url'])
 
-    def test_cache_dictionary_config_builder_redis_with_auth_and_user(self):
+    def test_cache_config_builder_redis_with_auth_and_user(self):
         """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    config_prefix='test_prefix',
@@ -872,7 +872,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
             'redis://user:secrete@[::1]:6379/0',
             config_dict['test_prefix.arguments.url'])
 
-    def test_cache_dictionary_config_builder_redis_sentinel(self):
+    def test_cache_config_builder_redis_sentinel(self):
         """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    enabled=True,
@@ -896,7 +896,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertNotIn('test_prefix.arguments.sentinel_kwargs',
                          config_dict)
 
-    def test_cache_dictionary_config_builder_redis_sentinel_with_db(self):
+    def test_cache_config_builder_redis_sentinel_with_db(self):
         """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    enabled=True,
@@ -921,7 +921,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertNotIn('test_prefix.arguments.sentinel_kwargs',
                          config_dict)
 
-    def test_cache_dictionary_config_builder_redis_sentinel_with_sock_to(self):
+    def test_cache_config_builder_redis_sentinel_with_sock_to(self):
         """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    enabled=True,
@@ -946,7 +946,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertNotIn('test_prefix.arguments.sentinel_kwargs',
                          config_dict)
 
-    def test_cache_dictionary_config_builder_redis_sentinel_with_auth(self):
+    def test_cache_config_builder_redis_sentinel_with_auth(self):
         """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(group='cache',
                                    enabled=True,
@@ -978,6 +978,42 @@ class CacheRegionTest(test_cache.BaseTestCase):
             'user', config_dict['test_prefix.arguments.username'])
         self.assertEqual(
             'secrete', config_dict['test_prefix.arguments.password'])
+
+    def test_cache_config_builder_with_backend_expiration(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(group='cache',
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.memcached',
+                                   backend_expiration_time=600)
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+        self.assertEqual(
+            600, config_dict['test_prefix.expiration_time'])
+        self.assertEqual(
+            600, config_dict['test_prefix.arguments.memcached_expire_time'])
+
+    def test_cache_config_builder_with_redis_backend_expiration(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(group='cache',
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.redis',
+                                   backend_expiration_time=600)
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+        self.assertEqual(
+            600, config_dict['test_prefix.expiration_time'])
+        self.assertEqual(
+            600, config_dict['test_prefix.arguments.redis_expiration_time'])
+
+    def test_cache_config_builder_with_backend_expiration_too_small(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(group='cache',
+                                   config_prefix='test_prefix',
+                                   backend='dogpile.cache.memcached',
+                                   backend_expiration_time=599)
+
+        self.assertRaises(exception.ConfigurationError,
+                          cache._build_cache_config, self.config_fixture.conf)
 
     def test_cache_debug_proxy(self):
         single_value = 'Test Value'

@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    The new ``[cache] enable_backend_expiration`` option has been added. When
+    this option is set to ``True``, all cache records are added to the cache
+    backend in use with expiration time, so that expired records are
+    automatically purged by the reclaiming feature in the backend.

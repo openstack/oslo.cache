@@ -25,10 +25,17 @@ FILE_OPTIONS = {
                         'changed unless there is another dogpile.cache '
                         'region with the same configuration name.'),
         cfg.IntOpt('expiration_time', default=600,
+                   min=1,
                    help='Default TTL, in seconds, for any cached item in '
                         'the dogpile.cache region. This applies to any '
                         'cached method that doesn\'t have an explicit '
                         'cache expiration time defined for it.'),
+        cfg.IntOpt('backend_expiration_time',
+                   min=1,
+                   help='Expiration time in cache backend to purge '
+                        'expired records automatically. This should be '
+                        'greater than expiration_time and all cache_time '
+                        'options'),
         # NOTE(morganfainberg): It is recommended that either Redis or
         # Memcached are used as the dogpile backend for real workloads. To
         # prevent issues with the memory cache ending up in "production"
