@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2013 Metacloud
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -19,7 +18,7 @@ from oslotest import base
 
 class BaseTestCase(base.BaseTestCase):
     def setUp(self):
-        super(BaseTestCase, self).setUp()
+        super().setUp()
         self.config_fixture = self.useFixture(config_fixture.Config())
         self.config_fixture.config(
             # TODO(morganfainberg): Make Cache Testing a separate test case

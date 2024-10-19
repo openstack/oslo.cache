@@ -62,10 +62,10 @@ SON_MANIPULATOR = None
 NO_VALUE = core.NO_VALUE
 
 
-class MockCursor(object):
+class MockCursor:
 
     def __init__(self, collection, dataset_factory):
-        super(MockCursor, self).__init__()
+        super().__init__()
         self.collection = collection
         self._factory = dataset_factory
         self._dataset = self._factory()
@@ -94,10 +94,10 @@ class MockCursor(object):
         return arr[index]
 
 
-class MockCollection(object):
+class MockCollection:
 
     def __init__(self, db, name):
-        super(MockCollection, self).__init__()
+        super().__init__()
         self.name = name
         self._collection_database = db
         self._documents = {}
@@ -218,7 +218,7 @@ class MockCollection(object):
         }
 
 
-class MockMongoDB(object):
+class MockMongoDB:
     def __init__(self, dbname):
         self._dbname = dbname
 
@@ -243,7 +243,7 @@ class MockMongoDB(object):
         return get_collection(self._dbname, name)
 
 
-class MockMongoClient(object):
+class MockMongoClient:
     def __init__(self, *args, **kwargs):
         pass
 
@@ -267,15 +267,15 @@ class MyTransformer(mongo.BaseTransform):
     """Added here just to check manipulator logic is used correctly."""
 
     def transform_incoming(self, son, collection):
-        return super(MyTransformer, self).transform_incoming(son, collection)
+        return super().transform_incoming(son, collection)
 
     def transform_outgoing(self, son, collection):
-        return super(MyTransformer, self).transform_outgoing(son, collection)
+        return super().transform_outgoing(son, collection)
 
 
 class MongoCache(test_cache.BaseTestCase):
     def setUp(self):
-        super(MongoCache, self).setUp()
+        super().setUp()
         global COLLECTIONS
         COLLECTIONS = {}
         mongo.MongoApi._DB = {}
@@ -417,7 +417,7 @@ class MongoCache(test_cache.BaseTestCase):
         self.assertIsInstance(region1.backend.api._data_manipulator,
                               mongo.BaseTransform)
 
-        class_name = '%s.%s' % (MyTransformer.__module__, "MyTransformer")
+        class_name = '{}.{}'.format(MyTransformer.__module__, "MyTransformer")
 
         arguments2 = copy.copy(self.arguments)
         arguments2['cache_collection'] = 'cache_region2'

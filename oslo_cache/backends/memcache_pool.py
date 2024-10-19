@@ -31,7 +31,7 @@ from oslo_cache import exception
 
 
 # Helper to ease backend refactoring
-class ClientProxy(object):
+class ClientProxy:
     def __init__(self, client_pool):
         self.client_pool = client_pool
 
@@ -62,7 +62,7 @@ class PooledMemcachedBackend(memcached_backend.MemcachedBackend):
 
     # Composed from GenericMemcachedBackend's and MemcacheArgs's __init__
     def __init__(self, arguments):
-        super(PooledMemcachedBackend, self).__init__(arguments)
+        super().__init__(arguments)
         if arguments.get('sasl_enabled', False):
             if (arguments.get('username') is None or
                     arguments.get('password') is None):

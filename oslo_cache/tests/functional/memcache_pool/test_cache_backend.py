@@ -29,7 +29,7 @@ class TestMemcachePoolCacheBackend(test_base.BaseTestCaseCacheBackend):
         # NOTE(hberaud): super must be called after all to ensure that
         # config fixture is properly initialized with value related to
         # the current backend in use.
-        super(TestMemcachePoolCacheBackend, self).setUp()
+        super().setUp()
 
 
 class TestBMemcachePoolCacheBackend(test_base.BaseTestCaseCacheBackend):
@@ -46,4 +46,4 @@ class TestBMemcachePoolCacheBackend(test_base.BaseTestCaseCacheBackend):
             memcache_username='sasl_name',
             memcache_password='sasl_pswd'
         )
-        super(TestBMemcachePoolCacheBackend, self).setUp()
+        super().setUp()

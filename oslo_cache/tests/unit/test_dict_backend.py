@@ -28,7 +28,7 @@ VALUE = 'test_value'
 class CacheDictBackendTest(test_cache.BaseTestCase):
 
     def setUp(self):
-        super(CacheDictBackendTest, self).setUp()
+        super().setUp()
         self.config_fixture = self.useFixture(config_fixture.Config())
         self.config_fixture.config(group='cache', backend='oslo_cache.dict')
         self.time_fixture = self.useFixture(time_fixture.TimeFixture())
