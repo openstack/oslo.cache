@@ -211,7 +211,7 @@ class MongoCacheBackend(api.CacheBackend):
         self.client.delete_multi(keys)
 
 
-class MongoApi(object):
+class MongoApi:
     """Class handling MongoDB specific functionality.
 
     This class uses PyMongo APIs internally to create database connection
@@ -494,7 +494,7 @@ class MongoApi(object):
                                            **self.meth_kwargs)
 
 
-class AbstractManipulator(object, metaclass=abc.ABCMeta):
+class AbstractManipulator(metaclass=abc.ABCMeta):
     """Abstract class with methods which need to be implemented for custom
     manipulation.
 

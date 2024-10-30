@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2013 Metacloud
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -50,7 +49,7 @@ class TestProxy(proxy.ProxyBackend):
         return value
 
 
-class TestProxyValue(object):
+class TestProxyValue:
     def __init__(self, value):
         self.value = value
         self.cached = False
@@ -59,7 +58,7 @@ class TestProxyValue(object):
 class CacheRegionTest(test_cache.BaseTestCase):
 
     def setUp(self):
-        super(CacheRegionTest, self).setUp()
+        super().setUp()
         self.region = cache.create_region()
         cache.configure_cache_region(self.config_fixture.conf, self.region)
         self.region.wrap(TestProxy)
@@ -110,7 +109,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
             group='cache',
             expiration_group=TEST_GROUP2)
 
-        class _test_obj(object):
+        class _test_obj:
             def __init__(self, value):
                 self.test_value = value
 

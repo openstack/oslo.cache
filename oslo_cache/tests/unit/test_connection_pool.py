@@ -36,7 +36,7 @@ class _TestConnectionPool(_memcache_pool.ConnectionPool):
 
 class TestConnectionPool(test_cache.BaseTestCase):
     def setUp(self):
-        super(TestConnectionPool, self).setUp()
+        super().setUp()
         self.unused_timeout = 10
         self.maxsize = 2
         self.connection_pool = _TestConnectionPool(

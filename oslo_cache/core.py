@@ -152,12 +152,12 @@ def _build_cache_config(conf):
             netloc = conf.cache.redis_server
         else:
             if conf.cache.redis_username:
-                netloc = '%s:%s@%s' % (conf.cache.redis_username,
-                                       conf.cache.redis_password,
-                                       conf.cache.redis_server)
+                netloc = '{}:{}@{}'.format(conf.cache.redis_username,
+                                           conf.cache.redis_password,
+                                           conf.cache.redis_server)
             else:
-                netloc = ':%s@%s' % (conf.cache.redis_password,
-                                     conf.cache.redis_server)
+                netloc = ':{}@{}'.format(conf.cache.redis_password,
+                                         conf.cache.redis_server)
 
         parts = urllib.parse.ParseResult(
             scheme=('rediss' if conf.cache.tls_enabled else 'redis'),
