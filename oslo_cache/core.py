@@ -214,6 +214,26 @@ def _build_cache_config(conf):
             value = getattr(conf.cache, 'memcache_' + arg)
             conf_dict[f'{prefix}.arguments.{arg}'] = value
 
+    if conf.cache.backend_expiration_time is not None:
+        if conf.cache.expiration_time > conf.cache.backend_expiration_time:
+            raise exception.ConfigurationError(
+                "backend_expiration_time should not be smaller than "
+                "expiration_time.")
+        if conf.cache.backend in ('dogpile.cache.pymemcache',
+                                  'dogpile.cache.memcached',
+                                  'dogpile.cache.pylibmc',
+                                  'oslo_cache.memcache_pool'):
+            conf_dict[f'{prefix}.arguments.memcached_expire_time'] = \
+                conf.cache.backend_expiration_time
+        elif conf.cache.backend in ('dogpile.cache.redis',
+                                    'dogpile.cache.redis_sentinel'):
+            conf_dict[f'{prefix}.arguments.redis_expiration_time'] = \
+                conf.cache.backend_expiration_time
+        else:
+            raise exception.ConfigurationError(
+                "Enabling backend expiration is not supported by"
+                "the %s driver", conf.cache.backend)
+
     if conf.cache.tls_enabled:
         if conf.cache.backend in ('dogpile.cache.bmemcache',
                                   'dogpile.cache.pymemcache',
