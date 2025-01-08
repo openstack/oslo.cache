@@ -191,6 +191,29 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
             )
             conf_dict[f'{prefix}.arguments.host'] = host
             conf_dict[f'{prefix}.arguments.port'] = port
+    elif conf.cache.backend in (
+        'dogpile.cache.valkey',
+        'dogpile.cache.valkey_sentinel',
+    ):
+        for arg in ('username', 'password', 'socket_timeout'):
+            conf_dict[f'{prefix}.arguments.{arg}'] = getattr(conf.cache, arg)
+
+        conf_dict[f'{prefix}.arguments.db'] = conf.cache.valkey_db
+
+        if conf.cache.backend == 'dogpile.cache.valkey_sentinel':
+            conf_dict[f'{prefix}.arguments.service_name'] = (
+                conf.cache.valkey_sentinel_service_name
+            )
+            if conf.cache.valkey_sentinels:
+                conf_dict[f'{prefix}.arguments.sentinels'] = [
+                    _parse_sentinel(s) for s in conf.cache.valkey_sentinels
+                ]
+        else:
+            host, port = netutils.parse_host_port(
+                conf.cache.valkey_server, 6379
+            )
+            conf_dict[f'{prefix}.arguments.host'] = host
+            conf_dict[f'{prefix}.arguments.port'] = port
     else:
         # NOTE(yorik-sar): these arguments will be used for memcache-related
         # backends. Use setdefault for url to support old-style setting through
@@ -259,6 +282,13 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
             conf_dict[f'{prefix}.arguments.redis_expiration_time'] = (
                 conf.cache.backend_expiration_time
             )
+        elif conf.cache.backend in (
+            'dogpile.cache.valkey',
+            'dogpile.cache.valkey_sentinel',
+        ):
+            conf_dict[f'{prefix}.arguments.valkey_expiration_time'] = (
+                conf.cache.backend_expiration_time
+            )
         else:
             raise exception.ConfigurationError(
                 "Enabling backend expiration is not supported bythe %s driver",
@@ -288,6 +318,8 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
         elif conf.cache.backend in (
             'dogpile.cache.redis',
             'dogpile.cache.redis_sentinel',
+            'dogpile.cache.valkey',
+            'dogpile.cache.valkey_sentinel',
         ):
             conn_kwargs = {'ssl': True}
             if conf.cache.tls_cafile is not None:
@@ -304,7 +336,10 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
                     {'ssl_ciphers': conf.cache.tls_allowed_ciphers}
                 )
 
-            if conf.cache.backend == 'dogpile.cache.redis_sentinel':
+            if conf.cache.backend in (
+                'dogpile.cache.redis_sentinel',
+                'dogpile.cache.valkey_sentinel',
+            ):
                 conf_dict[f'{prefix}.arguments.connection_kwargs'] = (
                     conn_kwargs
                 )
@@ -320,9 +355,9 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
                 "or use a different backend."
             )
 
-    # NOTE(hberaud): Pymemcache backend and redis backends support socket
-    # keepalive, If it is enable in our config then configure it to enable this
-    # feature.
+    # NOTE(hberaud): Pymemcache backend, redis backends and valkey backends
+    # support socket keepalive, If it is enable in our config then configure it
+    # to enable this feature.
     # The socket keepalive feature means that client will be able to check
     # your connected socket and determine whether the connection is still up
     # and running or if it has broken.
@@ -345,6 +380,8 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
         elif conf.cache.backend in (
             'dogpile.cache.redis',
             'dogpile.cache.redis_sentinel',
+            'dogpile.cache.valkey',
+            'dogpile.cache.valkey_sentinel',
         ):
             conf_dict[f'{prefix}.arguments.socket_keepalive'] = True
             conf_dict[f'{prefix}.arguments.socket_keepalive_options'] = {
@@ -354,8 +391,8 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
             }
         else:
             raise exception.ConfigurationError(
-                "Socket keepalive is not supported by the "
-                f"{conf.cache.backend} backend"
+                "Socket keepalive is not supported by "
+                f"the {conf.cache.backend} backend"
             )
 
     # NOTE(hberaud): The pymemcache library comes with retry mechanisms that

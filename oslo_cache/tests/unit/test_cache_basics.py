@@ -355,6 +355,52 @@ class CacheRegionTest(test_cache.BaseTestCase):
         )
         self.assertNotIn('test_prefix.arguments.sentinel_kwargs', config_dict)
 
+    def test_cache_config_builder_tls_disabled_valkey(self):
+        """Validate the backend is reset to default if caching is disabled."""
+        self.config_fixture.config(
+            group='cache',
+            enabled=True,
+            config_prefix='test_prefix',
+            backend='dogpile.cache.valkey',
+            tls_cafile='path_to_ca_file',
+            tls_keyfile='path_to_key_file',
+            tls_certfile='path_to_cert_file',
+            tls_allowed_ciphers='allowed_ciphers',
+        )
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+        self.assertEqual(
+            'localhost', config_dict['test_prefix.arguments.host']
+        )
+        self.assertEqual(6379, config_dict['test_prefix.arguments.port'])
+        self.assertIsNone(config_dict['test_prefix.arguments.username'])
+        self.assertIsNone(config_dict['test_prefix.arguments.password'])
+        self.assertEqual(0, config_dict['test_prefix.arguments.db'])
+        self.assertFalse(self.config_fixture.conf.cache.tls_enabled)
+        self.assertNotIn(
+            'test_prefix.arguments.connection_kwargs', config_dict
+        )
+
+    def test_cache_config_builder_tls_disabled_valkey_sentinel(self):
+        """Validate the backend is reset to default if caching is disabled."""
+        self.config_fixture.config(
+            group='cache',
+            enabled=True,
+            config_prefix='test_prefix',
+            backend='dogpile.cache.valkey_sentinel',
+            tls_cafile='path_to_ca_file',
+            tls_keyfile='path_to_key_file',
+            tls_certfile='path_to_cert_file',
+        )
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertFalse(self.config_fixture.conf.cache.tls_enabled)
+        self.assertNotIn(
+            'test_prefix.arguments.connection_kwargs', config_dict
+        )
+        self.assertNotIn('test_prefix.arguments.sentinel_kwargs', config_dict)
+
     def test_cache_config_builder_tls_enabled(self):
         """Validate the backend is reset to default if caching is disabled."""
         self.config_fixture.config(
@@ -426,6 +472,83 @@ class CacheRegionTest(test_cache.BaseTestCase):
             enabled=True,
             config_prefix='test_prefix',
             backend='dogpile.cache.redis_sentinel',
+            tls_enabled=True,
+            tls_cafile='path_to_ca_file',
+            tls_keyfile='path_to_key_file',
+            tls_certfile='path_to_cert_file',
+            tls_allowed_ciphers='allowed_ciphers',
+        )
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertTrue(self.config_fixture.conf.cache.tls_enabled)
+        self.assertIn('test_prefix.arguments.connection_kwargs', config_dict)
+        self.assertEqual(
+            {
+                'ssl': True,
+                'ssl_ca_certs': 'path_to_ca_file',
+                'ssl_keyfile': 'path_to_key_file',
+                'ssl_certfile': 'path_to_cert_file',
+                'ssl_ciphers': 'allowed_ciphers',
+            },
+            config_dict['test_prefix.arguments.connection_kwargs'],
+        )
+        self.assertIn('test_prefix.arguments.sentinel_kwargs', config_dict)
+        self.assertEqual(
+            {
+                'ssl': True,
+                'ssl_ca_certs': 'path_to_ca_file',
+                'ssl_keyfile': 'path_to_key_file',
+                'ssl_certfile': 'path_to_cert_file',
+                'ssl_ciphers': 'allowed_ciphers',
+            },
+            config_dict['test_prefix.arguments.sentinel_kwargs'],
+        )
+
+    def test_cache_config_builder_tls_enabled_valkey(self):
+        """Validate the backend is reset to default if caching is disabled."""
+        self.config_fixture.config(
+            group='cache',
+            enabled=True,
+            config_prefix='test_prefix',
+            backend='dogpile.cache.valkey',
+            tls_enabled=True,
+            tls_cafile='path_to_ca_file',
+            tls_keyfile='path_to_key_file',
+            tls_certfile='path_to_cert_file',
+            tls_allowed_ciphers='allowed_ciphers',
+        )
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertTrue(self.config_fixture.conf.cache.tls_enabled)
+        self.assertIn('test_prefix.arguments.connection_kwargs', config_dict)
+        self.assertEqual(
+            'localhost', config_dict['test_prefix.arguments.host']
+        )
+        self.assertEqual(6379, config_dict['test_prefix.arguments.port'])
+        self.assertIsNone(config_dict['test_prefix.arguments.username'])
+        self.assertIsNone(config_dict['test_prefix.arguments.password'])
+        self.assertEqual(0, config_dict['test_prefix.arguments.db'])
+        self.assertEqual(
+            {
+                'ssl': True,
+                'ssl_ca_certs': 'path_to_ca_file',
+                'ssl_keyfile': 'path_to_key_file',
+                'ssl_certfile': 'path_to_cert_file',
+                'ssl_ciphers': 'allowed_ciphers',
+            },
+            config_dict['test_prefix.arguments.connection_kwargs'],
+        )
+        self.assertNotIn('test_prefix.arguments.sentinel_kwargs', config_dict)
+
+    def test_cache_config_builder_tls_enabled_valkey_sentinel(self):
+        """Validate the backend is reset to default if caching is disabled."""
+        self.config_fixture.config(
+            group='cache',
+            enabled=True,
+            config_prefix='test_prefix',
+            backend='dogpile.cache.valkey_sentinel',
             tls_enabled=True,
             tls_cafile='path_to_ca_file',
             tls_keyfile='path_to_key_file',
@@ -1061,6 +1184,313 @@ class CacheRegionTest(test_cache.BaseTestCase):
             'secrete', config_dict['test_prefix.arguments.password']
         )
 
+    def test_cache_config_builder_valkey(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(
+            group='cache',
+            config_prefix='test_prefix',
+            backend='dogpile.cache.valkey',
+            valkey_server='[::1]:6379',
+        )
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+        self.assertEqual('::1', config_dict['test_prefix.arguments.host'])
+        self.assertEqual(6379, config_dict['test_prefix.arguments.port'])
+        self.assertIsNone(config_dict['test_prefix.arguments.username'])
+        self.assertIsNone(config_dict['test_prefix.arguments.password'])
+        self.assertEqual(0, config_dict['test_prefix.arguments.db'])
+        self.assertEqual(
+            1.0, config_dict['test_prefix.arguments.socket_timeout']
+        )
+        self.assertNotIn('test_prefix.arguments.socket_keepalive', config_dict)
+        self.assertNotIn(
+            'test_prefix.arguments.socket_keepalive_options', config_dict
+        )
+
+    def test_cache_config_builder_valkey_with_db(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(
+            group='cache',
+            config_prefix='test_prefix',
+            backend='dogpile.cache.valkey',
+            valkey_server='[::1]:6379',
+            valkey_db=1,
+        )
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+        self.assertEqual('::1', config_dict['test_prefix.arguments.host'])
+        self.assertEqual(6379, config_dict['test_prefix.arguments.port'])
+        self.assertIsNone(config_dict['test_prefix.arguments.username'])
+        self.assertIsNone(config_dict['test_prefix.arguments.password'])
+        self.assertEqual(1, config_dict['test_prefix.arguments.db'])
+        self.assertEqual(
+            1.0, config_dict['test_prefix.arguments.socket_timeout']
+        )
+        self.assertNotIn('test_prefix.arguments.socket_keepalive', config_dict)
+        self.assertNotIn(
+            'test_prefix.arguments.socket_keepalive_options', config_dict
+        )
+
+    def test_cache_config_builder_valkey_with_sock_to(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(
+            group='cache',
+            config_prefix='test_prefix',
+            backend='dogpile.cache.valkey',
+            valkey_server='[::1]:6379',
+            socket_timeout=10.0,
+        )
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+        self.assertEqual('::1', config_dict['test_prefix.arguments.host'])
+        self.assertEqual(6379, config_dict['test_prefix.arguments.port'])
+        self.assertIsNone(config_dict['test_prefix.arguments.username'])
+        self.assertIsNone(config_dict['test_prefix.arguments.password'])
+        self.assertEqual(0, config_dict['test_prefix.arguments.db'])
+        self.assertEqual(
+            10.0, config_dict['test_prefix.arguments.socket_timeout']
+        )
+        self.assertNotIn('test_prefix.arguments.socket_keepalive', config_dict)
+        self.assertNotIn(
+            'test_prefix.arguments.socket_keepalive_options', config_dict
+        )
+
+    def test_cache_config_builder_valkey_with_keepalive(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(
+            group='cache',
+            config_prefix='test_prefix',
+            backend='dogpile.cache.valkey',
+            valkey_server='[::1]:6379',
+            enable_socket_keepalive=True,
+        )
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+        self.assertEqual('::1', config_dict['test_prefix.arguments.host'])
+        self.assertEqual(6379, config_dict['test_prefix.arguments.port'])
+        self.assertIsNone(config_dict['test_prefix.arguments.username'])
+        self.assertIsNone(config_dict['test_prefix.arguments.password'])
+        self.assertEqual(0, config_dict['test_prefix.arguments.db'])
+        self.assertEqual(
+            1.0, config_dict['test_prefix.arguments.socket_timeout']
+        )
+        self.assertTrue(config_dict['test_prefix.arguments.socket_keepalive'])
+        self.assertEqual(
+            {
+                socket.TCP_KEEPIDLE: 1,
+                socket.TCP_KEEPINTVL: 1,
+                socket.TCP_KEEPCNT: 1,
+            },
+            config_dict['test_prefix.arguments.socket_keepalive_options'],
+        )
+
+    def test_cache_config_builder_valkey_with_keepalive_params(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(
+            group='cache',
+            config_prefix='test_prefix',
+            backend='dogpile.cache.valkey',
+            valkey_server='[::1]:6379',
+            enable_socket_keepalive=True,
+            socket_keepalive_idle=2,
+            socket_keepalive_interval=3,
+            socket_keepalive_count=4,
+        )
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+        self.assertEqual('::1', config_dict['test_prefix.arguments.host'])
+        self.assertEqual(6379, config_dict['test_prefix.arguments.port'])
+        self.assertIsNone(config_dict['test_prefix.arguments.username'])
+        self.assertIsNone(config_dict['test_prefix.arguments.password'])
+        self.assertEqual(0, config_dict['test_prefix.arguments.db'])
+        self.assertEqual(
+            1.0, config_dict['test_prefix.arguments.socket_timeout']
+        )
+        self.assertTrue(config_dict['test_prefix.arguments.socket_keepalive'])
+        self.assertEqual(
+            {
+                socket.TCP_KEEPIDLE: 2,
+                socket.TCP_KEEPINTVL: 3,
+                socket.TCP_KEEPCNT: 4,
+            },
+            config_dict['test_prefix.arguments.socket_keepalive_options'],
+        )
+
+    def test_cache_config_builder_valkey_with_auth(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(
+            group='cache',
+            config_prefix='test_prefix',
+            backend='dogpile.cache.valkey',
+            valkey_server='[::1]:6379',
+            password='secrete',
+        )
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+        self.assertEqual('::1', config_dict['test_prefix.arguments.host'])
+        self.assertEqual(6379, config_dict['test_prefix.arguments.port'])
+        self.assertIsNone(config_dict['test_prefix.arguments.username'])
+        self.assertEqual(
+            'secrete', config_dict['test_prefix.arguments.password']
+        )
+        self.assertEqual(0, config_dict['test_prefix.arguments.db'])
+
+    def test_cache_config_builder_valkey_with_auth_and_user(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(
+            group='cache',
+            config_prefix='test_prefix',
+            backend='dogpile.cache.valkey',
+            valkey_server='[::1]:6379',
+            username='user',
+            password='secrete',
+        )
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+        self.assertEqual('::1', config_dict['test_prefix.arguments.host'])
+        self.assertEqual(6379, config_dict['test_prefix.arguments.port'])
+        self.assertEqual('user', config_dict['test_prefix.arguments.username'])
+        self.assertEqual(
+            'secrete', config_dict['test_prefix.arguments.password']
+        )
+        self.assertEqual(0, config_dict['test_prefix.arguments.db'])
+
+    def test_cache_config_builder_valkey_sentinel(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(
+            group='cache',
+            enabled=True,
+            config_prefix='test_prefix',
+            backend='dogpile.cache.valkey_sentinel',
+        )
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertFalse(self.config_fixture.conf.cache.tls_enabled)
+        self.assertEqual(0, config_dict['test_prefix.arguments.db'])
+        self.assertEqual(
+            'mymaster', config_dict['test_prefix.arguments.service_name']
+        )
+        self.assertEqual(
+            [('localhost', 26379)],
+            config_dict['test_prefix.arguments.sentinels'],
+        )
+        self.assertEqual(
+            1.0, config_dict['test_prefix.arguments.socket_timeout']
+        )
+        self.assertNotIn('test_prefix.arguments.socket_keepalive', config_dict)
+        self.assertNotIn(
+            'test_prefix.arguments.socket_keepalive_options', config_dict
+        )
+        self.assertNotIn(
+            'test_prefix.arguments.connection_kwargs', config_dict
+        )
+        self.assertNotIn('test_prefix.arguments.sentinel_kwargs', config_dict)
+
+    def test_cache_config_builder_valkey_sentinel_with_db(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(
+            group='cache',
+            enabled=True,
+            config_prefix='test_prefix',
+            backend='dogpile.cache.valkey_sentinel',
+            valkey_db=1,
+        )
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertFalse(self.config_fixture.conf.cache.tls_enabled)
+        self.assertEqual(1, config_dict['test_prefix.arguments.db'])
+        self.assertEqual(
+            'mymaster', config_dict['test_prefix.arguments.service_name']
+        )
+        self.assertEqual(
+            [('localhost', 26379)],
+            config_dict['test_prefix.arguments.sentinels'],
+        )
+        self.assertEqual(
+            1.0, config_dict['test_prefix.arguments.socket_timeout']
+        )
+        self.assertNotIn('test_prefix.arguments.socket_keepalive', config_dict)
+        self.assertNotIn(
+            'test_prefix.arguments.socket_keepalive_options', config_dict
+        )
+        self.assertNotIn(
+            'test_prefix.arguments.connection_kwargs', config_dict
+        )
+        self.assertNotIn('test_prefix.arguments.sentinel_kwargs', config_dict)
+
+    def test_cache_config_builder_valkey_sentinel_with_sock_to(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(
+            group='cache',
+            enabled=True,
+            config_prefix='test_prefix',
+            backend='dogpile.cache.valkey_sentinel',
+            socket_timeout=10.0,
+        )
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertFalse(self.config_fixture.conf.cache.tls_enabled)
+        self.assertEqual(0, config_dict['test_prefix.arguments.db'])
+        self.assertEqual(
+            'mymaster', config_dict['test_prefix.arguments.service_name']
+        )
+        self.assertEqual(
+            [('localhost', 26379)],
+            config_dict['test_prefix.arguments.sentinels'],
+        )
+        self.assertEqual(
+            10.0, config_dict['test_prefix.arguments.socket_timeout']
+        )
+        self.assertNotIn('test_prefix.arguments.socket_keepalive', config_dict)
+        self.assertNotIn(
+            'test_prefix.arguments.socket_keepalive_options', config_dict
+        )
+        self.assertNotIn(
+            'test_prefix.arguments.connection_kwargs', config_dict
+        )
+        self.assertNotIn('test_prefix.arguments.sentinel_kwargs', config_dict)
+
+    def test_cache_config_builder_valkey_sentinel_with_auth(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(
+            group='cache',
+            enabled=True,
+            config_prefix='test_prefix',
+            backend='dogpile.cache.valkey_sentinel',
+            username='user',
+            password='secrete',
+            valkey_db=1,
+            valkey_sentinels=[
+                '127.0.0.1:26379',
+                '[::1]:26379',
+                'localhost:26379',
+            ],
+            valkey_sentinel_service_name='cluster',
+        )
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+
+        self.assertFalse(self.config_fixture.conf.cache.tls_enabled)
+        self.assertEqual(1, config_dict['test_prefix.arguments.db'])
+        self.assertEqual(
+            'cluster', config_dict['test_prefix.arguments.service_name']
+        )
+        self.assertEqual(
+            [
+                ('127.0.0.1', 26379),
+                ('::1', 26379),
+                ('localhost', 26379),
+            ],
+            config_dict['test_prefix.arguments.sentinels'],
+        )
+        self.assertEqual('user', config_dict['test_prefix.arguments.username'])
+        self.assertEqual(
+            'secrete', config_dict['test_prefix.arguments.password']
+        )
+
     def test_cache_config_builder_with_backend_expiration(self):
         """Validate we build a sane dogpile.cache dictionary config."""
         self.config_fixture.config(
@@ -1089,6 +1519,21 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertEqual(600, config_dict['test_prefix.expiration_time'])
         self.assertEqual(
             600, config_dict['test_prefix.arguments.redis_expiration_time']
+        )
+
+    def test_cache_config_builder_with_valkey_backend_expiration(self):
+        """Validate we build a sane dogpile.cache dictionary config."""
+        self.config_fixture.config(
+            group='cache',
+            config_prefix='test_prefix',
+            backend='dogpile.cache.valkey',
+            backend_expiration_time=600,
+        )
+
+        config_dict = cache._build_cache_config(self.config_fixture.conf)
+        self.assertEqual(600, config_dict['test_prefix.expiration_time'])
+        self.assertEqual(
+            600, config_dict['test_prefix.arguments.valkey_expiration_time']
         )
 
     def test_cache_config_builder_with_backend_expiration_too_small(self):

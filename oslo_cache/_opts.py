@@ -81,6 +81,8 @@ OPTS = [
             'dogpile.cache.dbm',
             'dogpile.cache.redis',
             'dogpile.cache.redis_sentinel',
+            'dogpile.cache.valkey',
+            'dogpile.cache.valkey_sentinel',
             'dogpile.cache.memory',
             'dogpile.cache.memory_pickle',
             'dogpile.cache.null',
@@ -90,10 +92,10 @@ OPTS = [
             'environments with hundreds of threaded servers, Memcache '
             'with pooling (oslo_cache.memcache_pool) is recommended. '
             'For environments with less than 100 threaded servers, '
-            'Memcached (dogpile.cache.memcached) or Redis '
-            '(dogpile.cache.redis) is recommended. Test environments '
-            'with a single instance of the server can use the '
-            'dogpile.cache.memory backend.'
+            'Memcached (dogpile.cache.memcached), Redis '
+            '(dogpile.cache.redis) or Valkey (dogpile.cache.valkey) is '
+            'recommended. Test environments with a single instance of '
+            'the server can use the dogpile.cache.memory backend.'
         ),
     ),
     cfg.MultiStrOpt(
@@ -220,6 +222,24 @@ OPTS = [
         help='Service name of the redis sentinel cluster.',
     ),
     cfg.StrOpt(
+        'valkey_server',
+        default='localhost:6379',
+        help='Valkey server in the format of "host:port"',
+    ),
+    cfg.IntOpt(
+        'valkey_db', default=0, min=0, help='Database id in Valkey server'
+    ),
+    cfg.ListOpt(
+        'valkey_sentinels',
+        default=['localhost:26379'],
+        help='Valkey sentinel servers in the format of "host:port"',
+    ),
+    cfg.StrOpt(
+        'valkey_sentinel_service_name',
+        default='mymaster',
+        help='Service name of the valkey sentinel cluster.',
+    ),
+    cfg.StrOpt(
         'username',
         help='the user name for authentication to backend.',
         deprecated_opts=[
@@ -249,6 +269,8 @@ OPTS = [
                     'oslo_cache.memcache_pool',
                     'dogpile.cache.redis',
                     'dogpile.cache.redis_sentinel',
+                    'dogpile.cache.valkey',
+                    'dogpile.cache.valkey_sentinel',
                 ]
             )
         ),
@@ -300,6 +322,8 @@ OPTS = [
                     'oslo_cache.memcache_pool',
                     'dogpile.cache.redis',
                     'dogpile.cache.redis_sentinel',
+                    'dogpile.cache.valkey',
+                    'dogpile.cache.valkey_sentinel',
                 ]
             )
         ),
@@ -319,6 +343,8 @@ OPTS = [
                     'oslo_cache.memcache_pool',
                     'dogpile.cache.redis',
                     'dogpile.cache.redis_sentinel',
+                    'dogpile.cache.valkey',
+                    'dogpile.cache.valkey_sentinel',
                 ]
             )
         ),
