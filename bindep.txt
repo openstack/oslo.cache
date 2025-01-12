@@ -1,7 +1,9 @@
 # This file contains runtime (non-python) dependencies
 # More info at: https://docs.openstack.org/infra/bindep/readme.html
 
-etcd [tests-functional-etcd]
+etcd [platform:rpm tests-functional-etcd]
+etcd-server [platform:dpkg tests-functional-etcd]
+etcd-client [platform:dpkg tests-functional-etcd]
 memcached [tests-functional-memcached]
 redis [platform:rpm tests-functional-redis]
 redis-server [platform:dpkg tests-functional-redis]
