@@ -12,7 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
+
 from oslo_cache.tests.functional import test_base
+
+
+REDIS_PORT = os.getenv("OSLO_CACHE_TEST_REDIS_PORT", "6379")
 
 
 class TestRedisCacheBackend(test_base.BaseTestCaseCacheBackend):
@@ -20,7 +25,7 @@ class TestRedisCacheBackend(test_base.BaseTestCaseCacheBackend):
         self.config_fixture.config(
             group='cache',
             backend='dogpile.cache.redis',
-            redis_server='127.0.0.1:6379',
+            redis_server=f"127.0.0.1:{REDIS_PORT}",
         )
 
         # NOTE(hberaud): super must be called after all to ensure that
