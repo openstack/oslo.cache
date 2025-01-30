@@ -14,6 +14,7 @@
 # under the License.
 
 """Thread-safe connection pool for python-binary-memcached."""
+import debtcollector
 try:
     import eventlet
 except ImportError:
@@ -23,6 +24,16 @@ from oslo_cache._memcache_pool import MemcacheClientPool
 from oslo_log import log
 
 LOG = log.getLogger(__name__)
+
+
+if eventlet and eventlet.patcher.is_monkey_patched('thread'):
+    debtcollector.deprecate(
+        "Eventlet support is deprecated "
+        "and will be soon no longer supported. "
+        "This backend was originally designed to be compatible with Eventlet "
+        "and with monkey patching, so using this backend in an environment "
+        "with eventlet is now deprecated. "
+        "Please migrate your code and stop monkey patching your environment.")
 
 
 class _BMemcacheClient(bmemcached.Client):
