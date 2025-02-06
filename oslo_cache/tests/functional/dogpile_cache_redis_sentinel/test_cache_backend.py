@@ -12,7 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
+
 from oslo_cache.tests.functional import test_base
+
+
+REDIS_SENTINEL_PORT = os.getenv("OSLO_CACHE_TEST_REDIS_SENTINEL_PORT", "6380")
 
 
 class TestRedisSentinelCacheBackend(test_base.BaseTestCaseCacheBackend):
@@ -20,7 +25,7 @@ class TestRedisSentinelCacheBackend(test_base.BaseTestCaseCacheBackend):
         self.config_fixture.config(
             group='cache',
             backend='dogpile.cache.redis_sentinel',
-            redis_sentinels=['127.0.0.1:6380'],
+            redis_sentinels=[f"127.0.0.1:{REDIS_SENTINEL_PORT}"],
             redis_sentinel_service_name='pifpaf'
         )
 

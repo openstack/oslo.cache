@@ -12,7 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
+
 from oslo_cache.tests.functional import test_base
+
+
+MEMCACHED_PORT = os.getenv("OSLO_CACHE_TEST_MEMCACHED_PORT", "11212")
 
 
 class TestDogpileCacheBMemcachedBackend(test_base.BaseTestCaseCacheBackend):
@@ -20,7 +25,7 @@ class TestDogpileCacheBMemcachedBackend(test_base.BaseTestCaseCacheBackend):
         self.config_fixture.config(
             group="cache",
             backend="dogpile.cache.bmemcached",
-            memcache_servers="localhost:11212",
+            memcache_servers=f"localhost:{MEMCACHED_PORT}",
         )
 
         # NOTE(hberaud): super must be called after all to ensure that
