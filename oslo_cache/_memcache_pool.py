@@ -39,12 +39,7 @@ LOG = log.getLogger(__name__)
 
 if eventlet and eventlet.patcher.is_monkey_patched('thread'):
     debtcollector.deprecate(
-        "Eventlet support is deprecated "
-        "and will be soon no longer supported. "
-        "This backend was originally designed to be compatible with Eventlet "
-        "and with monkey patching, so using this backend in an environment "
-        "with eventlet is now deprecated. "
-        "Please migrate your code and stop monkey patching your environment.")
+        "Eventlet support is deprecated and will be removed.")
 
 
 class _MemcacheClient(memcache.Client):
