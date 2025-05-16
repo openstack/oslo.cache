@@ -262,6 +262,10 @@ def _build_cache_config(conf):
                 tls_context.set_ciphers(conf.cache.tls_allowed_ciphers)
 
             conf_dict['%s.arguments.tls_context' % prefix] = tls_context
+
+            # pass the value of tls_enabled to the backend
+            conf_dict['%s.arguments.tls_enabled' % prefix] = \
+                conf.cache.tls_enabled
         elif conf.cache.backend in ('dogpile.cache.redis',
                                     'dogpile.cache.redis_sentinel'):
             if conf.cache.tls_allowed_ciphers is not None:
