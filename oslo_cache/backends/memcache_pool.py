@@ -63,9 +63,11 @@ class PooledMemcachedBackend(memcached_backend.MemcachedBackend):
     # Composed from GenericMemcachedBackend's and MemcacheArgs's __init__
     def __init__(self, arguments):
         super().__init__(arguments)
-        if arguments.get('sasl_enabled', False):
-            if (arguments.get('username') is None or
-                    arguments.get('password') is None):
+        if (arguments.get('tls_enabled', False) or
+                arguments.get('sasl_enabled', False)):
+            if (arguments.get('sasl_enabled', False) and
+                (arguments.get('username') is None or
+                    arguments.get('password') is None)):
                 raise exception.ConfigurationError(
                     'username and password should be configured to use SASL '
                     'authentication.')
