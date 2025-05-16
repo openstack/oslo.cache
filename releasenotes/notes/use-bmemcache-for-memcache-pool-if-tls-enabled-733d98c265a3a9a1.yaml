@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    If tls_enabled=true memcache_pool has been switched to use bmemcached.
