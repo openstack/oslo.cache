@@ -189,6 +189,9 @@ def _build_cache_config(conf):
 
         conf_dict['%s.arguments.tls_context' % prefix] = tls_context
 
+        # pass the value of tls_enabled to the backend
+        conf_dict['%s.arguments.tls_enabled' % prefix] = conf.cache.tls_enabled
+
     # NOTE(hberaud): Pymemcache support socket keepalive, If it is enable in
     # our config then configure it to enable this feature.
     # The socket keepalive feature means that pymemcache will be able to check

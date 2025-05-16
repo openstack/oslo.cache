@@ -56,7 +56,8 @@ class PooledMemcachedBackend(memcached_backend.MemcachedBackend):
     # Composed from GenericMemcachedBackend's and MemcacheArgs's __init__
     def __init__(self, arguments):
         super(PooledMemcachedBackend, self).__init__(arguments)
-        if arguments.get('sasl_enabled', False):
+        if (arguments.get('tls_enabled', False) or
+                arguments.get('sasl_enabled', False)):
             self.client_pool = _bmemcache_pool.BMemcacheClientPool(
                 self.url,
                 arguments,
