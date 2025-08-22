@@ -90,7 +90,7 @@ FILE_OPTIONS = {
                          'host refer to an IPv6 or a given domain refer to '
                          'IPv6 then you should prefix the given address with '
                          'the address family (``inet6``) '
-                         '(e.g ``inet6[::1]:11211``, '
+                         '(e.g ``inet6:[::1]:11211``, '
                          '``inet6:[fd12:3456:789a:1::1]:11211``, '
                          '``inet6:[controller-0.internalapi]:11211``). '
                          'If the address family is not given then these '
