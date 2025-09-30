@@ -11,8 +11,13 @@
 # under the License.
 
 
-from oslo_cache.core import *  # noqa
-
+from oslo_cache.core import (
+    configure,
+    configure_cache_region,
+    create_region,
+    get_memoization_decorator,
+    NO_VALUE,
+)
 
 __all__ = [
     'configure',

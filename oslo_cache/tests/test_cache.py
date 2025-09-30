@@ -26,4 +26,5 @@ class BaseTestCase(base.BaseTestCase):
             group='cache',
             backend='dogpile.cache.memory',
             enabled=True,
-            proxies=['oslo_cache.testing.CacheIsolatingProxy'])
+            proxies=['oslo_cache.testing.CacheIsolatingProxy'],
+        )

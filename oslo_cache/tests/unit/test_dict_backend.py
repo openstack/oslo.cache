@@ -26,7 +26,6 @@ VALUE = 'test_value'
 
 
 class CacheDictBackendTest(test_cache.BaseTestCase):
-
     def setUp(self):
         super().setUp()
         self.config_fixture = self.useFixture(config_fixture.Config())
@@ -34,7 +33,8 @@ class CacheDictBackendTest(test_cache.BaseTestCase):
         self.time_fixture = self.useFixture(time_fixture.TimeFixture())
         self.region = dp_region.make_region()
         self.region.configure(
-            'oslo_cache.dict', arguments={'expiration_time': 0.5})
+            'oslo_cache.dict', arguments={'expiration_time': 0.5}
+        )
 
     def test_dict_backend(self):
         self.assertIs(NO_VALUE, self.region.get(KEY))
@@ -64,7 +64,8 @@ class CacheDictBackendTest(test_cache.BaseTestCase):
     def test_dict_backend_zero_expiration_time(self):
         self.region = dp_region.make_region()
         self.region.configure(
-            'oslo_cache.dict', arguments={'expiration_time': 0})
+            'oslo_cache.dict', arguments={'expiration_time': 0}
+        )
 
         self.region.set(KEY, VALUE)
         self.time_fixture.advance_time_seconds(1)

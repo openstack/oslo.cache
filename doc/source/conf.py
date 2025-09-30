@@ -34,9 +34,7 @@ openstackdocs_bug_tag = ''
 # sphinxcontrib.apidoc options
 apidoc_module_dir = '../../oslo_cache'
 apidoc_output_dir = 'reference/api'
-apidoc_excluded_paths = [
-    'tests'
-]
+apidoc_excluded_paths = ['tests']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -70,16 +68,19 @@ html_theme = 'openstackdocs'
 # html_static_path = ['static']
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = '%sdoc' % project
+htmlhelp_basename = f'{project}doc'
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass
 # [howto/manual]).
 latex_documents = [
-    ('index',
-     '%s.tex' % project,
-     '%s Documentation' % project,
-     'OpenStack Foundation', 'manual'),
+    (
+        'index',
+        f'{project}.tex',
+        f'{project} Documentation',
+        'OpenStack Foundation',
+        'manual',
+    ),
 ]
 
 intersphinx_mapping = {

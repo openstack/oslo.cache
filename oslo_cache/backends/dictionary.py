@@ -18,9 +18,7 @@ from dogpile.cache import api
 from oslo_cache import core
 from oslo_utils import timeutils
 
-__all__ = [
-    'DictCacheBackend'
-]
+__all__ = ['DictCacheBackend']
 
 _NO_VALUE = core.NO_VALUE
 

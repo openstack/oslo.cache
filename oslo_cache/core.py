@@ -32,8 +32,10 @@ The library has special public value for nonexistent or expired keys called
 :data:`NO_VALUE`. To use this value you should import it from oslo_cache.core::
 
     from oslo_cache import core
+
     NO_VALUE = core.NO_VALUE
 """
+
 import socket
 import ssl
 import urllib.parse
@@ -67,6 +69,7 @@ _LOG = log.getLogger(__name__)
 
 class _DebugProxy(proxy.ProxyBackend):
     """Extra Logging ProxyBackend."""
+
     # NOTE(morganfainberg): Pass all key/values through repr to ensure we have
     # a clean description of the information.  Without use of repr, it might
     # be possible to run into encode/decode error(s). For logging/debugging
@@ -75,19 +78,25 @@ class _DebugProxy(proxy.ProxyBackend):
 
     def get(self, key):
         value = self.proxied.get(key)
-        _LOG.debug('CACHE_GET: Key: "%(key)r" Value: "%(value)r"',
-                   {'key': key, 'value': value})
+        _LOG.debug(
+            'CACHE_GET: Key: "%(key)r" Value: "%(value)r"',
+            {'key': key, 'value': value},
+        )
         return value
 
     def get_multi(self, keys):
         values = self.proxied.get_multi(keys)
-        _LOG.debug('CACHE_GET_MULTI: "%(keys)r" Values: "%(values)r"',
-                   {'keys': keys, 'values': values})
+        _LOG.debug(
+            'CACHE_GET_MULTI: "%(keys)r" Values: "%(values)r"',
+            {'keys': keys, 'values': values},
+        )
         return values
 
     def set(self, key, value):
-        _LOG.debug('CACHE_SET: Key: "%(key)r" Value: "%(value)r"',
-                   {'key': key, 'value': value})
+        _LOG.debug(
+            'CACHE_SET: Key: "%(key)r" Value: "%(value)r"',
+            {'key': key, 'value': value},
+        )
         return self.proxied.set(key, value)
 
     def set_multi(self, keys):
@@ -125,8 +134,10 @@ def _build_cache_config(conf):
         try:
             (argname, argvalue) = argument.split(':', 1)
         except ValueError:
-            msg = ('Unable to build cache config-key. Expected format '
-                   '"<argname>:<value>". Skipping unknown format: %s')
+            msg = (
+                'Unable to build cache config-key. Expected format '
+                '"<argname>:<value>". Skipping unknown format: %s'
+            )
             _LOG.error(msg, argument)
             continue
 
@@ -139,9 +150,11 @@ def _build_cache_config(conf):
         # take data and do not handle processing/validation as expected
         # directly makes for odd behaviors when wrapping dogpile.cache in
         # a library like oslo.cache
-        if (conf.cache.backend
-                in ('dogpile.cache.memcached', 'oslo_cache.memcache_pool') and
-                argname == 'url'):
+        if (
+            conf.cache.backend
+            in ('dogpile.cache.memcached', 'oslo_cache.memcache_pool')
+            and argname == 'url'
+        ):
             argvalue = argvalue.split(',')
         conf_dict[arg_key] = argvalue
 
@@ -152,21 +165,23 @@ def _build_cache_config(conf):
             netloc = conf.cache.redis_server
         else:
             if conf.cache.redis_username:
-                netloc = '{}:{}@{}'.format(conf.cache.redis_username,
-                                           conf.cache.redis_password,
-                                           conf.cache.redis_server)
+                netloc = f'{conf.cache.redis_username}:{conf.cache.redis_password}@{conf.cache.redis_server}'
             else:
-                netloc = ':{}@{}'.format(conf.cache.redis_password,
-                                         conf.cache.redis_server)
+                netloc = (
+                    f':{conf.cache.redis_password}@{conf.cache.redis_server}'
+                )
 
         parts = urllib.parse.ParseResult(
             scheme=('rediss' if conf.cache.tls_enabled else 'redis'),
-            netloc=netloc, path=str(conf.cache.redis_db), params='', query='',
-            fragment='')
+            netloc=netloc,
+            path=str(conf.cache.redis_db),
+            params='',
+            query='',
+            fragment='',
+        )
 
         conf_dict.setdefault(
-            f'{prefix}.arguments.url',
-            urllib.parse.urlunparse(parts)
+            f'{prefix}.arguments.url', urllib.parse.urlunparse(parts)
         )
         for arg in ('socket_timeout',):
             value = getattr(conf.cache, 'redis_' + arg)
@@ -175,11 +190,13 @@ def _build_cache_config(conf):
         for arg in ('username', 'password', 'socket_timeout', 'db'):
             value = getattr(conf.cache, 'redis_' + arg)
             conf_dict[f'{prefix}.arguments.{arg}'] = value
-        conf_dict[f'{prefix}.arguments.service_name'] = \
+        conf_dict[f'{prefix}.arguments.service_name'] = (
             conf.cache.redis_sentinel_service_name
+        )
         if conf.cache.redis_sentinels:
             conf_dict[f'{prefix}.arguments.sentinels'] = [
-                _parse_sentinel(s) for s in conf.cache.redis_sentinels]
+                _parse_sentinel(s) for s in conf.cache.redis_sentinels
+            ]
     else:
         # NOTE(yorik-sar): these arguments will be used for memcache-related
         # backends. Use setdefault for url to support old-style setting through
@@ -204,13 +221,21 @@ def _build_cache_config(conf):
         #
         # The normal non-pooled clients connect explicitly on each use and
         # does not need the explicit flush_on_reconnect
-        conf_dict.setdefault(f'{prefix}.arguments.url',
-                             conf.cache.memcache_servers)
+        conf_dict.setdefault(
+            f'{prefix}.arguments.url', conf.cache.memcache_servers
+        )
 
-        for arg in ('dead_retry', 'socket_timeout', 'pool_maxsize',
-                    'pool_unused_timeout', 'pool_connection_get_timeout',
-                    'pool_flush_on_reconnect', 'sasl_enabled', 'username',
-                    'password'):
+        for arg in (
+            'dead_retry',
+            'socket_timeout',
+            'pool_maxsize',
+            'pool_unused_timeout',
+            'pool_connection_get_timeout',
+            'pool_flush_on_reconnect',
+            'sasl_enabled',
+            'username',
+            'password',
+        ):
             value = getattr(conf.cache, 'memcache_' + arg)
             conf_dict[f'{prefix}.arguments.{arg}'] = value
 
@@ -218,29 +243,40 @@ def _build_cache_config(conf):
         if conf.cache.expiration_time > conf.cache.backend_expiration_time:
             raise exception.ConfigurationError(
                 "backend_expiration_time should not be smaller than "
-                "expiration_time.")
-        if conf.cache.backend in ('dogpile.cache.pymemcache',
-                                  'dogpile.cache.memcached',
-                                  'dogpile.cache.pylibmc',
-                                  'oslo_cache.memcache_pool'):
-            conf_dict[f'{prefix}.arguments.memcached_expire_time'] = \
+                "expiration_time."
+            )
+        if conf.cache.backend in (
+            'dogpile.cache.pymemcache',
+            'dogpile.cache.memcached',
+            'dogpile.cache.pylibmc',
+            'oslo_cache.memcache_pool',
+        ):
+            conf_dict[f'{prefix}.arguments.memcached_expire_time'] = (
                 conf.cache.backend_expiration_time
-        elif conf.cache.backend in ('dogpile.cache.redis',
-                                    'dogpile.cache.redis_sentinel'):
-            conf_dict[f'{prefix}.arguments.redis_expiration_time'] = \
+            )
+        elif conf.cache.backend in (
+            'dogpile.cache.redis',
+            'dogpile.cache.redis_sentinel',
+        ):
+            conf_dict[f'{prefix}.arguments.redis_expiration_time'] = (
                 conf.cache.backend_expiration_time
+            )
         else:
             raise exception.ConfigurationError(
-                "Enabling backend expiration is not supported by"
-                "the %s driver", conf.cache.backend)
+                "Enabling backend expiration is not supported bythe %s driver",
+                conf.cache.backend,
+            )
 
     if conf.cache.tls_enabled:
-        if conf.cache.backend in ('dogpile.cache.bmemcache',
-                                  'dogpile.cache.pymemcache',
-                                  'oslo_cache.memcache_pool'):
+        if conf.cache.backend in (
+            'dogpile.cache.bmemcache',
+            'dogpile.cache.pymemcache',
+            'oslo_cache.memcache_pool',
+        ):
             _LOG.debug('Oslo Cache TLS - CA: %s', conf.cache.tls_cafile)
             tls_context = ssl.create_default_context(
-                cafile=conf.cache.tls_cafile)
+                cafile=conf.cache.tls_cafile
+            )
 
             if conf.cache.enforce_fips_mode:
                 if hasattr(ssl, 'FIPS_mode'):
@@ -253,11 +289,13 @@ def _build_cache_config(conf):
                         "executable used to a version with FIPS mode support "
                         "or disable FIPS mode by setting "
                         "the '[cache] enforce_fips_mode' configuration option "
-                        "to 'False'.")
+                        "to 'False'."
+                    )
 
             if conf.cache.tls_certfile is not None:
-                _LOG.debug('Oslo Cache TLS - cert: %s',
-                           conf.cache.tls_certfile)
+                _LOG.debug(
+                    'Oslo Cache TLS - cert: %s', conf.cache.tls_certfile
+                )
                 _LOG.debug('Oslo Cache TLS - key: %s', conf.cache.tls_keyfile)
                 tls_context.load_cert_chain(
                     conf.cache.tls_certfile,
@@ -274,45 +312,53 @@ def _build_cache_config(conf):
             conf_dict[f'{prefix}.arguments.tls_context'] = tls_context
 
             # pass the value of tls_enabled to the backend
-            conf_dict[f'{prefix}.arguments.tls_enabled'] = \
+            conf_dict[f'{prefix}.arguments.tls_enabled'] = (
                 conf.cache.tls_enabled
-        elif conf.cache.backend in ('dogpile.cache.redis',
-                                    'dogpile.cache.redis_sentinel'):
+            )
+        elif conf.cache.backend in (
+            'dogpile.cache.redis',
+            'dogpile.cache.redis_sentinel',
+        ):
             if conf.cache.tls_allowed_ciphers is not None:
                 raise exception.ConfigurationError(
                     "Limiting allowed ciphers is not supported by "
-                    "the %s backend" % conf.cache.backend)
+                    f"the {conf.cache.backend} backend"
+                )
             if conf.cache.enforce_fips_mode:
                 raise exception.ConfigurationError(
-                    "FIPS mode is not supported by the %s backend" %
-                    conf.cache.backend)
+                    f"FIPS mode is not supported by the {conf.cache.backend} backend"
+                )
 
             conn_kwargs = {}
             if conf.cache.tls_cafile is not None:
                 _LOG.debug('Oslo Cache TLS - CA: %s', conf.cache.tls_cafile)
                 conn_kwargs['ssl_ca_certs'] = conf.cache.tls_cafile
             if conf.cache.tls_certfile is not None:
-                _LOG.debug('Oslo Cache TLS - cert: %s',
-                           conf.cache.tls_certfile)
+                _LOG.debug(
+                    'Oslo Cache TLS - cert: %s', conf.cache.tls_certfile
+                )
                 _LOG.debug('Oslo Cache TLS - key: %s', conf.cache.tls_keyfile)
-                conn_kwargs.update({
-                    'ssl_certfile': conf.cache.tls_certfile,
-                    'ssl_keyfile': conf.cache.tls_keyfile
-                })
+                conn_kwargs.update(
+                    {
+                        'ssl_certfile': conf.cache.tls_certfile,
+                        'ssl_keyfile': conf.cache.tls_keyfile,
+                    }
+                )
             if conf.cache.backend == 'dogpile.cache.redis_sentinel':
                 conn_kwargs.update({'ssl': True})
-                conf_dict[f'{prefix}.arguments.connection_kwargs'] = \
+                conf_dict[f'{prefix}.arguments.connection_kwargs'] = (
                     conn_kwargs
-                conf_dict[f'{prefix}.arguments.sentinel_kwargs'] = \
-                    conn_kwargs
+                )
+                conf_dict[f'{prefix}.arguments.sentinel_kwargs'] = conn_kwargs
             else:
-                conf_dict[f'{prefix}.arguments.connection_kwargs'] = \
+                conf_dict[f'{prefix}.arguments.connection_kwargs'] = (
                     conn_kwargs
+                )
         else:
             raise exception.ConfigurationError(
                 "TLS setting via [cache] tls_enabled is not supported by the "
-                "%s backend. Set [cache] tls_enabled=False or use a different "
-                "backend." % conf.cache.backend
+                f"{conf.cache.backend} backend. Set [cache] tls_enabled=False or use a different "
+                "backend."
             )
 
     # NOTE(hberaud): Pymemcache backend and redis backends support socket
@@ -325,32 +371,38 @@ def _build_cache_config(conf):
     if conf.cache.enable_socket_keepalive:
         if conf.cache.backend == 'dogpile.cache.pymemcache':
             import pymemcache
+
             socket_keepalive = pymemcache.KeepaliveOpts(
                 idle=conf.cache.socket_keepalive_idle,
                 intvl=conf.cache.socket_keepalive_interval,
-                cnt=conf.cache.socket_keepalive_count)
+                cnt=conf.cache.socket_keepalive_count,
+            )
             # As with the TLS context above, the config dict below will be
             # consumed by dogpile.cache that will be used as a proxy between
             # oslo.cache and pymemcache.
-            conf_dict[f'{prefix}.arguments.socket_keepalive'] = \
+            conf_dict[f'{prefix}.arguments.socket_keepalive'] = (
                 socket_keepalive
-        elif conf.cache.backend in ('dogpile.cache.redis',
-                                    'dogpile.cache.redis_sentinel'):
+            )
+        elif conf.cache.backend in (
+            'dogpile.cache.redis',
+            'dogpile.cache.redis_sentinel',
+        ):
             socket_keepalive_options = {
                 socket.TCP_KEEPIDLE: conf.cache.socket_keepalive_idle,
                 socket.TCP_KEEPINTVL: conf.cache.socket_keepalive_interval,
-                socket.TCP_KEEPCNT: conf.cache.socket_keepalive_count
+                socket.TCP_KEEPCNT: conf.cache.socket_keepalive_count,
             }
             conf_dict.setdefault(
                 f'{prefix}.arguments.connection_kwargs', {}
-            ).update({
-                'socket_keepalive': True,
-                'socket_keepalive_options': socket_keepalive_options
-            })
+            ).update(
+                {
+                    'socket_keepalive': True,
+                    'socket_keepalive_options': socket_keepalive_options,
+                }
+            )
         else:
             raise exception.ConfigurationError(
-                "Socket keepalive is not supported by the %s backend"
-                % conf.cache.backend
+                f"Socket keepalive is not supported by the {conf.cache.backend} backend"
             )
 
     # NOTE(hberaud): The pymemcache library comes with retry mechanisms that
@@ -366,17 +418,19 @@ def _build_cache_config(conf):
             )
             raise exception.ConfigurationError(msg)
         import pymemcache
+
         conf_dict[f'{prefix}.arguments.enable_retry_client'] = True
-        conf_dict[f'{prefix}.arguments.retry_attempts'] = \
+        conf_dict[f'{prefix}.arguments.retry_attempts'] = (
             conf.cache.retry_attempts
-        conf_dict[f'{prefix}.arguments.retry_delay'] = \
-            conf.cache.retry_delay
-        conf_dict[f'{prefix}.arguments.hashclient_retry_attempts'] = \
+        )
+        conf_dict[f'{prefix}.arguments.retry_delay'] = conf.cache.retry_delay
+        conf_dict[f'{prefix}.arguments.hashclient_retry_attempts'] = (
             conf.cache.hashclient_retry_attempts
-        conf_dict[f'{prefix}.arguments.hashclient_retry_delay'] = \
+        )
+        conf_dict[f'{prefix}.arguments.hashclient_retry_delay'] = (
             conf.cache.hashclient_retry_delay
-        conf_dict[f'{prefix}.arguments.dead_timeout'] = \
-            conf.cache.dead_timeout
+        )
+        conf_dict[f'{prefix}.arguments.dead_timeout'] = conf.cache.dead_timeout
 
     return conf_dict
 
@@ -456,7 +510,8 @@ def configure_cache_region(conf, region):
     """
     if not isinstance(region, dogpile.cache.CacheRegion):
         raise exception.ConfigurationError(
-            _('region not type dogpile.cache.CacheRegion'))
+            _('region not type dogpile.cache.CacheRegion')
+        )
 
     if not region.is_configured:
         # NOTE(morganfainberg): this is how you tell if a region is configured.
@@ -464,8 +519,9 @@ def configure_cache_region(conf, region):
         # easier / less ugly.
 
         config_dict = _build_cache_config(conf)
-        region.configure_from_config(config_dict,
-                                     f'{conf.cache.config_prefix}.')
+        region.configure_from_config(
+            config_dict, f'{conf.cache.config_prefix}.'
+        )
 
         if conf.cache.debug_cache_backend:
             region.wrap(_DebugProxy)
@@ -509,11 +565,13 @@ def _get_should_cache_fn(conf, group):
     :type group: string
     :returns: function reference
     """
+
     def should_cache(value):
         if not conf.cache.enabled:
             return False
         conf_group = getattr(conf, group)
         return getattr(conf_group, 'caching', True)
+
     return should_cache
 
 
@@ -538,9 +596,11 @@ def _get_expiration_time_fn(conf, group):
     :type group: string
     :rtype: function reference
     """
+
     def get_expiration_time():
         conf_group = getattr(conf, group)
         return getattr(conf_group, 'cache_time', None)
+
     return get_expiration_time
 
 
@@ -566,19 +626,21 @@ def get_memoization_decorator(conf, region, group, expiration_group=None):
         import oslo_cache.core
 
         MEMOIZE = oslo_cache.core.get_memoization_decorator(
-            conf, region, group='group1')
+            conf, region, group='group1'
+        )
+
 
         @MEMOIZE
-        def function(arg1, arg2):
-            ...
+        def function(arg1, arg2): ...
 
 
         ALTERNATE_MEMOIZE = oslo_cache.core.get_memoization_decorator(
-            conf, region, group='group2', expiration_group='group3')
+            conf, region, group='group2', expiration_group='group3'
+        )
+
 
         @ALTERNATE_MEMOIZE
-        def function2(arg1, arg2):
-            ...
+        def function2(arg1, arg2): ...
 
     :param conf: config object, must have had :func:`configure` called on it.
     :type conf: oslo_config.cfg.ConfigOpts
@@ -598,8 +660,9 @@ def get_memoization_decorator(conf, region, group, expiration_group=None):
     should_cache = _get_should_cache_fn(conf, group)
     expiration_time = _get_expiration_time_fn(conf, expiration_group)
 
-    memoize = region.cache_on_arguments(should_cache_fn=should_cache,
-                                        expiration_time=expiration_time)
+    memoize = region.cache_on_arguments(
+        should_cache_fn=should_cache, expiration_time=expiration_time
+    )
 
     # Make sure the actual "should_cache" and "expiration_time" methods are
     # available. This is potentially interesting/useful to pre-seed cache

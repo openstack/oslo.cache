@@ -26,7 +26,7 @@ class TestMemcachePoolCacheBackend(test_base.BaseTestCaseCacheBackend):
             group='cache',
             backend='oslo_cache.memcache_pool',
             enabled=True,
-            memcache_servers=[f'localhost:{MEMCACHED_PORT}']
+            memcache_servers=[f'localhost:{MEMCACHED_PORT}'],
         )
         # NOTE(hberaud): super must be called after all to ensure that
         # config fixture is properly initialized with value related to
@@ -45,6 +45,6 @@ class TestBMemcachePoolCacheBackend(test_base.BaseTestCaseCacheBackend):
             memcache_servers=[f'localhost:{MEMCACHED_PORT}'],
             memcache_sasl_enabled=False,
             memcache_username='sasl_name',
-            memcache_password='sasl_pswd'
+            memcache_password='sasl_pswd',
         )
         super().setUp()

@@ -40,8 +40,8 @@ class TestConnectionPool(test_cache.BaseTestCase):
         self.unused_timeout = 10
         self.maxsize = 2
         self.connection_pool = _TestConnectionPool(
-            maxsize=self.maxsize,
-            unused_timeout=self.unused_timeout)
+            maxsize=self.maxsize, unused_timeout=self.unused_timeout
+        )
         self.addCleanup(self.cleanup_instance('connection_pool'))
 
     def cleanup_instance(self, *names):
@@ -54,6 +54,7 @@ class TestConnectionPool(test_cache.BaseTestCase):
             for name in names:
                 if hasattr(self, name):
                     delattr(self, name)
+
         return cleanup
 
     def test_get_context_manager(self):
@@ -68,8 +69,8 @@ class TestConnectionPool(test_cache.BaseTestCase):
         self.test_get_context_manager()
         newtime = time.time() + self.unused_timeout * 2
         non_expired_connection = _memcache_pool._PoolItem(
-            ttl=(newtime * 2),
-            connection=mock.MagicMock())
+            ttl=(newtime * 2), connection=mock.MagicMock()
+        )
         self.connection_pool.queue.append(non_expired_connection)
         self.assertThat(self.connection_pool.queue, matchers.HasLength(2))
         with mock.patch.object(time, 'time', return_value=newtime):
@@ -77,7 +78,8 @@ class TestConnectionPool(test_cache.BaseTestCase):
             with self.connection_pool.acquire():
                 pass
             conn.assert_has_calls(
-                [mock.call(self.connection_pool.destroyed_value)])
+                [mock.call(self.connection_pool.destroyed_value)]
+            )
         self.assertThat(self.connection_pool.queue, matchers.HasLength(1))
         self.assertEqual(0, non_expired_connection.connection.call_count)
 
@@ -85,13 +87,15 @@ class TestConnectionPool(test_cache.BaseTestCase):
         class TestException(Exception):
             pass
 
-        with mock.patch.object(_TestConnectionPool, '_create_connection',
-                               side_effect=TestException):
+        with mock.patch.object(
+            _TestConnectionPool,
+            '_create_connection',
+            side_effect=TestException,
+        ):
             with testtools.ExpectedException(TestException):
                 with self.connection_pool.acquire():
                     pass
-            self.assertThat(self.connection_pool.queue,
-                            matchers.HasLength(0))
+            self.assertThat(self.connection_pool.queue, matchers.HasLength(0))
             self.assertEqual(0, self.connection_pool._acquired)
 
     def test_connection_pool_limits_maximum_connections(self):
@@ -114,9 +118,8 @@ class TestConnectionPool(test_cache.BaseTestCase):
 
     def test_connection_pool_maximum_connection_get_timeout(self):
         connection_pool = _TestConnectionPool(
-            maxsize=1,
-            unused_timeout=self.unused_timeout,
-            conn_get_timeout=0)
+            maxsize=1, unused_timeout=self.unused_timeout, conn_get_timeout=0
+        )
 
         def _acquire_connection():
             with connection_pool.acquire():
@@ -134,7 +137,6 @@ class TestConnectionPool(test_cache.BaseTestCase):
 
 
 class TestMemcacheClientOverrides(test_cache.BaseTestCase):
-
     def test_client_stripped_of_threading_local(self):
         """threading.local overrides are restored for _MemcacheClient"""
         client_class = _memcache_pool._MemcacheClient
@@ -143,8 +145,10 @@ class TestMemcacheClientOverrides(test_cache.BaseTestCase):
         self.assertTrue(thread_local is threading.local)
         for field in thread_local.__dict__.keys():
             if field not in ('__dict__', '__weakref__'):
-                self.assertNotEqual(id(getattr(thread_local, field, None)),
-                                    id(getattr(client_class, field, None)))
+                self.assertNotEqual(
+                    id(getattr(thread_local, field, None)),
+                    id(getattr(client_class, field, None)),
+                )
 
     def test_can_create_with_kwargs(self):
         """Test for lp 1812935
@@ -153,6 +157,7 @@ class TestMemcacheClientOverrides(test_cache.BaseTestCase):
         following to the top of oslo_cache/tests/__init__.py::
 
             import eventlet
+
             eventlet.monkey_patch()
 
         This should happen before any other imports in that file.
@@ -165,7 +170,6 @@ class TestMemcacheClientOverrides(test_cache.BaseTestCase):
 
 
 class TestBMemcacheClient(test_cache.BaseTestCase):
-
     def test_can_create_with_kwargs(self):
         client = _bmemcache_pool._BMemcacheClient('foo', password='123456')
         # Make sure kwargs are properly processed by the client

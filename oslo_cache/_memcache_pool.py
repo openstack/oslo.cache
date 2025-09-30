@@ -23,6 +23,7 @@ import threading
 import time
 
 import debtcollector
+
 try:
     import eventlet
 except ImportError:
@@ -39,7 +40,8 @@ LOG = log.getLogger(__name__)
 
 if eventlet and eventlet.patcher.is_monkey_patched('thread'):
     debtcollector.deprecate(
-        "Eventlet support is deprecated and will be removed.")
+        "Eventlet support is deprecated and will be removed."
+    )
 
 
 class _MemcacheClient(memcache.Client):
@@ -49,6 +51,7 @@ class _MemcacheClient(memcache.Client):
     methods overloaded by threading.local so we can reuse clients in
     different threads
     """
+
     __delattr__ = object.__delattr__
     __getattribute__ = object.__getattribute__
     __setattr__ = object.__setattr__
@@ -75,6 +78,7 @@ class ConnectionPool(queue.Queue):
     This class implements the basic connection pool logic as an abstract base
     class.
     """
+
     def __init__(self, maxsize, unused_timeout, conn_get_timeout=None):
         """Initialize the connection pool.
 
@@ -118,7 +122,8 @@ class ConnectionPool(queue.Queue):
                 break
             except Exception as e:
                 self._do_log(
-                    LOG.warning, "Unable to cleanup a connection: %s", e)
+                    LOG.warning, "Unable to cleanup a connection: %s", e
+                )
 
     def _create_connection(self):
         """Returns a connection instance.
@@ -163,9 +168,12 @@ class ConnectionPool(queue.Queue):
             conn = self.get(timeout=self._connection_get_timeout)
         except queue.Empty:
             raise exception.QueueEmpty(
-                _('Unable to get a connection from pool id %(id)s after '
-                  '%(seconds)s seconds.') %
-                {'id': id(self), 'seconds': self._connection_get_timeout})
+                _(
+                    'Unable to get a connection from pool id %(id)s after '
+                    '%(seconds)s seconds.'
+                )
+                % {'id': id(self), 'seconds': self._connection_get_timeout}
+            )
         self._trace_logger('Acquired connection %s', id(conn))
         try:
             yield conn
@@ -218,10 +226,12 @@ class ConnectionPool(queue.Queue):
             pass
 
     def _put(self, conn):
-        self.queue.append(_PoolItem(
-            ttl=time.time() + self._unused_timeout,
-            connection=conn,
-        ))
+        self.queue.append(
+            _PoolItem(
+                ttl=time.time() + self._unused_timeout,
+                connection=conn,
+            )
+        )
         self._acquired -= 1
 
 
@@ -234,10 +244,12 @@ class MemcacheClientPool(ConnectionPool):
         self._arguments = {
             'dead_retry': arguments.get('dead_retry', 5 * 60),
             'socket_timeout': arguments.get('socket_timeout', 3.0),
-            'server_max_value_length':
-                arguments.get('server_max_value_length'),
+            'server_max_value_length': arguments.get(
+                'server_max_value_length'
+            ),
             'flush_on_reconnect': arguments.get(
-                'pool_flush_on_reconnect', False),
+                'pool_flush_on_reconnect', False
+            ),
         }
         # NOTE(morganfainberg): The host objects expect an int for the
         # deaduntil value. Initialize this at 0 for each host with 0 indicating
@@ -284,7 +296,9 @@ class MemcacheClientPool(ConnectionPool):
                         self._hosts_deaduntil[i] = host.deaduntil
                         self._debug_logger(
                             'Marked host %s dead until %s',
-                            self.urls[i], host.deaduntil)
+                            self.urls[i],
+                            host.deaduntil,
+                        )
                     else:
                         self._hosts_deaduntil[i] = 0
         finally:

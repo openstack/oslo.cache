@@ -25,7 +25,7 @@ class TestDogpileCachePyMemcacheBackend(test_base.BaseTestCaseCacheBackend):
         self.config_fixture.config(
             group="cache",
             backend="dogpile.cache.pymemcache",
-            memcache_servers=[f'localhost:{MEMCACHED_PORT}']
+            memcache_servers=[f'localhost:{MEMCACHED_PORT}'],
         )
 
         # NOTE(hberaud): super must be called after all to ensure that

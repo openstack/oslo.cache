@@ -26,7 +26,7 @@ class TestRedisSentinelCacheBackend(test_base.BaseTestCaseCacheBackend):
             group='cache',
             backend='dogpile.cache.redis_sentinel',
             redis_sentinels=[f"127.0.0.1:{REDIS_SENTINEL_PORT}"],
-            redis_sentinel_service_name='pifpaf'
+            redis_sentinel_service_name='pifpaf',
         )
 
         # NOTE(hberaud): super must be called after all to ensure that

@@ -13,14 +13,13 @@
 # under the License.
 
 """dogpile.cache backend that uses etcd 3.x for storage"""
+
 from dogpile.cache import api
 
 from oslo_cache import core
 from oslo_serialization import jsonutils
 
-__all__ = [
-    'Etcd3gwCacheBackend'
-]
+__all__ = ['Etcd3gwCacheBackend']
 
 _NO_VALUE = core.NO_VALUE
 
@@ -41,9 +40,10 @@ class Etcd3gwCacheBackend(api.CacheBackend):
         self.timeout = int(arguments.get('timeout', self.DEFAULT_TIMEOUT))
         # module etcd3gw is only required when etcd3gw backend is used
         import etcd3gw
-        self._client = etcd3gw.client(host=self.host,
-                                      port=self.port,
-                                      timeout=self.timeout)
+
+        self._client = etcd3gw.client(
+            host=self.host, port=self.port, timeout=self.timeout
+        )
 
     def get(self, key):
         values = self._client.get(key, False)

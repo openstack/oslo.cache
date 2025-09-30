@@ -86,9 +86,11 @@ class BaseTestCaseCacheBackend(base.BaseTestCase):
         random_key1 = uuidutils.generate_uuid(dashed=False)
         random_key2 = uuidutils.generate_uuid(dashed=False)
         random_key3 = uuidutils.generate_uuid(dashed=False)
-        mapping = {random_key1: 'dummyValue1',
-                   random_key2: 'dummyValue2',
-                   random_key3: 'dummyValue3'}
+        mapping = {
+            random_key1: 'dummyValue1',
+            random_key2: 'dummyValue2',
+            random_key3: 'dummyValue3',
+        }
         self.region.set_multi(mapping)
         # should return NO_VALUE as key does not exist in cache
         self.assertEqual(NO_VALUE, self.region.get(random_key))
@@ -102,9 +104,11 @@ class BaseTestCaseCacheBackend(base.BaseTestCase):
         random_key1 = uuidutils.generate_uuid(dashed=False)
         random_key2 = uuidutils.generate_uuid(dashed=False)
         random_key3 = uuidutils.generate_uuid(dashed=False)
-        mapping = {random_key1: 'dummyValue1',
-                   random_key2: '',
-                   random_key3: 'dummyValue3'}
+        mapping = {
+            random_key1: 'dummyValue1',
+            random_key2: '',
+            random_key3: 'dummyValue3',
+        }
         self.region.set_multi(mapping)
 
         keys = [random_key, random_key1, random_key2, random_key3]
@@ -120,9 +124,11 @@ class BaseTestCaseCacheBackend(base.BaseTestCase):
         random_key1 = uuidutils.generate_uuid(dashed=False)
         random_key2 = uuidutils.generate_uuid(dashed=False)
         random_key3 = uuidutils.generate_uuid(dashed=False)
-        mapping = {random_key1: 'dummyValue1',
-                   random_key2: 'dummyValue2',
-                   random_key3: 'dummyValue3'}
+        mapping = {
+            random_key1: 'dummyValue1',
+            random_key2: 'dummyValue2',
+            random_key3: 'dummyValue3',
+        }
         self.region.set_multi(mapping)
         # should return NO_VALUE as key does not exist in cache
         self.assertEqual(NO_VALUE, self.region.get(random_key))
@@ -130,8 +136,7 @@ class BaseTestCaseCacheBackend(base.BaseTestCase):
         self.assertEqual("dummyValue2", self.region.get(random_key2))
         self.assertEqual("dummyValue3", self.region.get(random_key3))
 
-        mapping = {random_key1: 'dummyValue4',
-                   random_key2: 'dummyValue5'}
+        mapping = {random_key1: 'dummyValue4', random_key2: 'dummyValue5'}
         self.region.set_multi(mapping)
         self.assertEqual(NO_VALUE, self.region.get(random_key))
         self.assertEqual("dummyValue4", self.region.get(random_key1))
@@ -144,10 +149,12 @@ class BaseTestCaseCacheBackend(base.BaseTestCase):
         random_key2 = uuidutils.generate_uuid(dashed=False)
         random_key3 = uuidutils.generate_uuid(dashed=False)
         random_key4 = uuidutils.generate_uuid(dashed=False)
-        mapping = {random_key1: 'dummyValue1',
-                   random_key2: None,
-                   random_key3: '',
-                   random_key4: 'dummyValue4'}
+        mapping = {
+            random_key1: 'dummyValue1',
+            random_key2: None,
+            random_key3: '',
+            random_key4: 'dummyValue4',
+        }
         self.region.set_multi(mapping)
         # should return NO_VALUE as key does not exist in cache
         self.assertEqual(NO_VALUE, self.region.get(random_key))
@@ -166,8 +173,7 @@ class BaseTestCaseCacheBackend(base.BaseTestCase):
         self.assertEqual("", results[3])
         self.assertEqual("dummyValue4", results[4])
 
-        mapping = {random_key1: 'dummyValue5',
-                   random_key2: 'dummyValue6'}
+        mapping = {random_key1: 'dummyValue5', random_key2: 'dummyValue6'}
         self.region.set_multi(mapping)
         self.assertEqual(NO_VALUE, self.region.get(random_key))
         self.assertEqual("dummyValue5", self.region.get(random_key1))
@@ -188,9 +194,11 @@ class BaseTestCaseCacheBackend(base.BaseTestCase):
         random_key1 = uuidutils.generate_uuid(dashed=False)
         random_key2 = uuidutils.generate_uuid(dashed=False)
         random_key3 = uuidutils.generate_uuid(dashed=False)
-        mapping = {random_key1: 'dummyValue1',
-                   random_key2: 'dummyValue2',
-                   random_key3: 'dummyValue3'}
+        mapping = {
+            random_key1: 'dummyValue1',
+            random_key2: 'dummyValue2',
+            random_key3: 'dummyValue3',
+        }
         self.region.set_multi(mapping)
         # should return NO_VALUE as key does not exist in cache
         self.assertEqual(NO_VALUE, self.region.get(random_key))

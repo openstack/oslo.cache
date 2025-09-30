@@ -14,7 +14,9 @@
 # under the License.
 
 """Thread-safe connection pool for python-binary-memcached."""
+
 import debtcollector
+
 try:
     import eventlet
 except ImportError:
@@ -28,7 +30,8 @@ LOG = log.getLogger(__name__)
 
 if eventlet and eventlet.patcher.is_monkey_patched('thread'):
     debtcollector.deprecate(
-        "Eventlet support is deprecated and will be removed.")
+        "Eventlet support is deprecated and will be removed."
+    )
 
 
 class _BMemcacheClient(bmemcached.Client):
@@ -38,6 +41,7 @@ class _BMemcacheClient(bmemcached.Client):
     methods overloaded by threading.local so we can reuse clients in
     different threads
     """
+
     __delattr__ = object.__delattr__
     __getattribute__ = object.__getattribute__
     __setattr__ = object.__setattr__

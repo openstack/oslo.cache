@@ -25,7 +25,7 @@ class TestEtcdCacheBackend(test_base.BaseTestCaseCacheBackend):
         self.config_fixture.config(
             group='cache',
             backend='oslo_cache.etcd3gw',
-            backend_argument=['host:127.0.0.1', f'port:{ETCD_PORT}']
+            backend_argument=['host:127.0.0.1', f'port:{ETCD_PORT}'],
         )
 
         # NOTE(hberaud): super must be called after all to ensure that

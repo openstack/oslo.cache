@@ -63,14 +63,17 @@ class PooledMemcachedBackend(memcached_backend.MemcachedBackend):
     # Composed from GenericMemcachedBackend's and MemcacheArgs's __init__
     def __init__(self, arguments):
         super().__init__(arguments)
-        if (arguments.get('tls_enabled', False) or
-                arguments.get('sasl_enabled', False)):
-            if (arguments.get('sasl_enabled', False) and
-                (arguments.get('username') is None or
-                    arguments.get('password') is None)):
+        if arguments.get('tls_enabled', False) or arguments.get(
+            'sasl_enabled', False
+        ):
+            if arguments.get('sasl_enabled', False) and (
+                arguments.get('username') is None
+                or arguments.get('password') is None
+            ):
                 raise exception.ConfigurationError(
                     'username and password should be configured to use SASL '
-                    'authentication.')
+                    'authentication.'
+                )
             if not _bmemcache_pool:
                 raise ImportError("python-binary-memcached package is missing")
             self.client_pool = _bmemcache_pool.BMemcacheClientPool(
@@ -78,8 +81,9 @@ class PooledMemcachedBackend(memcached_backend.MemcachedBackend):
                 arguments,
                 maxsize=arguments.get('pool_maxsize', 10),
                 unused_timeout=arguments.get('pool_unused_timeout', 60),
-                conn_get_timeout=arguments.get('pool_connection_get_timeout',
-                                               10),
+                conn_get_timeout=arguments.get(
+                    'pool_connection_get_timeout', 10
+                ),
             )
         else:
             self.client_pool = _memcache_pool.MemcacheClientPool(
@@ -87,8 +91,9 @@ class PooledMemcachedBackend(memcached_backend.MemcachedBackend):
                 arguments,
                 maxsize=arguments.get('pool_maxsize', 10),
                 unused_timeout=arguments.get('pool_unused_timeout', 60),
-                conn_get_timeout=arguments.get('pool_connection_get_timeout',
-                                               10),
+                conn_get_timeout=arguments.get(
+                    'pool_connection_get_timeout', 10
+                ),
             )
 
     # Since all methods in backend just call one of methods of client, this

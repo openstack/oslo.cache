@@ -14,7 +14,6 @@
 
 """Items useful for external testing."""
 
-
 import copy
 
 from dogpile.cache import proxy
@@ -60,9 +59,11 @@ class CacheIsolatingProxy(proxy.ProxyBackend):
             group='cache',
             backend='dogpile.cache.memory',
             enabled=True,
-            proxies=['oslo_cache.testing.CacheIsolatingProxy'])
+            proxies=['oslo_cache.testing.CacheIsolatingProxy'],
+        )
 
     """
+
     def get(self, key):
         return _copy_value(self.proxied.get(key))
 
