@@ -228,7 +228,7 @@ FILE_OPTIONS = {
             help='Enable retry client mechanisms to handle failure. '
             'Those mechanisms can be used to wrap all kind of pymemcache '
             'clients. The wrapper allows you to define how many attempts '
-            'to make and how long to wait between attemots.'),
+            'to make and how long to wait between attempts.'),
         cfg.IntOpt(
             'retry_attempts',
             min=1,
