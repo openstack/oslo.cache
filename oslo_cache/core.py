@@ -451,12 +451,7 @@ def _sha1_mangle_key(key):
 
 
 def _key_generate_to_str(s):
-    # NOTE(morganfainberg): Since we need to stringify all arguments, attempt
-    # to stringify and handle the Unicode error explicitly as needed.
-    try:
-        return str(s)
-    except UnicodeEncodeError:
-        return s.encode('utf-8')
+    return str(s)
 
 
 def function_key_generator(namespace, fn, to_str=_key_generate_to_str):
