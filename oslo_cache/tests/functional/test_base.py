@@ -209,7 +209,7 @@ class BaseTestCaseCacheBackend(base.BaseTestCase):
 
         keys = mapping.keys()
 
-        self.region.delete_multi(keys)
+        self.region.delete_multi(list(keys))
 
         self.assertEqual(NO_VALUE, self.region.get("InvalidKey"))
         # should return NO_VALUE as keys no longer exist in cache

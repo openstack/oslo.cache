@@ -15,6 +15,7 @@
 
 """Thread-safe connection pool for python-binary-memcached."""
 
+from typing import Any
 import warnings
 
 try:
@@ -36,7 +37,7 @@ if eventlet and eventlet.patcher.is_monkey_patched('thread'):
     )
 
 
-class _BMemcacheClient(bmemcached.Client):
+class _BMemcacheClient(bmemcached.Client):  # type: ignore
     """Thread global memcache client
 
     As client is inherited from threading.local we have to restore object
@@ -52,23 +53,39 @@ class _BMemcacheClient(bmemcached.Client):
     if eventlet and eventlet.patcher.is_monkey_patched('thread'):
         # NOTE(bnemec): I'm not entirely sure why this works in a
         # monkey-patched environment and not with vanilla stdlib, but it does.
-        def __new__(cls, *args, **kwargs):
+        def __new__(
+            cls, *args: Any, **kwargs: Any
+        ) -> type['_BMemcacheClient']:
             return object.__new__(cls)
     else:
         __new__ = object.__new__
 
-    def __del__(self):
+    def __del__(self) -> None:
         pass
 
 
 class BMemcacheClientPool(MemcacheClientPool):
-    def __init__(self, urls, arguments, **kwargs):
-        MemcacheClientPool.__init__(self, urls, arguments, **kwargs)
+    def __init__(
+        self,
+        urls: list[str],
+        arguments: dict[str, Any],
+        *,
+        maxsize: int,
+        unused_timeout: float,
+        conn_get_timeout: float | None = None,
+    ) -> None:
+        super().__init__(
+            urls,
+            arguments,
+            maxsize=maxsize,
+            unused_timeout=unused_timeout,
+            conn_get_timeout=conn_get_timeout,
+        )
         self._arguments = {
             'username': arguments.get('username', None),
             'password': arguments.get('password', None),
             'tls_context': arguments.get('tls_context', None),
         }
 
-    def _create_connection(self):
+    def _create_connection(self) -> _BMemcacheClient:
         return _BMemcacheClient(self.urls, **self._arguments)

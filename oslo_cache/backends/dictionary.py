@@ -14,6 +14,9 @@
 
 """dogpile.cache backend that uses dictionary for storage"""
 
+from collections.abc import Sequence, Mapping
+from typing import Any
+
 from dogpile.cache import api
 from oslo_cache import core
 from oslo_utils import timeutils
@@ -35,29 +38,31 @@ class DictCacheBackend(api.CacheBackend):
     :type expiration_time: real
     """
 
-    def __init__(self, arguments):
+    def __init__(self, arguments: dict[str, Any]) -> None:
         self.expiration_time = arguments.get('expiration_time', 0)
-        self.cache = {}
+        self.cache: dict[str, tuple[api.BackendFormatted, float]] = {}
 
-    def get(self, key):
+    def get(self, key: api.KeyType) -> api.BackendFormatted:
         """Retrieves the value for a key.
 
         :param key: dictionary key
         :returns: value for a key or :data:`oslo_cache.core.NO_VALUE`
             for nonexistent or expired keys.
         """
-        (value, timeout) = self.cache.get(key, (_NO_VALUE, 0))
+        value, timeout = self.cache.get(key, (_NO_VALUE, 0))
         if self.expiration_time > 0 and timeutils.utcnow_ts() >= timeout:
             self.cache.pop(key, None)
             return _NO_VALUE
 
         return value
 
-    def get_multi(self, keys):
+    def get_multi(
+        self, keys: Sequence[api.KeyType]
+    ) -> Sequence[api.BackendFormatted]:
         """Retrieves the value for a list of keys."""
         return [self.get(key) for key in keys]
 
-    def set(self, key, value):
+    def set(self, key: api.KeyType, value: api.BackendSetType) -> None:
         """Sets the value for a key.
 
         Expunges expired keys during each set.
@@ -67,7 +72,9 @@ class DictCacheBackend(api.CacheBackend):
         """
         self.set_multi({key: value})
 
-    def set_multi(self, mapping):
+    def set_multi(
+        self, mapping: Mapping[api.KeyType, api.BackendSetType]
+    ) -> None:
         """Set multiple values in the cache.
         Expunges expired keys during each set.
 
@@ -80,14 +87,14 @@ class DictCacheBackend(api.CacheBackend):
         for key, value in mapping.items():
             self.cache[key] = (value, timeout)
 
-    def delete(self, key):
+    def delete(self, key: api.KeyType) -> None:
         """Deletes the value associated with the key if it exists.
 
         :param key: dictionary key
         """
         self.cache.pop(key, None)
 
-    def delete_multi(self, keys):
+    def delete_multi(self, keys: Sequence[api.KeyType]) -> None:
         """Deletes the value associated with each key in list if it exists.
 
         :param keys: list of dictionary keys
@@ -95,7 +102,7 @@ class DictCacheBackend(api.CacheBackend):
         for key in keys:
             self.cache.pop(key, None)
 
-    def _clear(self):
+    def _clear(self) -> None:
         """Expunges expired keys."""
         now = timeutils.utcnow_ts()
         for k in list(self.cache):

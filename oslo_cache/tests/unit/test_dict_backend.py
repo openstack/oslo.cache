@@ -106,7 +106,7 @@ class CacheDictBackendTest(test_cache.BaseTestCase):
             self.assertIn(value, cached_values)
         self.assertEqual(len(multi_values.values()), len(cached_values))
 
-        self.region.delete_multi(multi_values.keys())
+        self.region.delete_multi(list(multi_values.keys()))
         for value in self.region.get_multi(multi_values.keys()):
             self.assertEqual(NO_VALUE, value)
 

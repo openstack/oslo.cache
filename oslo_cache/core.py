@@ -36,14 +36,18 @@ The library has special public value for nonexistent or expired keys called
     NO_VALUE = core.NO_VALUE
 """
 
+from collections.abc import Callable, Mapping, Sequence
 import socket
 import ssl
+from typing import Any
 import urllib.parse
 
 import dogpile.cache
 from dogpile.cache import api
 from dogpile.cache import proxy
+import dogpile.cache.region
 from dogpile.cache import util
+from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import importutils
 from oslo_utils import netutils
@@ -76,7 +80,7 @@ class _DebugProxy(proxy.ProxyBackend):
     # purposes encode/decode is irrelevant and we should be looking at the
     # data exactly as it stands.
 
-    def get(self, key):
+    def get(self, key: api.KeyType) -> api.BackendFormatted:
         value = self.proxied.get(key)
         _LOG.debug(
             'CACHE_GET: Key: "%(key)r" Value: "%(value)r"',
@@ -84,7 +88,9 @@ class _DebugProxy(proxy.ProxyBackend):
         )
         return value
 
-    def get_multi(self, keys):
+    def get_multi(
+        self, keys: Sequence[api.KeyType]
+    ) -> Sequence[api.BackendFormatted]:
         values = self.proxied.get_multi(keys)
         _LOG.debug(
             'CACHE_GET_MULTI: "%(keys)r" Values: "%(values)r"',
@@ -92,40 +98,42 @@ class _DebugProxy(proxy.ProxyBackend):
         )
         return values
 
-    def set(self, key, value):
+    def set(self, key: api.KeyType, value: api.BackendSetType) -> None:
         _LOG.debug(
             'CACHE_SET: Key: "%(key)r" Value: "%(value)r"',
             {'key': key, 'value': value},
         )
         return self.proxied.set(key, value)
 
-    def set_multi(self, keys):
+    def set_multi(
+        self, keys: Mapping[api.KeyType, api.BackendSetType]
+    ) -> None:
         _LOG.debug('CACHE_SET_MULTI: "%r"', keys)
         self.proxied.set_multi(keys)
 
-    def delete(self, key):
+    def delete(self, key: api.KeyType) -> None:
         self.proxied.delete(key)
         _LOG.debug('CACHE_DELETE: "%r"', key)
 
-    def delete_multi(self, keys):
+    def delete_multi(self, keys: Sequence[api.KeyType]) -> None:
         _LOG.debug('CACHE_DELETE_MULTI: "%r"', keys)
         self.proxied.delete_multi(keys)
 
 
-def _parse_sentinel(sentinel):
+def _parse_sentinel(sentinel: str) -> tuple[str, int]:
     host, port = netutils.parse_host_port(sentinel)
     if host is None or port is None:
         raise exception.ConfigurationError('Malformed sentinel server format')
     return (host, port)
 
 
-def _build_cache_config(conf):
+def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
     """Build the cache region dictionary configuration.
 
     :returns: dict
     """
     prefix = conf.cache.config_prefix
-    conf_dict = {}
+    conf_dict: dict[str, Any] = {}
     conf_dict[f'{prefix}.backend'] = _opts._DEFAULT_BACKEND
     if conf.cache.enabled is True:
         conf_dict[f'{prefix}.backend'] = conf.cache.backend
@@ -281,7 +289,7 @@ def _build_cache_config(conf):
             if conf.cache.enforce_fips_mode:
                 if hasattr(ssl, 'FIPS_mode'):
                     _LOG.info("Enforcing the use of the OpenSSL FIPS mode")
-                    ssl.FIPS_mode_set(1)
+                    ssl.FIPS_mode_set(1)  # type: ignore
                 else:
                     raise exception.ConfigurationError(
                         "OpenSSL FIPS mode is not supported by your Python "
@@ -435,41 +443,58 @@ def _build_cache_config(conf):
     return conf_dict
 
 
-def _sha1_mangle_key(key):
+def _sha1_mangle_key(key: str | bytes) -> str:
     """Wrapper for dogpile's sha1_mangle_key.
 
     dogpile's sha1_mangle_key function expects an encoded string, so we
     should take steps to properly handle multiple inputs before passing
     the key through.
     """
-    try:
-        key = key.encode('utf-8', errors='xmlcharrefreplace')
-    except (UnicodeError, AttributeError):
-        # NOTE(stevemar): if encoding fails just continue anyway.
-        pass
-    return util.sha1_mangle_key(key)
+    if isinstance(key, str):
+        try:
+            key = key.encode('utf-8', errors='xmlcharrefreplace')
+        except (UnicodeError, AttributeError):
+            # NOTE(stevemar): if encoding fails just continue anyway.
+            pass
+    return util.sha1_mangle_key(key)  # type: ignore
 
 
-def _key_generate_to_str(s):
+def _key_generate_to_str(s: Any) -> str:
     return str(s)
 
 
-def function_key_generator(namespace, fn, to_str=_key_generate_to_str):
+def function_key_generator(
+    namespace: str | None,
+    fn: Callable[..., Any],
+    to_str: Callable[[Any], str] = _key_generate_to_str,
+) -> Callable[..., str]:
     # NOTE(morganfainberg): This wraps dogpile.cache's default
     # function_key_generator to change the default to_str mechanism.
-    return util.function_key_generator(namespace, fn, to_str=to_str)
+    return util.function_key_generator(  # type: ignore
+        namespace, fn, to_str=to_str
+    )
 
 
-def kwarg_function_key_generator(namespace, fn, to_str=_key_generate_to_str):
+def kwarg_function_key_generator(
+    namespace: str,
+    fn: Callable[..., Any],
+    to_str: Callable[[Any], str] = _key_generate_to_str,
+) -> Callable[..., str]:
     # NOTE(ralonsoh): This wraps dogpile.cache's default
     # kwarg_function_key_generator to change the default to_str mechanism.
-    return util.kwarg_function_key_generator(namespace, fn, to_str=to_str)
+    return util.kwarg_function_key_generator(  # type: ignore
+        namespace, fn, to_str=to_str
+    )
 
 
-def create_region(function=function_key_generator):
+def create_region(
+    function: Callable[
+        [str, Callable[..., Any], Callable[[Any], str]], Callable[..., str]
+    ] = function_key_generator,
+) -> dogpile.cache.region.CacheRegion:
     """Create a region.
 
-    This is just dogpile.cache.make_region, but the key generator has a
+    This is just dogpile.cache.region.make_region, but the key generator has a
     different to_str mechanism.
 
     .. note::
@@ -484,11 +509,12 @@ def create_region(function=function_key_generator):
     :rtype: :class:`dogpile.cache.region.CacheRegion`
 
     """
+    return dogpile.cache.region.make_region(function_key_generator=function)
 
-    return dogpile.cache.make_region(function_key_generator=function)
 
-
-def configure_cache_region(conf, region):
+def configure_cache_region(
+    conf: cfg.ConfigOpts, region: dogpile.cache.region.CacheRegion
+) -> dogpile.cache.region.CacheRegion:
     """Configure a cache region.
 
     If the cache region is already configured, this function does nothing.
@@ -503,7 +529,7 @@ def configure_cache_region(conf, region):
     :returns: The region.
     :rtype: :class:`dogpile.cache.region.CacheRegion`
     """
-    if not isinstance(region, dogpile.cache.CacheRegion):
+    if not isinstance(region, dogpile.cache.region.CacheRegion):
         raise exception.ConfigurationError(
             _('region not type dogpile.cache.CacheRegion')
         )
@@ -514,7 +540,7 @@ def configure_cache_region(conf, region):
         # easier / less ugly.
 
         config_dict = _build_cache_config(conf)
-        region.configure_from_config(
+        region.configure_from_config(  # type: ignore[no-untyped-call]
             config_dict, f'{conf.cache.config_prefix}.'
         )
 
@@ -543,7 +569,9 @@ def configure_cache_region(conf, region):
     return region
 
 
-def _get_should_cache_fn(conf, group):
+def _get_should_cache_fn(
+    conf: cfg.ConfigOpts, group: str
+) -> Callable[[Any], bool]:
     """Build a function that returns a config group's caching status.
 
     For any given object that has caching capabilities, a boolean config option
@@ -561,7 +589,7 @@ def _get_should_cache_fn(conf, group):
     :returns: function reference
     """
 
-    def should_cache(value):
+    def should_cache(value: Any) -> bool:
         if not conf.cache.enabled:
             return False
         conf_group = getattr(conf, group)
@@ -570,7 +598,9 @@ def _get_should_cache_fn(conf, group):
     return should_cache
 
 
-def _get_expiration_time_fn(conf, group):
+def _get_expiration_time_fn(
+    conf: cfg.ConfigOpts, group: str
+) -> Callable[[], float | None]:
     """Build a function that returns a config group's expiration time status.
 
     For any given object that has caching capabilities, an int config option
@@ -592,14 +622,20 @@ def _get_expiration_time_fn(conf, group):
     :rtype: function reference
     """
 
-    def get_expiration_time():
+    def get_expiration_time() -> float | None:
         conf_group = getattr(conf, group)
         return getattr(conf_group, 'cache_time', None)
 
     return get_expiration_time
 
 
-def get_memoization_decorator(conf, region, group, expiration_group=None):
+# TODO(stephenfin): Add hints for the return type of this (it's complex!)
+def get_memoization_decorator(
+    conf: cfg.ConfigOpts,
+    region: dogpile.cache.region.CacheRegion,
+    group: str,
+    expiration_group: str | None = None,
+) -> Any:
     """Build a function based on the `cache_on_arguments` decorator.
 
     The memoization decorator that gets created by this function is a
@@ -656,19 +692,20 @@ def get_memoization_decorator(conf, region, group, expiration_group=None):
     expiration_time = _get_expiration_time_fn(conf, expiration_group)
 
     memoize = region.cache_on_arguments(
-        should_cache_fn=should_cache, expiration_time=expiration_time
+        should_cache_fn=should_cache,
+        expiration_time=expiration_time,  # type: ignore
     )
 
     # Make sure the actual "should_cache" and "expiration_time" methods are
     # available. This is potentially interesting/useful to pre-seed cache
     # values.
-    memoize.should_cache = should_cache
-    memoize.get_expiration_time = expiration_time
+    memoize.should_cache = should_cache  # type: ignore
+    memoize.get_expiration_time = expiration_time  # type: ignore
 
     return memoize
 
 
-def configure(conf):
+def configure(conf: cfg.ConfigOpts) -> None:
     """Configure the library.
 
     Register the required oslo.cache config options into an oslo.config CONF

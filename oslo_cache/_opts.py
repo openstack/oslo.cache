@@ -402,13 +402,15 @@ FILE_OPTIONS = {
 }
 
 
-def configure(conf):
+def configure(conf: cfg.ConfigOpts) -> None:
     for section in FILE_OPTIONS:
         for option in FILE_OPTIONS[section]:
             conf.register_opt(option, group=section)
 
 
-def set_defaults(conf, memcache_pool_flush_on_reconnect=False):
+def set_defaults(
+    conf: cfg.ConfigOpts, memcache_pool_flush_on_reconnect: bool = False
+) -> None:
     """Set defaults for configuration variables.
 
     Overrides default options values.
@@ -428,7 +430,7 @@ def set_defaults(conf, memcache_pool_flush_on_reconnect=False):
     )
 
 
-def list_opts():
+def list_opts() -> list[tuple[str, cfg.Opt]]:
     """Return a list of oslo_config options.
 
     The returned list includes all oslo_config options which are registered as

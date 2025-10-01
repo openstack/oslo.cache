@@ -100,7 +100,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
         test_value = TestProxyValue('Direct Cache Test')
         self.region.set('cache_test', test_value)
         cached_value = self.region.get('cache_test')
-        self.assertTrue(cached_value.cached)
+        self.assertTrue(cached_value.cached)  # type: ignore
 
     def test_cache_region_no_error_multiple_config(self):
         # Verify configuring the CacheRegion again doesn't error.
@@ -306,7 +306,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
             config_dict = cache._build_cache_config(self.config_fixture.conf)
 
             self.assertFalse(self.config_fixture.conf.cache.tls_enabled)
-            ssl.create_default_context.assert_not_called()
+            ssl.create_default_context.assert_not_called()  # type: ignore
             self.assertNotIn('test_prefix.arguments.tls_context', config_dict)
 
     def test_cache_config_builder_tls_disabled_redis(self):
@@ -370,7 +370,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
 
             self.assertTrue(self.config_fixture.conf.cache.tls_enabled)
 
-            ssl.create_default_context.assert_called_with(cafile=None)
+            ssl.create_default_context.assert_called_with(cafile=None)  # type: ignore
             fake_context.load_cert_chain.assert_not_called()
             fake_context.set_ciphers.assert_not_called()
 
@@ -526,7 +526,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
                 cache._build_cache_config,
                 self.config_fixture.conf,
             )
-            ssl.create_default_context.assert_not_called()
+            ssl.create_default_context.assert_not_called()  # type: ignore
 
     def test_cache_config_builder_tls_enabled_with_config(self):
         """Validate the backend is reset to default if caching is disabled."""
@@ -550,7 +550,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
 
             self.assertTrue(self.config_fixture.conf.cache.tls_enabled)
 
-            ssl.create_default_context.assert_called_with(
+            ssl.create_default_context.assert_called_with(  # type: ignore
                 cafile='path_to_ca_file',
             )
             fake_context.load_cert_chain.assert_called_with(
@@ -1138,7 +1138,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
             self.assertIn(value, cached_values)
         self.assertEqual(len(multi_values.values()), len(cached_values))
 
-        self.region.delete_multi(multi_values.keys())
+        self.region.delete_multi(list(multi_values.keys()))
         for value in self.region.get_multi(multi_values.keys()):
             self.assertEqual(NO_VALUE, value)
 

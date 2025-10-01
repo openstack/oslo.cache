@@ -15,12 +15,14 @@
 
 """Thread-safe connection pool for python-memcached."""
 
-import collections
+from collections.abc import Generator
 import contextlib
+import dataclasses
 import itertools
 import queue
 import threading
 import time
+from typing import Any, Generic, TypeVar
 import warnings
 
 try:
@@ -45,7 +47,7 @@ if eventlet and eventlet.patcher.is_monkey_patched('thread'):
     )
 
 
-class _MemcacheClient(memcache.Client):
+class _MemcacheClient(memcache.Client):  # type: ignore
     """Thread global memcache client
 
     As client is inherited from threading.local we have to restore object
@@ -61,26 +63,39 @@ class _MemcacheClient(memcache.Client):
     if eventlet and eventlet.patcher.is_monkey_patched('thread'):
         # NOTE(bnemec): I'm not entirely sure why this works in a
         # monkey-patched environment and not with vanilla stdlib, but it does.
-        def __new__(cls, *args, **kwargs):
+        def __new__(cls, *args: Any, **kwargs: Any) -> type['_MemcacheClient']:
             return object.__new__(cls)
     else:
         __new__ = object.__new__
 
-    def __del__(self):
+    def __del__(self) -> None:
         pass
 
 
-_PoolItem = collections.namedtuple('_PoolItem', ['ttl', 'connection'])
+T = TypeVar('T')
 
 
-class ConnectionPool(queue.Queue):
+@dataclasses.dataclass
+class _PoolItem(Generic[T]):
+    ttl: float
+    connection: T
+
+
+# TODO(stephenfin): Make this private so we can eventually fold it into
+# MemcacheClientPool, it's sole user.
+class ConnectionPool(queue.Queue[T], Generic[T]):
     """Base connection pool class
 
     This class implements the basic connection pool logic as an abstract base
     class.
     """
 
-    def __init__(self, maxsize, unused_timeout, conn_get_timeout=None):
+    def __init__(
+        self,
+        maxsize: int,
+        unused_timeout: float,
+        conn_get_timeout: float | None = None,
+    ) -> None:
         """Initialize the connection pool.
 
         :param maxsize: maximum number of client connections for the pool
@@ -102,7 +117,7 @@ class ConnectionPool(queue.Queue):
         self._connection_get_timeout = conn_get_timeout
         self._acquired = 0
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Delete the connection pool.
 
         Destory all connections left in the queue.
@@ -124,7 +139,7 @@ class ConnectionPool(queue.Queue):
                     LOG.warning, "Unable to cleanup a connection: %s", e
                 )
 
-    def _create_connection(self):
+    def _create_connection(self) -> T:
         """Returns a connection instance.
 
         This is called when the pool needs another instance created.
@@ -134,7 +149,7 @@ class ConnectionPool(queue.Queue):
         """
         raise NotImplementedError
 
-    def _destroy_connection(self, conn):
+    def _destroy_connection(self, conn: T) -> None:
         """Destroy and cleanup a connection instance.
 
         This is called when the pool wishes to get rid of an existing
@@ -146,21 +161,21 @@ class ConnectionPool(queue.Queue):
         """
         raise NotImplementedError
 
-    def _do_log(self, level, msg, *args):
+    def _do_log(self, level: int, msg: str, *args: Any) -> None:
         if LOG.isEnabledFor(level):
             thread_id = threading.current_thread().ident
             args = (id(self), thread_id) + args
             prefix = 'Memcached pool %s, thread %s: '
             LOG.log(level, prefix + msg, *args)
 
-    def _debug_logger(self, msg, *args):
+    def _debug_logger(self, msg: str, *args: Any) -> None:
         self._do_log(log.DEBUG, msg, *args)
 
-    def _trace_logger(self, msg, *args):
+    def _trace_logger(self, msg: str, *args: Any) -> None:
         self._do_log(log.TRACE, msg, *args)
 
     @contextlib.contextmanager
-    def acquire(self):
+    def acquire(self) -> Generator[T, None, None]:
         self._trace_logger('Acquiring connection')
         self._drop_expired_connections()
         try:
@@ -184,7 +199,7 @@ class ConnectionPool(queue.Queue):
                 self._trace_logger('Reaping exceeding connection %s', id(conn))
                 self._destroy_connection(conn)
 
-    def _qsize(self):
+    def _qsize(self) -> int:
         if self.maxsize:
             return self.maxsize - self._acquired
         else:
@@ -195,18 +210,19 @@ class ConnectionPool(queue.Queue):
     # NOTE(dstanek): stdlib and eventlet Queue implementations
     # have different names for the qsize method. This ensures
     # that we override both of them.
+    # TODO(stephenfin): Remove when we drop eventlet support
     if not hasattr(queue.Queue, '_qsize'):
         qsize = _qsize
 
-    def _get(self):
+    def _get(self) -> T:
         try:
             conn = self.queue.pop().connection
         except IndexError:
             conn = self._create_connection()
         self._acquired += 1
-        return conn
+        return conn  # type: ignore
 
-    def _drop_expired_connections(self):
+    def _drop_expired_connections(self) -> None:
         """Drop all expired connections from the left end of the queue."""
         now = time.time()
         try:
@@ -222,7 +238,7 @@ class ConnectionPool(queue.Queue):
             # depletionn.
             pass
 
-    def _put(self, conn):
+    def _put(self, conn: T) -> None:
         self.queue.append(
             _PoolItem(
                 ttl=time.time() + self._unused_timeout,
@@ -232,9 +248,17 @@ class ConnectionPool(queue.Queue):
         self._acquired -= 1
 
 
-class MemcacheClientPool(ConnectionPool):
-    def __init__(self, urls, arguments, **kwargs):
-        super().__init__(**kwargs)
+class MemcacheClientPool(ConnectionPool[_MemcacheClient]):
+    def __init__(
+        self,
+        urls: list[str],
+        arguments: dict[str, Any],
+        *,
+        maxsize: int,
+        unused_timeout: float,
+        conn_get_timeout: float | None = None,
+    ) -> None:
+        super().__init__(maxsize, unused_timeout, conn_get_timeout)
         self.urls = urls
         self._arguments = {
             'dead_retry': arguments.get('dead_retry', 5 * 60),
@@ -251,13 +275,13 @@ class MemcacheClientPool(ConnectionPool):
         # the host is not dead.
         self._hosts_deaduntil = [0] * len(urls)
 
-    def _create_connection(self):
+    def _create_connection(self) -> _MemcacheClient:
         return _MemcacheClient(self.urls, **self._arguments)
 
-    def _destroy_connection(self, conn):
+    def _destroy_connection(self, conn: _MemcacheClient) -> None:
         conn.disconnect_all()
 
-    def _get(self):
+    def _get(self) -> _MemcacheClient:
         conn = super()._get()
         try:
             # Propagate host state known to us to this client's list
@@ -274,7 +298,7 @@ class MemcacheClientPool(ConnectionPool):
             raise
         return conn
 
-    def _put(self, conn):
+    def _put(self, conn: _MemcacheClient) -> None:
         try:
             # If this client found that one of the hosts is dead, mark it as
             # such in our internal list

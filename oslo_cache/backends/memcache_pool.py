@@ -15,7 +15,9 @@
 
 """dogpile.cache backend that uses Memcached connection pool"""
 
+from collections.abc import Callable
 import functools
+from typing import Any
 
 from dogpile.cache.backends import memcached as memcached_backend
 
@@ -23,7 +25,7 @@ try:
     from oslo_cache import _bmemcache_pool
 except ImportError as e:
     if str(e) == "No module named 'bmemcached'":
-        _bmemcache_pool = None
+        _bmemcache_pool = None  # type: ignore
     else:
         raise
 from oslo_cache import _memcache_pool
@@ -32,14 +34,14 @@ from oslo_cache import exception
 
 # Helper to ease backend refactoring
 class ClientProxy:
-    def __init__(self, client_pool):
+    def __init__(self, client_pool: _memcache_pool.MemcacheClientPool) -> None:
         self.client_pool = client_pool
 
-    def _run_method(self, __name, *args, **kwargs):
+    def _run_method(self, __name: str, *args: Any, **kwargs: Any) -> Any:
         with self.client_pool.acquire() as client:
             return getattr(client, __name)(*args, **kwargs)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Callable[..., Any]:
         return functools.partial(self._run_method, name)
 
 
@@ -60,9 +62,11 @@ class PooledMemcachedBackend(memcached_backend.MemcachedBackend):
     picking the host to use (from the given server list) based on a key hash.
     """
 
+    client_pool: _memcache_pool.MemcacheClientPool
+
     # Composed from GenericMemcachedBackend's and MemcacheArgs's __init__
-    def __init__(self, arguments):
-        super().__init__(arguments)
+    def __init__(self, arguments: dict[str, Any]) -> None:
+        super().__init__(arguments)  # type: ignore
         if arguments.get('tls_enabled', False) or arguments.get(
             'sasl_enabled', False
         ):
@@ -99,5 +103,5 @@ class PooledMemcachedBackend(memcached_backend.MemcachedBackend):
     # Since all methods in backend just call one of methods of client, this
     # lets us avoid need to hack it too much
     @property
-    def client(self):
-        return ClientProxy(self.client_pool)
+    def client(self) -> ClientProxy:
+        return ClientProxy(self.client_pool)  # type: ignore
