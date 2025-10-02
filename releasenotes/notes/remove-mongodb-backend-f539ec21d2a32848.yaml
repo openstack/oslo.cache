@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    The ``oslo_cache.mongo`` backend has been removed. This was found to be
+    incompatible with pymongo 3.x or later, which was first released in 2015.

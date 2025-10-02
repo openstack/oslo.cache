@@ -43,7 +43,6 @@ FILE_OPTIONS = {
         cfg.StrOpt('backend', default=_DEFAULT_BACKEND,
                    choices=['oslo_cache.memcache_pool',
                             'oslo_cache.dict',
-                            'oslo_cache.mongo',
                             'oslo_cache.etcd3gw',
                             'dogpile.cache.pymemcache',
                             'dogpile.cache.memcached',
