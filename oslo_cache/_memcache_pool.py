@@ -146,18 +146,18 @@ class ConnectionPool(queue.Queue):
         """
         raise NotImplementedError
 
-    def _do_log(self, level, msg, *args, **kwargs):
+    def _do_log(self, level, msg, *args):
         if LOG.isEnabledFor(level):
             thread_id = threading.current_thread().ident
             args = (id(self), thread_id) + args
             prefix = 'Memcached pool %s, thread %s: '
-            LOG.log(level, prefix + msg, *args, **kwargs)
+            LOG.log(level, prefix + msg, *args)
 
-    def _debug_logger(self, msg, *args, **kwargs):
-        self._do_log(log.DEBUG, msg, *args, **kwargs)
+    def _debug_logger(self, msg, *args):
+        self._do_log(log.DEBUG, msg, *args)
 
-    def _trace_logger(self, msg, *args, **kwargs):
-        self._do_log(log.TRACE, msg, *args, **kwargs)
+    def _trace_logger(self, msg, *args):
+        self._do_log(log.TRACE, msg, *args)
 
     @contextlib.contextmanager
     def acquire(self):
