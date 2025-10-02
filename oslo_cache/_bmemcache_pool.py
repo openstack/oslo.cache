@@ -15,7 +15,7 @@
 
 """Thread-safe connection pool for python-binary-memcached."""
 
-import debtcollector
+import warnings
 
 try:
     import eventlet
@@ -29,8 +29,10 @@ LOG = log.getLogger(__name__)
 
 
 if eventlet and eventlet.patcher.is_monkey_patched('thread'):
-    debtcollector.deprecate(
-        "Eventlet support is deprecated and will be removed."
+    warnings.warn(
+        "Eventlet support is deprecated and will be removed.",
+        category=DeprecationWarning,
+        stacklevel=3,
     )
 
 
