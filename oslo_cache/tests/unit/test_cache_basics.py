@@ -637,7 +637,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
         opts = ['enable_retry_client', 'retry_attempts', 'retry_delay']
 
         for el in opts:
-            self.assertNotIn('test_prefix.arguments.{}'.format(el),
+            self.assertNotIn(f'test_prefix.arguments.{el}',
                              config_dict)
 
     def test_cache_pymemcache_retry_enabled(self):
@@ -653,7 +653,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
         opts = ['enable_retry_client', 'retry_attempts', 'retry_delay']
 
         for el in opts:
-            self.assertIn('test_prefix.arguments.{}'.format(el), config_dict)
+            self.assertIn(f'test_prefix.arguments.{el}', config_dict)
 
     def test_cache_pymemcache_retry_with_opts(self):
         """Validate we build a valid config for the retry client."""
