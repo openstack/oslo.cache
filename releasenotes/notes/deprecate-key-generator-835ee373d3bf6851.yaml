@@ -1,0 +1,8 @@
+---
+deprecations:
+  - |
+    The following functionas of the ``oslo_cache.core`` module are deprecated.
+    Use the same functions from ``dogpile.cache.util`` module instead.
+
+    - ``function_key_generator``
+    - ``kwarg_function_key_generator``

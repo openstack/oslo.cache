@@ -41,6 +41,7 @@ import socket
 import ssl
 from typing import Any
 import urllib.parse
+import warnings
 
 import dogpile.cache
 from dogpile.cache import api
@@ -464,8 +465,11 @@ def function_key_generator(
     fn: Callable[..., Any],
     to_str: Callable[[Any], str] = str,
 ) -> Callable[..., str]:
-    # NOTE(morganfainberg): This wraps dogpile.cache's default
-    # function_key_generator to change the default to_str mechanism.
+    warnings.warn(
+        "Use dogpile.cache.utils.function_key_generator instead",
+        category=DeprecationWarning,
+        stacklevel=2,
+    )
     return util.function_key_generator(  # type: ignore
         namespace, fn, to_str=to_str
     )
@@ -476,8 +480,11 @@ def kwarg_function_key_generator(
     fn: Callable[..., Any],
     to_str: Callable[[Any], str] = str,
 ) -> Callable[..., str]:
-    # NOTE(ralonsoh): This wraps dogpile.cache's default
-    # kwarg_function_key_generator to change the default to_str mechanism.
+    warnings.warn(
+        "Use dogpile.cache.utils.kwarg_function_key_generator instead",
+        category=DeprecationWarning,
+        stacklevel=2,
+    )
     return util.kwarg_function_key_generator(  # type: ignore
         namespace, fn, to_str=to_str
     )
@@ -486,7 +493,7 @@ def kwarg_function_key_generator(
 def create_region(
     function: Callable[
         [str, Callable[..., Any], Callable[[Any], str]], Callable[..., str]
-    ] = function_key_generator,
+    ] = util.function_key_generator,
 ) -> dogpile.cache.region.CacheRegion:
     """Create a region.
 
