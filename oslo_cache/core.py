@@ -459,14 +459,10 @@ def _sha1_mangle_key(key: str | bytes) -> str:
     return util.sha1_mangle_key(key)  # type: ignore
 
 
-def _key_generate_to_str(s: Any) -> str:
-    return str(s)
-
-
 def function_key_generator(
     namespace: str,
     fn: Callable[..., Any],
-    to_str: Callable[[Any], str] = _key_generate_to_str,
+    to_str: Callable[[Any], str] = str,
 ) -> Callable[..., str]:
     # NOTE(morganfainberg): This wraps dogpile.cache's default
     # function_key_generator to change the default to_str mechanism.
@@ -478,7 +474,7 @@ def function_key_generator(
 def kwarg_function_key_generator(
     namespace: str,
     fn: Callable[..., Any],
-    to_str: Callable[[Any], str] = _key_generate_to_str,
+    to_str: Callable[[Any], str] = str,
 ) -> Callable[..., str]:
     # NOTE(ralonsoh): This wraps dogpile.cache's default
     # kwarg_function_key_generator to change the default to_str mechanism.
