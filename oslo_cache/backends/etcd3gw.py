@@ -14,7 +14,7 @@
 
 """dogpile.cache backend that uses etcd 3.x for storage"""
 
-from collections.abc import Sequence, Mapping
+from collections.abc import Iterable, Mapping, Sequence
 from typing import Any
 
 from dogpile.cache import api
@@ -56,7 +56,7 @@ class Etcd3gwCacheBackend(api.CacheBackend):
         return api.CachedValue(value, metadata)
 
     def get_multi(
-        self, keys: Sequence[api.KeyType]
+        self, keys: Iterable[api.KeyType]
     ) -> Sequence[api.BackendFormatted]:
         """Retrieves the value for a list of keys."""
         return [self.get(key) for key in keys]
@@ -76,6 +76,6 @@ class Etcd3gwCacheBackend(api.CacheBackend):
     def delete(self, key: api.KeyType) -> None:
         self._client.delete(key)
 
-    def delete_multi(self, keys: Sequence[api.KeyType]) -> None:
+    def delete_multi(self, keys: Iterable[api.KeyType]) -> None:
         for key in keys:
             self._client.delete(key)

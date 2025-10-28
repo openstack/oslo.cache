@@ -36,7 +36,7 @@ The library has special public value for nonexistent or expired keys called
     NO_VALUE = core.NO_VALUE
 """
 
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 import socket
 import ssl
 from typing import Any
@@ -89,7 +89,7 @@ class _DebugProxy(proxy.ProxyBackend):
         return value
 
     def get_multi(
-        self, keys: Sequence[api.KeyType]
+        self, keys: Iterable[api.KeyType]
     ) -> Sequence[api.BackendFormatted]:
         values = self.proxied.get_multi(keys)
         _LOG.debug(
@@ -115,7 +115,7 @@ class _DebugProxy(proxy.ProxyBackend):
         self.proxied.delete(key)
         _LOG.debug('CACHE_DELETE: "%r"', key)
 
-    def delete_multi(self, keys: Sequence[api.KeyType]) -> None:
+    def delete_multi(self, keys: Iterable[api.KeyType]) -> None:
         _LOG.debug('CACHE_DELETE_MULTI: "%r"', keys)
         self.proxied.delete_multi(keys)
 
@@ -464,7 +464,7 @@ def _key_generate_to_str(s: Any) -> str:
 
 
 def function_key_generator(
-    namespace: str | None,
+    namespace: str,
     fn: Callable[..., Any],
     to_str: Callable[[Any], str] = _key_generate_to_str,
 ) -> Callable[..., str]:

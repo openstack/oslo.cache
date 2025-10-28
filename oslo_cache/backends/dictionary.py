@@ -14,7 +14,7 @@
 
 """dogpile.cache backend that uses dictionary for storage"""
 
-from collections.abc import Sequence, Mapping
+from collections.abc import Iterable, Mapping, Sequence
 from typing import Any
 
 from dogpile.cache import api
@@ -57,7 +57,7 @@ class DictCacheBackend(api.CacheBackend):
         return value
 
     def get_multi(
-        self, keys: Sequence[api.KeyType]
+        self, keys: Iterable[api.KeyType]
     ) -> Sequence[api.BackendFormatted]:
         """Retrieves the value for a list of keys."""
         return [self.get(key) for key in keys]
@@ -94,7 +94,7 @@ class DictCacheBackend(api.CacheBackend):
         """
         self.cache.pop(key, None)
 
-    def delete_multi(self, keys: Sequence[api.KeyType]) -> None:
+    def delete_multi(self, keys: Iterable[api.KeyType]) -> None:
         """Deletes the value associated with each key in list if it exists.
 
         :param keys: list of dictionary keys
