@@ -1,0 +1,9 @@
+---
+deprecations:
+  - |
+    The ``[cache] hashclient_retry_delay`` option has been deprecated in favor
+    of the new ``[cache] hashclient_retry_timeout`` option.
+
+  - |
+    The ``[cache] dead_timeout`` option has been deprecated in favor of
+    the new ``[cache] hashclient_dead_timeout`` option.

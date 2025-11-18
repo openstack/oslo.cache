@@ -367,7 +367,8 @@ FILE_OPTIONS = {
             ),
         ),
         cfg.FloatOpt(
-            'hashclient_retry_delay',
+            'hashclient_retry_timeout',
+            deprecated_name='hashclient_retry_delay',
             default=1,
             help=(
                 'Time in seconds that should pass between '
@@ -375,7 +376,8 @@ FILE_OPTIONS = {
             ),
         ),
         cfg.FloatOpt(
-            'dead_timeout',
+            'hashclient_dead_timeout',
+            deprecated_name='dead_timeout',
             default=60,
             help=(
                 'Time in seconds before attempting to add a node '
