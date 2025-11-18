@@ -436,10 +436,12 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
         conf_dict[f'{prefix}.arguments.hashclient_retry_attempts'] = (
             conf.cache.hashclient_retry_attempts
         )
-        conf_dict[f'{prefix}.arguments.hashclient_retry_delay'] = (
+        conf_dict[f'{prefix}.arguments.hashclient_retry_timeout'] = (
             conf.cache.hashclient_retry_delay
         )
-        conf_dict[f'{prefix}.arguments.dead_timeout'] = conf.cache.dead_timeout
+        conf_dict[f'{prefix}.arguments.hashclient_dead_timeout'] = (
+            conf.cache.dead_timeout
+        )
 
     return conf_dict
 

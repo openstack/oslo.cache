@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fixed the following ignored options.
+
+    - ``[cache] hashclient_retry_delay``
+    - ``[cache] dead_timeout``
