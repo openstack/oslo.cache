@@ -760,11 +760,11 @@ class CacheRegionTest(test_cache.BaseTestCase):
         )
 
         self.assertEqual(
-            config_dict['test_prefix.arguments.hashclient_retry_delay'], 100
+            config_dict['test_prefix.arguments.hashclient_retry_timeout'], 100
         )
 
         self.assertEqual(
-            config_dict['test_prefix.arguments.dead_timeout'], 100
+            config_dict['test_prefix.arguments.hashclient_dead_timeout'], 100
         )
 
     def test_cache_config_builder_flush_on_reconnect_enabled(self):
