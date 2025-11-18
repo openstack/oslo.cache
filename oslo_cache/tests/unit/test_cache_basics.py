@@ -741,8 +741,8 @@ class CacheRegionTest(test_cache.BaseTestCase):
             retry_attempts=42,
             retry_delay=42,
             hashclient_retry_attempts=100,
-            hashclient_retry_delay=100,
-            dead_timeout=100,
+            hashclient_retry_timeout=100,
+            hashclient_dead_timeout=100,
         )
 
         config_dict = cache._build_cache_config(self.config_fixture.conf)
