@@ -13,6 +13,7 @@
 import queue
 import threading
 import time
+from typing import Any
 from unittest import mock
 
 import testtools
@@ -24,7 +25,7 @@ from oslo_cache import exception
 from oslo_cache.tests import test_cache
 
 
-class _TestConnectionPool(_memcache_pool.ConnectionPool):
+class _TestConnectionPool(_memcache_pool.ConnectionPool[Any]):
     destroyed_value = 'destroyed'
 
     def _create_connection(self):

@@ -104,4 +104,4 @@ class PooledMemcachedBackend(memcached_backend.MemcachedBackend):
     # lets us avoid need to hack it too much
     @property
     def client(self) -> ClientProxy:
-        return ClientProxy(self.client_pool)  # type: ignore
+        return ClientProxy(self.client_pool)

@@ -459,7 +459,7 @@ def _sha1_mangle_key(key: str | bytes) -> str:
         except (UnicodeError, AttributeError):
             # NOTE(stevemar): if encoding fails just continue anyway.
             pass
-    return util.sha1_mangle_key(key)  # type: ignore
+    return util.sha1_mangle_key(key)
 
 
 def function_key_generator(
@@ -472,9 +472,7 @@ def function_key_generator(
         category=DeprecationWarning,
         stacklevel=2,
     )
-    return util.function_key_generator(  # type: ignore
-        namespace, fn, to_str=to_str
-    )
+    return util.function_key_generator(namespace, fn, to_str=to_str)
 
 
 def kwarg_function_key_generator(
@@ -487,9 +485,7 @@ def kwarg_function_key_generator(
         category=DeprecationWarning,
         stacklevel=2,
     )
-    return util.kwarg_function_key_generator(  # type: ignore
-        namespace, fn, to_str=to_str
-    )
+    return util.kwarg_function_key_generator(namespace, fn, to_str=to_str)
 
 
 def create_region(
@@ -545,7 +541,7 @@ def configure_cache_region(
         # easier / less ugly.
 
         config_dict = _build_cache_config(conf)
-        region.configure_from_config(  # type: ignore[no-untyped-call]
+        region.configure_from_config(
             config_dict, f'{conf.cache.config_prefix}.'
         )
 
@@ -697,8 +693,7 @@ def get_memoization_decorator(
     expiration_time = _get_expiration_time_fn(conf, expiration_group)
 
     memoize = region.cache_on_arguments(
-        should_cache_fn=should_cache,
-        expiration_time=expiration_time,  # type: ignore
+        should_cache_fn=should_cache, expiration_time=expiration_time
     )
 
     # Make sure the actual "should_cache" and "expiration_time" methods are
