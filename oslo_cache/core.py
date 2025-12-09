@@ -174,7 +174,10 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
             netloc = conf.cache.redis_server
         else:
             if conf.cache.redis_username:
-                netloc = f'{conf.cache.redis_username}:{conf.cache.redis_password}@{conf.cache.redis_server}'
+                netloc = (
+                    f'{conf.cache.redis_username}:{conf.cache.redis_password}'
+                    f'@{conf.cache.redis_server}'
+                )
             else:
                 netloc = (
                     f':{conf.cache.redis_password}@{conf.cache.redis_server}'
@@ -335,7 +338,8 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
                 )
             if conf.cache.enforce_fips_mode:
                 raise exception.ConfigurationError(
-                    f"FIPS mode is not supported by the {conf.cache.backend} backend"
+                    f"FIPS mode is not supported by the {conf.cache.backend} "
+                    "backend"
                 )
 
             conn_kwargs = {}
@@ -366,8 +370,8 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
         else:
             raise exception.ConfigurationError(
                 "TLS setting via [cache] tls_enabled is not supported by the "
-                f"{conf.cache.backend} backend. Set [cache] tls_enabled=False or use a different "
-                "backend."
+                f"{conf.cache.backend} backend. Set [cache] tls_enabled=False "
+                "or use a different backend."
             )
 
     # NOTE(hberaud): Pymemcache backend and redis backends support socket
@@ -411,7 +415,8 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
             )
         else:
             raise exception.ConfigurationError(
-                f"Socket keepalive is not supported by the {conf.cache.backend} backend"
+                "Socket keepalive is not supported by the "
+                f"{conf.cache.backend} backend"
             )
 
     # NOTE(hberaud): The pymemcache library comes with retry mechanisms that
