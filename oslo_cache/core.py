@@ -290,20 +290,6 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
                 cafile=conf.cache.tls_cafile
             )
 
-            if conf.cache.enforce_fips_mode:
-                if hasattr(ssl, 'FIPS_mode'):
-                    _LOG.info("Enforcing the use of the OpenSSL FIPS mode")
-                    ssl.FIPS_mode_set(1)  # type: ignore
-                else:
-                    raise exception.ConfigurationError(
-                        "OpenSSL FIPS mode is not supported by your Python "
-                        "version. You must either change the Python "
-                        "executable used to a version with FIPS mode support "
-                        "or disable FIPS mode by setting "
-                        "the '[cache] enforce_fips_mode' configuration option "
-                        "to 'False'."
-                    )
-
             if conf.cache.tls_certfile is not None:
                 _LOG.debug(
                     'Oslo Cache TLS - cert: %s', conf.cache.tls_certfile
@@ -335,11 +321,6 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
                 raise exception.ConfigurationError(
                     "Limiting allowed ciphers is not supported by "
                     f"the {conf.cache.backend} backend"
-                )
-            if conf.cache.enforce_fips_mode:
-                raise exception.ConfigurationError(
-                    f"FIPS mode is not supported by the {conf.cache.backend} "
-                    "backend"
                 )
 
             conn_kwargs = {}
