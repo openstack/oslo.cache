@@ -387,6 +387,11 @@ FILE_OPTIONS = {
         cfg.BoolOpt(
             'enforce_fips_mode',
             default=False,
+            deprecated_for_removal=True,
+            deprecated_reason=(
+                'FIPS_mode_set API was removed in OpenSSL 3.0.0. '
+                'This option has no effect now.'
+            ),
             help=(
                 'Global toggle for enforcing the OpenSSL FIPS mode. '
                 'This feature requires Python support. '
