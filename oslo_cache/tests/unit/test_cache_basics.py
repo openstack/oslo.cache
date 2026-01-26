@@ -821,6 +821,10 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertEqual(
             1.0, config_dict['test_prefix.arguments.socket_timeout']
         )
+        self.assertNotIn('test_prefix.arguments.socket_keepalive', config_dict)
+        self.assertNotIn(
+            'test_prefix.arguments.socket_keepalive_options', config_dict
+        )
 
     def test_cache_config_builder_redis_with_db(self):
         """Validate we build a sane dogpile.cache dictionary config."""
@@ -838,6 +842,10 @@ class CacheRegionTest(test_cache.BaseTestCase):
         )
         self.assertEqual(
             1.0, config_dict['test_prefix.arguments.socket_timeout']
+        )
+        self.assertNotIn('test_prefix.arguments.socket_keepalive', config_dict)
+        self.assertNotIn(
+            'test_prefix.arguments.socket_keepalive_options', config_dict
         )
 
     def test_cache_config_builder_redis_with_sock_to(self):
@@ -857,6 +865,10 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertEqual(
             10.0, config_dict['test_prefix.arguments.socket_timeout']
         )
+        self.assertNotIn('test_prefix.arguments.socket_keepalive', config_dict)
+        self.assertNotIn(
+            'test_prefix.arguments.socket_keepalive_options', config_dict
+        )
 
     def test_cache_config_builder_redis_with_keepalive(self):
         """Validate we build a sane dogpile.cache dictionary config."""
@@ -875,16 +887,14 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertEqual(
             1.0, config_dict['test_prefix.arguments.socket_timeout']
         )
+        self.assertTrue(config_dict['test_prefix.arguments.socket_keepalive'])
         self.assertEqual(
             {
-                'socket_keepalive': True,
-                'socket_keepalive_options': {
-                    socket.TCP_KEEPIDLE: 1,
-                    socket.TCP_KEEPINTVL: 1,
-                    socket.TCP_KEEPCNT: 1,
-                },
+                socket.TCP_KEEPIDLE: 1,
+                socket.TCP_KEEPINTVL: 1,
+                socket.TCP_KEEPCNT: 1,
             },
-            config_dict['test_prefix.arguments.connection_kwargs'],
+            config_dict['test_prefix.arguments.socket_keepalive_options'],
         )
 
     def test_cache_config_builder_redis_with_keepalive_params(self):
@@ -907,16 +917,14 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertEqual(
             1.0, config_dict['test_prefix.arguments.socket_timeout']
         )
+        self.assertTrue(config_dict['test_prefix.arguments.socket_keepalive'])
         self.assertEqual(
             {
-                'socket_keepalive': True,
-                'socket_keepalive_options': {
-                    socket.TCP_KEEPIDLE: 2,
-                    socket.TCP_KEEPINTVL: 3,
-                    socket.TCP_KEEPCNT: 4,
-                },
+                socket.TCP_KEEPIDLE: 2,
+                socket.TCP_KEEPINTVL: 3,
+                socket.TCP_KEEPCNT: 4,
             },
-            config_dict['test_prefix.arguments.connection_kwargs'],
+            config_dict['test_prefix.arguments.socket_keepalive_options'],
         )
 
     def test_cache_config_builder_redis_with_auth(self):
@@ -975,6 +983,10 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertEqual(
             1.0, config_dict['test_prefix.arguments.socket_timeout']
         )
+        self.assertNotIn('test_prefix.arguments.socket_keepalive', config_dict)
+        self.assertNotIn(
+            'test_prefix.arguments.socket_keepalive_options', config_dict
+        )
         self.assertNotIn(
             'test_prefix.arguments.connection_kwargs', config_dict
         )
@@ -1004,6 +1016,10 @@ class CacheRegionTest(test_cache.BaseTestCase):
         self.assertEqual(
             1.0, config_dict['test_prefix.arguments.socket_timeout']
         )
+        self.assertNotIn('test_prefix.arguments.socket_keepalive', config_dict)
+        self.assertNotIn(
+            'test_prefix.arguments.socket_keepalive_options', config_dict
+        )
         self.assertNotIn(
             'test_prefix.arguments.connection_kwargs', config_dict
         )
@@ -1032,6 +1048,10 @@ class CacheRegionTest(test_cache.BaseTestCase):
         )
         self.assertEqual(
             10.0, config_dict['test_prefix.arguments.socket_timeout']
+        )
+        self.assertNotIn('test_prefix.arguments.socket_keepalive', config_dict)
+        self.assertNotIn(
+            'test_prefix.arguments.socket_keepalive_options', config_dict
         )
         self.assertNotIn(
             'test_prefix.arguments.connection_kwargs', config_dict

@@ -400,19 +400,12 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
             'dogpile.cache.redis',
             'dogpile.cache.redis_sentinel',
         ):
-            socket_keepalive_options = {
+            conf_dict[f'{prefix}.arguments.socket_keepalive'] = True
+            conf_dict[f'{prefix}.arguments.socket_keepalive_options'] = {
                 socket.TCP_KEEPIDLE: conf.cache.socket_keepalive_idle,
                 socket.TCP_KEEPINTVL: conf.cache.socket_keepalive_interval,
                 socket.TCP_KEEPCNT: conf.cache.socket_keepalive_count,
             }
-            conf_dict.setdefault(
-                f'{prefix}.arguments.connection_kwargs', {}
-            ).update(
-                {
-                    'socket_keepalive': True,
-                    'socket_keepalive_options': socket_keepalive_options,
-                }
-            )
         else:
             raise exception.ConfigurationError(
                 "Socket keepalive is not supported by the "
