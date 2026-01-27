@@ -147,15 +147,6 @@ FILE_OPTIONS = {
                 'oslo_cache.memcache_pool backends only).'
             ),
         ),
-        cfg.FloatOpt(
-            'memcache_socket_timeout',
-            default=1.0,
-            help=(
-                'Timeout in seconds for every call to a server. '
-                '(dogpile.cache.memcache and oslo_cache.memcache_pool '
-                'backends only).'
-            ),
-        ),
         cfg.IntOpt(
             'memcache_pool_maxsize',
             default=10,
@@ -200,15 +191,6 @@ FILE_OPTIONS = {
             ),
         ),
         cfg.StrOpt(
-            'memcache_username',
-            help='the user name for the memcached which SASL enabled',
-        ),
-        cfg.StrOpt(
-            'memcache_password',
-            secret=True,
-            help='the password for the memcached which SASL enabled',
-        ),
-        cfg.StrOpt(
             'redis_server',
             default='localhost:6379',
             help='Redis server in the format of "host:port"',
@@ -216,28 +198,32 @@ FILE_OPTIONS = {
         cfg.IntOpt(
             'redis_db', default=0, min=0, help='Database id in Redis server'
         ),
-        cfg.StrOpt('redis_username', help='the user name for redis'),
-        cfg.StrOpt(
-            'redis_password', secret=True, help='the password for redis'
-        ),
         cfg.ListOpt(
             'redis_sentinels',
             default=['localhost:26379'],
             help='Redis sentinel servers in the format of "host:port"',
         ),
-        cfg.FloatOpt(
-            'redis_socket_timeout',
-            default=1.0,
-            help=(
-                'Timeout in seconds for every call to a server. '
-                '(dogpile.cache.redis and dogpile.cache.redis_sentinel '
-                'backends only).'
-            ),
-        ),
         cfg.StrOpt(
             'redis_sentinel_service_name',
             default='mymaster',
             help='Service name of the redis sentinel cluster.',
+        ),
+        cfg.StrOpt(
+            'username',
+            help='the user name for authentication to backend.',
+            deprecated_opts=[
+                cfg.DeprecatedOpt('memcache_username', group='cache'),
+                cfg.DeprecatedOpt('redis_username', group='cache'),
+            ],
+        ),
+        cfg.StrOpt(
+            'password',
+            secret=True,
+            help='the password for authentication to backend.',
+            deprecated_opts=[
+                cfg.DeprecatedOpt('memcache_password', group='cache'),
+                cfg.DeprecatedOpt('redis_password', group='cache'),
+            ],
         ),
         cfg.BoolOpt(
             'tls_enabled',
@@ -295,6 +281,20 @@ FILE_OPTIONS = {
                 '``dogpile.cache.bmemcache``, '
                 '``dogpile.cache.pymemcache`` and '
                 '``oslo_cache.memcache_pool``.'
+            ),
+        ),
+        cfg.FloatOpt(
+            'socket_timeout',
+            default=1.0,
+            deprecated_opts=[
+                cfg.DeprecatedOpt('memcache_socket_timeout', group='cache'),
+                cfg.DeprecatedOpt('redis_socket_timeout', group='cache'),
+            ],
+            help=(
+                'Timeout in seconds for every call to a server. '
+                'Currently supported by ``dogpile.cache.memcache``, '
+                '``oslo_cache.memcache_pool``, ``dogpile.cache.redis`` '
+                'and ``dogpile.cache.redis_sentinel``.'
             ),
         ),
         cfg.BoolOpt(

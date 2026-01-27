@@ -170,18 +170,16 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
         _LOG.debug('Oslo Cache Config: %s', conf_dict)
 
     if conf.cache.backend == 'dogpile.cache.redis':
-        if conf.cache.redis_password is None:
+        if conf.cache.password is None:
             netloc = conf.cache.redis_server
         else:
-            if conf.cache.redis_username:
+            if conf.cache.username:
                 netloc = (
-                    f'{conf.cache.redis_username}:{conf.cache.redis_password}'
+                    f'{conf.cache.username}:{conf.cache.password}'
                     f'@{conf.cache.redis_server}'
                 )
             else:
-                netloc = (
-                    f':{conf.cache.redis_password}@{conf.cache.redis_server}'
-                )
+                netloc = f':{conf.cache.password}@{conf.cache.redis_server}'
 
         parts = urllib.parse.ParseResult(
             scheme=('rediss' if conf.cache.tls_enabled else 'redis'),
@@ -195,13 +193,15 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
         conf_dict.setdefault(
             f'{prefix}.arguments.url', urllib.parse.urlunparse(parts)
         )
-        for arg in ('socket_timeout',):
-            value = getattr(conf.cache, 'redis_' + arg)
-            conf_dict[f'{prefix}.arguments.{arg}'] = value
+        conf_dict[f'{prefix}.arguments.socket_timeout'] = (
+            conf.cache.socket_timeout
+        )
     elif conf.cache.backend == 'dogpile.cache.redis_sentinel':
-        for arg in ('username', 'password', 'socket_timeout', 'db'):
-            value = getattr(conf.cache, 'redis_' + arg)
-            conf_dict[f'{prefix}.arguments.{arg}'] = value
+        for arg in ('username', 'password', 'socket_timeout'):
+            conf_dict[f'{prefix}.arguments.{arg}'] = getattr(conf.cache, arg)
+
+        conf_dict[f'{prefix}.arguments.db'] = conf.cache.redis_db
+
         conf_dict[f'{prefix}.arguments.service_name'] = (
             conf.cache.redis_sentinel_service_name
         )
@@ -238,8 +238,14 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
         )
 
         for arg in (
-            'dead_retry',
             'socket_timeout',
+            'username',
+            'password',
+        ):
+            conf_dict[f'{prefix}.arguments.{arg}'] = getattr(conf.cache, arg)
+
+        for arg in (
+            'dead_retry',
             'pool_maxsize',
             'pool_unused_timeout',
             'pool_connection_get_timeout',
