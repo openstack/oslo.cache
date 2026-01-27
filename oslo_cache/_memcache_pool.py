@@ -136,7 +136,7 @@ class ConnectionPool(queue.Queue[T], Generic[T]):
                 break
             except Exception as e:
                 self._do_log(
-                    LOG.warning, "Unable to cleanup a connection: %s", e
+                    log.WARNING, "Unable to cleanup a connection: %s", e
                 )
 
     def _create_connection(self) -> T:
