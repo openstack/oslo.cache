@@ -1,0 +1,9 @@
+---
+deprecations:
+  - |
+    The following ``[cache]`` options have been deprecated
+
+    - ``memcache_username`` and ``redis_username`` (Use ``username``)
+    - ``memcache_password`` and ``redis_password`` (Use ``password``)
+    - ``memcache_socket_timeout`` and ``redis_socket_timeout``
+      (Use ``socket_timeout``)
