@@ -44,7 +44,7 @@ class TestBMemcachePoolCacheBackend(test_base.BaseTestCaseCacheBackend):
             enabled=True,
             memcache_servers=[f'localhost:{MEMCACHED_PORT}'],
             memcache_sasl_enabled=False,
-            memcache_username='sasl_name',
-            memcache_password='sasl_pswd',
+            username='sasl_name',
+            password='sasl_pswd',
         )
         super().setUp()

@@ -887,8 +887,8 @@ class CacheRegionTest(test_cache.BaseTestCase):
             config_prefix='test_prefix',
             backend='dogpile.cache.redis',
             redis_server='[::1]:6379',
-            redis_username='user',
-            redis_password='secrete',
+            username='user',
+            password='secrete',
         )
 
         config_dict = cache._build_cache_config(self.config_fixture.conf)
@@ -1002,8 +1002,8 @@ class CacheRegionTest(test_cache.BaseTestCase):
             enabled=True,
             config_prefix='test_prefix',
             backend='dogpile.cache.redis_sentinel',
-            redis_username='user',
-            redis_password='secrete',
+            username='user',
+            password='secrete',
             redis_db=1,
             redis_sentinels=[
                 '127.0.0.1:26379',
