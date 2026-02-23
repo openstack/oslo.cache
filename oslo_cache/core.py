@@ -251,8 +251,6 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
             'pool_connection_get_timeout',
             'pool_flush_on_reconnect',
             'sasl_enabled',
-            'username',
-            'password',
         ):
             value = getattr(conf.cache, 'memcache_' + arg)
             conf_dict[f'{prefix}.arguments.{arg}'] = value
