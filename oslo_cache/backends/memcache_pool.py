@@ -67,7 +67,7 @@ class PooledMemcachedBackend(memcached_backend.MemcachedBackend):
     # Composed from GenericMemcachedBackend's and MemcacheArgs's __init__
     def __init__(self, arguments: dict[str, Any]) -> None:
         super().__init__(arguments)  # type: ignore
-        if arguments.get('tls_enabled', False) or arguments.get(
+        if arguments.get('tls_context') is not None or arguments.get(
             'sasl_enabled', False
         ):
             if arguments.get('sasl_enabled', False) and (
