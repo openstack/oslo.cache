@@ -294,12 +294,6 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
             'dogpile.cache.redis',
             'dogpile.cache.redis_sentinel',
         ):
-            if conf.cache.tls_allowed_ciphers is not None:
-                raise exception.ConfigurationError(
-                    "Limiting allowed ciphers is not supported by "
-                    f"the {conf.cache.backend} backend"
-                )
-
             conn_kwargs = {'ssl': True}
             if conf.cache.tls_cafile is not None:
                 conn_kwargs['ssl_ca_certs'] = conf.cache.tls_cafile
@@ -309,6 +303,10 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
                         'ssl_certfile': conf.cache.tls_certfile,
                         'ssl_keyfile': conf.cache.tls_keyfile,
                     }
+                )
+            if conf.cache.tls_allowed_ciphers is not None:
+                conn_kwargs.update(
+                    {'ssl_ciphers': conf.cache.tls_allowed_ciphers}
                 )
 
             if conf.cache.backend == 'dogpile.cache.redis_sentinel':
