@@ -289,26 +289,17 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
             'dogpile.cache.pymemcache',
             'oslo_cache.memcache_pool',
         ):
-            _LOG.debug('Oslo Cache TLS - CA: %s', conf.cache.tls_cafile)
             tls_context = ssl.create_default_context(
                 cafile=conf.cache.tls_cafile
             )
 
             if conf.cache.tls_certfile is not None:
-                _LOG.debug(
-                    'Oslo Cache TLS - cert: %s', conf.cache.tls_certfile
-                )
-                _LOG.debug('Oslo Cache TLS - key: %s', conf.cache.tls_keyfile)
                 tls_context.load_cert_chain(
                     conf.cache.tls_certfile,
                     conf.cache.tls_keyfile,
                 )
 
             if conf.cache.tls_allowed_ciphers is not None:
-                _LOG.debug(
-                    'Oslo Cache TLS - ciphers: %s',
-                    conf.cache.tls_allowed_ciphers,
-                )
                 tls_context.set_ciphers(conf.cache.tls_allowed_ciphers)
 
             conf_dict[f'{prefix}.arguments.tls_context'] = tls_context
@@ -329,13 +320,8 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
 
             conn_kwargs = {}
             if conf.cache.tls_cafile is not None:
-                _LOG.debug('Oslo Cache TLS - CA: %s', conf.cache.tls_cafile)
                 conn_kwargs['ssl_ca_certs'] = conf.cache.tls_cafile
             if conf.cache.tls_certfile is not None:
-                _LOG.debug(
-                    'Oslo Cache TLS - cert: %s', conf.cache.tls_certfile
-                )
-                _LOG.debug('Oslo Cache TLS - key: %s', conf.cache.tls_keyfile)
                 conn_kwargs.update(
                     {
                         'ssl_certfile': conf.cache.tls_certfile,
