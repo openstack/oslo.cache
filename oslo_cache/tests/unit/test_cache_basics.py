@@ -393,6 +393,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
             tls_cafile='path_to_ca_file',
             tls_keyfile='path_to_key_file',
             tls_certfile='path_to_cert_file',
+            tls_allowed_ciphers='allowed_ciphers',
         )
 
         config_dict = cache._build_cache_config(self.config_fixture.conf)
@@ -412,6 +413,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
                 'ssl_ca_certs': 'path_to_ca_file',
                 'ssl_keyfile': 'path_to_key_file',
                 'ssl_certfile': 'path_to_cert_file',
+                'ssl_ciphers': 'allowed_ciphers',
             },
             config_dict['test_prefix.arguments.connection_kwargs'],
         )
@@ -428,6 +430,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
             tls_cafile='path_to_ca_file',
             tls_keyfile='path_to_key_file',
             tls_certfile='path_to_cert_file',
+            tls_allowed_ciphers='allowed_ciphers',
         )
 
         config_dict = cache._build_cache_config(self.config_fixture.conf)
@@ -440,6 +443,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
                 'ssl_ca_certs': 'path_to_ca_file',
                 'ssl_keyfile': 'path_to_key_file',
                 'ssl_certfile': 'path_to_cert_file',
+                'ssl_ciphers': 'allowed_ciphers',
             },
             config_dict['test_prefix.arguments.connection_kwargs'],
         )
@@ -450,6 +454,7 @@ class CacheRegionTest(test_cache.BaseTestCase):
                 'ssl_ca_certs': 'path_to_ca_file',
                 'ssl_keyfile': 'path_to_key_file',
                 'ssl_certfile': 'path_to_cert_file',
+                'ssl_ciphers': 'allowed_ciphers',
             },
             config_dict['test_prefix.arguments.sentinel_kwargs'],
         )

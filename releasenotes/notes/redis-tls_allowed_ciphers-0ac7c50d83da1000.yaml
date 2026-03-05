@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    The following backends now support the ``[cache] tls_allowed_ciphers``
+    option. Note that using this option requires redis-py 5.1.0 or later.
+
+    - ``dogpile.cache.redis``
+    - ``dogpile.cache.redis_sentinel``
