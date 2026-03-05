@@ -40,7 +40,6 @@ from collections.abc import Callable, Iterable, Mapping, Sequence
 import socket
 import ssl
 from typing import Any
-import urllib.parse
 import warnings
 
 import dogpile.cache
@@ -169,46 +168,29 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
 
         _LOG.debug('Oslo Cache Config: %s', conf_dict)
 
-    if conf.cache.backend == 'dogpile.cache.redis':
-        if conf.cache.password is None:
-            netloc = conf.cache.redis_server
-        else:
-            if conf.cache.username:
-                netloc = (
-                    f'{conf.cache.username}:{conf.cache.password}'
-                    f'@{conf.cache.redis_server}'
-                )
-            else:
-                netloc = f':{conf.cache.password}@{conf.cache.redis_server}'
-
-        parts = urllib.parse.ParseResult(
-            scheme=('rediss' if conf.cache.tls_enabled else 'redis'),
-            netloc=netloc,
-            path=str(conf.cache.redis_db),
-            params='',
-            query='',
-            fragment='',
-        )
-
-        conf_dict.setdefault(
-            f'{prefix}.arguments.url', urllib.parse.urlunparse(parts)
-        )
-        conf_dict[f'{prefix}.arguments.socket_timeout'] = (
-            conf.cache.socket_timeout
-        )
-    elif conf.cache.backend == 'dogpile.cache.redis_sentinel':
+    if conf.cache.backend in (
+        'dogpile.cache.redis',
+        'dogpile.cache.redis_sentinel',
+    ):
         for arg in ('username', 'password', 'socket_timeout'):
             conf_dict[f'{prefix}.arguments.{arg}'] = getattr(conf.cache, arg)
 
         conf_dict[f'{prefix}.arguments.db'] = conf.cache.redis_db
 
-        conf_dict[f'{prefix}.arguments.service_name'] = (
-            conf.cache.redis_sentinel_service_name
-        )
-        if conf.cache.redis_sentinels:
-            conf_dict[f'{prefix}.arguments.sentinels'] = [
-                _parse_sentinel(s) for s in conf.cache.redis_sentinels
-            ]
+        if conf.cache.backend == 'dogpile.cache.redis_sentinel':
+            conf_dict[f'{prefix}.arguments.service_name'] = (
+                conf.cache.redis_sentinel_service_name
+            )
+            if conf.cache.redis_sentinels:
+                conf_dict[f'{prefix}.arguments.sentinels'] = [
+                    _parse_sentinel(s) for s in conf.cache.redis_sentinels
+                ]
+        else:
+            host, port = netutils.parse_host_port(
+                conf.cache.redis_server, 6379
+            )
+            conf_dict[f'{prefix}.arguments.host'] = host
+            conf_dict[f'{prefix}.arguments.port'] = port
     else:
         # NOTE(yorik-sar): these arguments will be used for memcache-related
         # backends. Use setdefault for url to support old-style setting through
@@ -318,7 +300,7 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
                     f"the {conf.cache.backend} backend"
                 )
 
-            conn_kwargs = {}
+            conn_kwargs = {'ssl': True}
             if conf.cache.tls_cafile is not None:
                 conn_kwargs['ssl_ca_certs'] = conf.cache.tls_cafile
             if conf.cache.tls_certfile is not None:
@@ -328,8 +310,8 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
                         'ssl_keyfile': conf.cache.tls_keyfile,
                     }
                 )
+
             if conf.cache.backend == 'dogpile.cache.redis_sentinel':
-                conn_kwargs.update({'ssl': True})
                 conf_dict[f'{prefix}.arguments.connection_kwargs'] = (
                     conn_kwargs
                 )
