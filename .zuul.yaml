@@ -95,3 +95,11 @@
         - oslo.cache-functional-memcache_pool
         - oslo.cache-functional-dogpile.cache.redis
         - oslo.cache-functional-dogpile.cache.redis_sentinel
+    gate:
+      jobs:
+        - oslo.cache-functional-etcd3gw
+        - oslo.cache-functional-dogpile.cache.bmemcached
+        - oslo.cache-functional-dogpile.cache.pymemcache
+        - oslo.cache-functional-memcache_pool
+        - oslo.cache-functional-dogpile.cache.redis
+        - oslo.cache-functional-dogpile.cache.redis_sentinel
