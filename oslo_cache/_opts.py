@@ -279,8 +279,10 @@ FILE_OPTIONS = {
                 'cipher list format. If not specified, all OpenSSL enabled '
                 'ciphers will be available. Currently supported by '
                 '``dogpile.cache.bmemcache``, '
-                '``dogpile.cache.pymemcache`` and '
-                '``oslo_cache.memcache_pool``.'
+                '``dogpile.cache.pymemcache``, '
+                '``oslo_cache.memcache_pool``, '
+                '``dogpile.cache.redis`` and '
+                '``dogpile.cache.redis_sentinel``.'
             ),
         ),
         cfg.FloatOpt(
