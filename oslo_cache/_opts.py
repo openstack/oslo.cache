@@ -15,6 +15,18 @@
 from oslo_config import cfg
 
 
+def _supported_backends_msg(backends: list[str]) -> str:
+    backends_in_msg = [f'``{name}``' for name in backends]
+    return ' '.join(
+        [
+            'Currently supported by',
+            ', '.join(backends_in_msg[:-1]),
+            'and',
+            backends_in_msg[-1],
+        ]
+    )
+
+
 _DEFAULT_BACKEND = 'dogpile.cache.null'
 
 FILE_OPTIONS = {
@@ -230,12 +242,16 @@ FILE_OPTIONS = {
             default=False,
             help=(
                 'Global toggle for TLS usage when communicating with'
-                ' the caching servers. Currently supported by '
-                '``dogpile.cache.bmemcache``, '
-                '``dogpile.cache.pymemcache``, '
-                '``oslo_cache.memcache_pool``, '
-                '``dogpile.cache.redis`` and '
-                '``dogpile.cache.redis_sentinel``.'
+                ' the caching servers.'
+                + _supported_backends_msg(
+                    [
+                        'dogpile.cache.bmemcache',
+                        'dogpile.cache.pymemcache',
+                        'oslo_cache.memcache_pool',
+                        'dogpile.cache.redis',
+                        'dogpile.cache.redis_sentinel',
+                    ]
+                )
             ),
         ),
         cfg.StrOpt(
@@ -277,12 +293,16 @@ FILE_OPTIONS = {
                 'Set the available ciphers for sockets created with '
                 'the TLS context. It should be a string in the OpenSSL '
                 'cipher list format. If not specified, all OpenSSL enabled '
-                'ciphers will be available. Currently supported by '
-                '``dogpile.cache.bmemcache``, '
-                '``dogpile.cache.pymemcache``, '
-                '``oslo_cache.memcache_pool``, '
-                '``dogpile.cache.redis`` and '
-                '``dogpile.cache.redis_sentinel``.'
+                'ciphers will be available. '
+                + _supported_backends_msg(
+                    [
+                        'dogpile.cache.bmemcache',
+                        'dogpile.cache.pymemcache',
+                        'oslo_cache.memcache_pool',
+                        'dogpile.cache.redis',
+                        'dogpile.cache.redis_sentinel',
+                    ]
+                )
             ),
         ),
         cfg.FloatOpt(
@@ -294,9 +314,14 @@ FILE_OPTIONS = {
             ],
             help=(
                 'Timeout in seconds for every call to a server. '
-                'Currently supported by ``dogpile.cache.memcache``, '
-                '``oslo_cache.memcache_pool``, ``dogpile.cache.redis`` '
-                'and ``dogpile.cache.redis_sentinel``.'
+                + _supported_backends_msg(
+                    [
+                        'dogpile.cache.memcache',
+                        'oslo_cache.memcache_pool',
+                        'dogpile.cache.redis',
+                        'dogpile.cache.redis_sentinel',
+                    ]
+                )
             ),
         ),
         cfg.BoolOpt(
@@ -401,10 +426,14 @@ FILE_OPTIONS = {
                 'environments and may have been backported to older '
                 'Python versions on select environments. If the Python '
                 'executable used does not support OpenSSL FIPS mode, '
-                'an exception will be raised. Currently supported by '
-                '``dogpile.cache.bmemcache``, '
-                '``dogpile.cache.pymemcache`` and '
-                '``oslo_cache.memcache_pool``.'
+                'an exception will be raised. '
+                + _supported_backends_msg(
+                    [
+                        'dogpile.cache.bmemcache',
+                        'dogpile.cache.pymemcache',
+                        'oslo_cache.memcache_pool',
+                    ]
+                )
             ),
         ),
     ],
