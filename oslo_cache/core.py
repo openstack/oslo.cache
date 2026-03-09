@@ -370,7 +370,6 @@ def _build_cache_config(conf: cfg.ConfigOpts) -> dict[str, Any]:
                 "'dogpile.cache.pymemcache' backend."
             )
             raise exception.ConfigurationError(msg)
-        import pymemcache
 
         conf_dict[f'{prefix}.arguments.enable_retry_client'] = True
         conf_dict[f'{prefix}.arguments.retry_attempts'] = (
