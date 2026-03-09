@@ -19,7 +19,7 @@ from typing import Any
 import warnings
 
 try:
-    import eventlet
+    import eventlet  # type: ignore[import-not-found]
 except ImportError:
     eventlet = None
 import bmemcached

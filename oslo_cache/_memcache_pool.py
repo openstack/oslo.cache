@@ -26,7 +26,7 @@ from typing import Any, Generic, TypeVar
 import warnings
 
 try:
-    import eventlet
+    import eventlet  # type: ignore[import-not-found]
 except ImportError:
     eventlet = None
 import memcache
