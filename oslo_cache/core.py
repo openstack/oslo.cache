@@ -411,7 +411,7 @@ def function_key_generator(
     to_str: Callable[[Any], str] = str,
 ) -> Callable[..., str]:
     warnings.warn(
-        "Use dogpile.cache.utils.function_key_generator instead",
+        "Use dogpile.cache.util.function_key_generator instead",
         category=DeprecationWarning,
         stacklevel=2,
     )
@@ -424,7 +424,7 @@ def kwarg_function_key_generator(
     to_str: Callable[[Any], str] = str,
 ) -> Callable[..., str]:
     warnings.warn(
-        "Use dogpile.cache.utils.kwarg_function_key_generator instead",
+        "Use dogpile.cache.util.kwarg_function_key_generator instead",
         category=DeprecationWarning,
         stacklevel=2,
     )
