@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from collections.abc import Sequence
+
 from oslo_config import cfg
 
 
@@ -443,7 +445,7 @@ def set_defaults(
     )
 
 
-def list_opts() -> list[tuple[str, cfg.Opt]]:
+def list_opts() -> list[tuple[str, Sequence[cfg.Opt]]]:
     """Return a list of oslo_config options.
 
     The returned list includes all oslo_config options which are registered as

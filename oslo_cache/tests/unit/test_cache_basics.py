@@ -1128,7 +1128,8 @@ class CacheRegionTest(test_cache.BaseTestCase):
             self.assertEqual(NO_VALUE, value)
 
     def test_configure_non_region_object_raises_error(self):
-        self.assertRaises(
+        # we're intentionally calling this with the wrong type
+        self.assertRaises(  # type: ignore[call-overload]
             exception.ConfigurationError,
             cache.configure_cache_region,
             self.config_fixture.conf,
