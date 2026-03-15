@@ -22,6 +22,7 @@
       - LICENSE
       - ^releasenotes/.*$
       - ^\.pre-commit-config\.yaml$
+      - ^oslo_cache/tests/unit/.*$
 
 - job:
     name: oslo.cache-functional-etcd3gw
