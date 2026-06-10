@@ -437,10 +437,10 @@ def set_defaults(
         ``flush_on_reconnect`` flag. By default deactivated
     :type memcache_pool_flush_on_reconnect: bool
     """
-    conf.register_opt(FILE_OPTIONS, group='cache')
+    conf.register_opt(FILE_OPTIONS['cache'], group='cache')
 
     cfg.set_defaults(
-        FILE_OPTIONS,
+        FILE_OPTIONS['cache'],
         memcache_pool_flush_on_reconnect=memcache_pool_flush_on_reconnect,
     )
 
