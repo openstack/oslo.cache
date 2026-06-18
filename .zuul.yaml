@@ -9,11 +9,9 @@
 
 - job:
     name: oslo.cache-functional
-    parent: openstack-tox
+    parent: openstack-tox-functional
     abstract: true
     pre-run: playbooks/tests/functional/pre.yml
-    vars:
-      tox_envlist: functional
     irrelevant-files:
       - ^\.gitignore$
       - ^\.gitreview$
