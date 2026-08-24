@@ -63,7 +63,7 @@ class _MemcacheClient(memcache.Client):  # type: ignore
     if eventlet and eventlet.patcher.is_monkey_patched('thread'):
         # NOTE(bnemec): I'm not entirely sure why this works in a
         # monkey-patched environment and not with vanilla stdlib, but it does.
-        def __new__(cls, *args: Any, **kwargs: Any) -> type['_MemcacheClient']:
+        def __new__(cls, *args: Any, **kwargs: Any) -> '_MemcacheClient':
             return object.__new__(cls)
     else:
         __new__ = object.__new__
