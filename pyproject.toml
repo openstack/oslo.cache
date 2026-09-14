@@ -50,7 +50,7 @@ etcd3gw = [
 "oslo_cache.etcd3gw" = "oslo_cache.backends.etcd3gw:Etcd3gwCacheBackend"
 
 [tool.setuptools.packages.find]
-include = ["oslo_cache"]
+include = ["oslo_cache*"]
 
 [tool.mypy]
 python_version = "3.11"
