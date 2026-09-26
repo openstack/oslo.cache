@@ -5,15 +5,16 @@
 # Andi Chandler <andi@gowling.com>, 2020. #zanata
 # Andi Chandler <andi@gowling.com>, 2022. #zanata
 # Andi Chandler <andi@gowling.com>, 2023. #zanata
+# Andi Chandler <andi@gowling.com>, 2026. #zanata
 msgid ""
 msgstr ""
 "Project-Id-Version: oslo.cache Release Notes\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-27 14:34+0000\n"
+"POT-Creation-Date: 2026-09-25 06:41+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2023-06-21 08:15+0000\n"
+"PO-Revision-Date: 2026-09-24 07:57+0000\n"
 "Last-Translator: Andi Chandler <andi@gowling.com>\n"
 "Language-Team: English (United Kingdom)\n"
 "Language: en_GB\n"
@@ -92,11 +93,71 @@ msgstr "2.8.2"
 msgid "2023.1 Series Release Notes"
 msgstr "2023.1 Series Release Notes"
 
+msgid "2023.1-eom-2"
+msgstr "2023.1-eom-2"
+
+msgid "2023.2 Series Release Notes"
+msgstr "2023.2 Series Release Notes"
+
+msgid "2024.1 Series Release Notes"
+msgstr "2024.1 Series Release Notes"
+
+msgid "2024.1-eom"
+msgstr "2024.1-eom"
+
+msgid "2024.2 Series Release Notes"
+msgstr "2024.2 Series Release Notes"
+
+msgid "2024.2-eol"
+msgstr "2024.2-eol"
+
+msgid "2025.1 Series Release Notes"
+msgstr "2025.1 Series Release Notes"
+
+msgid "2025.2 Series Release Notes"
+msgstr "2025.2 Series Release Notes"
+
+msgid "2026.1 Series Release Notes"
+msgstr "2026.1 Series Release Notes"
+
+msgid "2026.2 Series Release Notes"
+msgstr "2026.2 Series Release Notes"
+
 msgid "3.1.0"
 msgstr "3.1.0"
 
+msgid "3.10.0"
+msgstr "3.10.0"
+
+msgid "3.10.2"
+msgstr "3.10.2"
+
+msgid "3.11.0"
+msgstr "3.11.0"
+
 msgid "3.4.0"
 msgstr "3.4.0"
+
+msgid "3.7.0"
+msgstr "3.7.0"
+
+msgid "3.8.0"
+msgstr "3.8.0"
+
+msgid "3.9.0"
+msgstr "3.9.0"
+
+msgid "4.0.0"
+msgstr "4.0.0"
+
+msgid "4.1.0"
+msgstr "4.1.0"
+
+msgid "4.2.0"
+msgstr "4.2.0"
+
+msgid "4.3.0"
+msgstr "4.3.0"
 
 msgid "@param flush_on_reconnect: optional flag which prevents a"
 msgstr "@param flush_on_reconnect: optional flag which prevents a"
@@ -138,6 +199,13 @@ msgid ""
 msgstr ""
 "Added a new memcached driver that uses pymemcache through dogpile.cache."
 
+msgid ""
+"Adding a new option, ``[cache] enforce_fips_mode``, to the rabbitmq driver "
+"to enforce the OpenSSL FIPS mode if supported by the version of Python."
+msgstr ""
+"Adding a new option, ``[cache] enforce_fips_mode``, to the rabbitmq driver "
+"to enforce the OpenSSL FIPS mode if supported by the version of Python."
+
 msgid "Bug Fixes"
 msgstr "Bug Fixes"
 
@@ -151,11 +219,23 @@ msgstr ""
 "clients start to flush the server on reconnect."
 
 msgid ""
+"But unfortunately this option is causing another issue. If memcache server "
+"disappears, or client had broken connection to memcache server, clients "
+"start to flush server on reconnect."
+msgstr ""
+"But unfortunately this option is causing another issue. If memcache server "
+"disappears, or client had broken connection to memcache server, clients "
+"start to flush server on reconnect."
+
+msgid ""
 "Configuration option ``memcache_pool_flush_on_reconnect`` added to control "
 "if flush will be sent to memcached server after reconnect."
 msgstr ""
 "Configuration option ``memcache_pool_flush_on_reconnect`` added to control "
 "if flush will be sent to memcached server after reconnect."
+
+msgid "Deprecation Notes"
+msgstr "Deprecation Notes"
 
 msgid ""
 "Fix the memcache_pool backend broken in oslo.cache's version 2.1.0 by "
@@ -277,6 +357,15 @@ msgstr "Victoria Series Release Notes"
 msgid "Wallaby Series Release Notes"
 msgstr "Wallaby Series Release Notes"
 
+msgid ""
+"When the ``dogpile.cache.redis`` backend is used and the ``[cache] "
+"tls_enable`` option is set to True, now the following ``[cache]`` options "
+"set tls certificates and keys used for TLS communication with Redis."
+msgstr ""
+"When the ``dogpile.cache.redis`` backend is used and the ``[cache] "
+"tls_enable`` option is set to True, now the following ``[cache]`` options "
+"set tls certificates and keys used for TLS communication with Redis."
+
 msgid "Xena Series Release Notes"
 msgstr "Xena Series Release Notes"
 
@@ -347,6 +436,58 @@ msgstr ""
 "python-binary-memcached package is only required if sasl_enabled=True. When "
 "sasl_enabled=False (default), the memcache_pool backend can be used without "
 "the python-binary-memcached package installed."
+
+msgid "``[cache] dead_timeout``"
+msgstr "``[cache] dead_timeout``"
+
+msgid "``[cache] hashclient_retry_delay``"
+msgstr "``[cache] hashclient_retry_delay``"
+
+msgid "``dogpile.cache.redis_sentinel``"
+msgstr "``dogpile.cache.redis_sentinel``"
+
+msgid "``dogpile.cache.redis``"
+msgstr "``dogpile.cache.redis``"
+
+msgid "``function_key_generator``"
+msgstr "``function_key_generator``"
+
+msgid "``kwarg_function_key_generator``"
+msgstr "``kwarg_function_key_generator``"
+
+msgid "``memcache_password`` and ``redis_password`` (Use ``password``)"
+msgstr "``memcache_password`` and ``redis_password`` (Use ``password``)"
+
+msgid ""
+"``memcache_socket_timeout`` and ``redis_socket_timeout`` (Use "
+"``socket_timeout``)"
+msgstr ""
+"``memcache_socket_timeout`` and ``redis_socket_timeout`` (Use "
+"``socket_timeout``)"
+
+msgid "``memcache_username`` and ``redis_username`` (Use ``username``)"
+msgstr "``memcache_username`` and ``redis_username`` (Use ``username``)"
+
+msgid "``redis_password``"
+msgstr "``redis_password``"
+
+msgid "``redis_server``"
+msgstr "``redis_server``"
+
+msgid "``redis_socket_timeout``"
+msgstr "``redis_socket_timeout``"
+
+msgid "``redis_username``"
+msgstr "``redis_username``"
+
+msgid "``tls_cafile``"
+msgstr "``tls_cafile``"
+
+msgid "``tls_certfile``"
+msgstr "``tls_certfile``"
+
+msgid "``tls_keyfile``"
+msgstr "``tls_keyfile``"
 
 msgid ""
 "`memcache_socket_timeout` is changed to float, given the same default value "
