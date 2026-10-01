@@ -1,7 +1,0 @@
-[run]
-branch = True
-source = oslo_cache
-omit = oslo_cache/tests/*
-
-[report]
-ignore_errors = True
