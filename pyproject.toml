@@ -55,11 +55,12 @@ include = ["oslo_cache*"]
 
 [tool.coverage.run]
 source = [
-    "oslo_cache"
+  "oslo_cache"
 ]
 branch = true
+parallel = true
 omit = [
-    "oslo_cache/tests/*"
+  "oslo_cache/tests/*"
 ]
 
 [tool.coverage.report]
