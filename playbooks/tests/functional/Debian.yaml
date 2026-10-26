@@ -3,6 +3,9 @@ backend_services_map:
   redis:
     - redis-server
     - redis-sentinel
+  valkey:
+    - valkey-server
+    - valkey-sentinel
   memcached:
     - memcached
   etcd:

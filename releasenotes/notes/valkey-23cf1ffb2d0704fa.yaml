@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Now Valkey is supported as a cache data backend.

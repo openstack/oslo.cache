@@ -81,6 +81,28 @@
         OSLO_BACKEND: dogpile_cache_redis_sentinel
         PIFPAF_OPTS: --sentinel
 
+- job:
+    name: oslo.cache-functional-valkey
+    parent: oslo.cache-functional
+    vars:
+      tox_environment:
+        PIFPAF_DAEMON: valkey
+
+- job:
+    name: oslo.cache-functional-dogpile.cache.valkey
+    parent: oslo.cache-functional-valkey
+    vars:
+      tox_environment:
+        OSLO_BACKEND: dogpile_cache_valkey
+
+- job:
+    name: oslo.cache-functional-dogpile.cache.valkey_sentinel
+    parent: oslo.cache-functional-valkey
+    vars:
+      tox_environment:
+        OSLO_BACKEND: dogpile_cache_valkey_sentinel
+        PIFPAF_OPTS: --sentinel
+
 - project:
     templates:
       - check-requirements
@@ -98,6 +120,8 @@
         - oslo.cache-functional-memcache_pool
         - oslo.cache-functional-dogpile.cache.redis
         - oslo.cache-functional-dogpile.cache.redis_sentinel
+        - oslo.cache-functional-dogpile.cache.valkey
+        - oslo.cache-functional-dogpile.cache.valkey_sentinel
     gate:
       jobs:
         - oslo.cache-functional-etcd3gw
@@ -106,3 +130,5 @@
         - oslo.cache-functional-memcache_pool
         - oslo.cache-functional-dogpile.cache.redis
         - oslo.cache-functional-dogpile.cache.redis_sentinel
+        - oslo.cache-functional-dogpile.cache.valkey
+        - oslo.cache-functional-dogpile.cache.valkey_sentinel
